@@ -11,6 +11,7 @@ import com.solve.domain.problem.error.ProblemSubmitError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
+import com.solve.global.config.SubmitProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
@@ -18,11 +19,14 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.File
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 @Service
 class ProblemSubmitServiceImpl(
     private val securityHolder: SecurityHolder,
+    private val submitProperties: SubmitProperties,
     private val problemRepository: ProblemRepository,
     private val problemSubmitRepository: ProblemSubmitRepository,
     private val simpMessageSendingOperations: SimpMessageSendingOperations
@@ -67,13 +71,22 @@ class ProblemSubmitServiceImpl(
         var progress = 0
         var memoryLimitExceeded = false
         var timeLimitExceeded = false
+        val directory = File(submitProperties.path)
+
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+
+        val file = File(directory,"${submit.id}.py")
+
+        file.writeText(request.code)
 
         for (testCase in testCases) {
             if (memoryLimitExceeded) {
                 break
             }
 
-            val processBuilder = ProcessBuilder("python3", "-c", request.code)
+            val processBuilder = ProcessBuilder("python3", file.absolutePath)
             val process = processBuilder.start()
             val pid = process.pid()
 
@@ -91,6 +104,12 @@ class ProblemSubmitServiceImpl(
                 }
             }.start()
 
+            val outputStream = process.outputStream
+
+            outputStream.write(testCase.input.toByteArray())
+            outputStream.flush()
+            outputStream.close()
+
             val timeLimit = problem.timeLimit
             val finishedInTime = process.waitFor(timeLimit, TimeUnit.MILLISECONDS)
 
@@ -100,17 +119,15 @@ class ProblemSubmitServiceImpl(
                 break
             }
 
-            val outputStream = process.outputStream
-
-            outputStream.write(testCase.input.toByteArray())
-            outputStream.close()
-
-            val inputReader = process.inputStream.bufferedReader()
-            val output = inputReader.readText()
+            val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
 
             if (output != testCase.output) {
                 submit.result = ProblemSubmitResult.WRONG_ANSWER
                 problemSubmitRepository.save(submit)
+
+                println("Wrong Answer")
+                println("Expected: ${testCase.output}")
+                println("Received: $output")
 
                 sendProgress(
                     ProblemSubmitProgressResponse(
