@@ -2,7 +2,7 @@ package com.solve.domain.problem.service.impl
 
 import com.solve.domain.problem.domain.entity.ProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
-import com.solve.domain.problem.domain.enums.ProblemSubmitResult
+import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.dto.response.ProblemSubmitProgressResponse
 import com.solve.domain.problem.dto.response.ProblemSubmitResponse
@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -42,7 +41,7 @@ class ProblemSubmitServiceImpl(
             problem = problem,
             language = request.language,
             visibility = request.visibility,
-            result = ProblemSubmitResult.PENDING
+            state = ProblemSubmitState.PENDING
         )
 
         problemSubmitRepository.save(submit)
@@ -122,7 +121,7 @@ class ProblemSubmitServiceImpl(
             val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
 
             if (output != testCase.output) {
-                submit.result = ProblemSubmitResult.WRONG_ANSWER
+                submit.state = ProblemSubmitState.WRONG_ANSWER
                 problemSubmitRepository.save(submit)
 
                 println("Wrong Answer")
@@ -132,7 +131,7 @@ class ProblemSubmitServiceImpl(
                 sendProgress(
                     ProblemSubmitProgressResponse(
                         submitId = submit.id!!,
-                        result = ProblemSubmitResult.WRONG_ANSWER,
+                        result = ProblemSubmitState.WRONG_ANSWER,
                         progress = progress
                     )
                 )
@@ -145,21 +144,21 @@ class ProblemSubmitServiceImpl(
             sendProgress(
                 ProblemSubmitProgressResponse(
                     submitId = submit.id!!,
-                    result = ProblemSubmitResult.PENDING,
+                    result = ProblemSubmitState.PENDING,
                     progress = progress
                 )
             )
         }
 
-        if (memoryLimitExceeded) submit.result = ProblemSubmitResult.MEMORY_LIMIT_EXCEEDED
-        else if (timeLimitExceeded) submit.result = ProblemSubmitResult.TIME_LIMIT_EXCEEDED
-        else submit.result = ProblemSubmitResult.ACCEPTED
+        if (memoryLimitExceeded) submit.state = ProblemSubmitState.MEMORY_LIMIT_EXCEEDED
+        else if (timeLimitExceeded) submit.state = ProblemSubmitState.TIME_LIMIT_EXCEEDED
+        else submit.state = ProblemSubmitState.ACCEPTED
         problemSubmitRepository.save(submit)
 
         sendProgress(
             ProblemSubmitProgressResponse(
                 submitId = submit.id!!,
-                result = submit.result,
+                result = submit.state,
                 progress = 100
             )
         )

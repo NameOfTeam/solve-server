@@ -1,7 +1,7 @@
 package com.solve.domain.problem.domain.entity
 
 import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
-import com.solve.domain.problem.domain.enums.ProblemSubmitResult
+import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.domain.enums.ProblemSubmitVisibility
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.BaseTimeEntity
@@ -15,8 +15,8 @@ class ProblemSubmit(
     val id: Long? = null,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "result", nullable = false)
-    var result: ProblemSubmitResult,
+    @Column(name = "state", nullable = false)
+    var state: ProblemSubmitState,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id")

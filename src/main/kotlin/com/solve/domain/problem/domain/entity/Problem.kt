@@ -29,8 +29,11 @@ class Problem(
     @Column(name = "time_limit", nullable = false)
     var timeLimit: Long,
 
-    @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val testCases: MutableList<ProblemTestCase> = mutableListOf(),
+
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val contributors: MutableList<ProblemContributor> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

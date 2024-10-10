@@ -1,6 +1,6 @@
 package com.solve.domain.problem.domain.enums
 
-enum class ProblemSubmitResult {
+enum class ProblemSubmitState {
     // 맞았습니다
     ACCEPTED,
 
