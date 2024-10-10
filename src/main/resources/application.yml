@@ -1,1 +1,21 @@
-spring.application.name=solve
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/solve"
+    username: "root"
+    password: "root"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  jwt:
+    issuer: "solve"
+    prefix: "Bearer "
+    header: "Authorization"
+    secret-key: "Ji9asjhdf9ih1i924j09ajoidhjkashdf90j9uah8912u490jaoisdfnkjahsd89fu091u24u9phaiusdhfiluhp981qup89uawp98dfhiouashdfouhpiuahgph13rphasfohsdFlkjbasdfjbaousfdh89"
+    access-token-expiration: 3600000
+    refresh-token-expiration: 86400000
+  data:
+    redis:
+      host: "localhost"
+      port: 6379
