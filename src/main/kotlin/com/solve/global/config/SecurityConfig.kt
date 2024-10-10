@@ -1,9 +1,9 @@
-package com.devox.global.config
+package com.solve.global.config
 
-import com.devox.global.security.jwt.filter.JwtAuthenticationFilter
-import com.devox.global.security.jwt.filter.JwtExceptionFilter
-import com.devox.global.security.jwt.handler.JwtAccessDeniedHandler
-import com.devox.global.security.jwt.handler.JwtAuthenticationEntryPoint
+import com.solve.global.security.jwt.filter.JwtAuthenticationFilter
+import com.solve.global.security.jwt.filter.JwtExceptionFilter
+import com.solve.global.security.jwt.handler.JwtAccessDeniedHandler
+import com.solve.global.security.jwt.handler.JwtAuthenticationEntryPoint
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -12,6 +12,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -59,9 +60,20 @@ class SecurityConfig(
             it
                 .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/reissue").anonymous()
-                .requestMatchers(HttpMethod.GET, "/users").authenticated()
-                .requestMatchers(HttpMethod.POST, "/files/upload").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/problems").admin()
+                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}").admin()
+                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}").admin()
+
+                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()
+                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/test-cases").admin()
+                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/test-cases/{testCaseId}").admin()
+                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/test-cases/{testCaseId}").admin()
+
+                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/ws").permitAll()
 
                 .anyRequest().authenticated()
         }
@@ -81,4 +93,7 @@ class SecurityConfig(
             maxAge = 3600
         })
     }
+
+    private fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl.user() = permitAll()
+    private fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl.admin() = hasRole("ADMIN")
 }

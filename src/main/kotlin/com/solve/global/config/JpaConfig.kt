@@ -1,4 +1,4 @@
-package com.devox.global.config
+package com.solve.global.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing

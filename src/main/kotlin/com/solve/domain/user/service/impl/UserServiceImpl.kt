@@ -1,18 +1,19 @@
-package com.devox.domain.user.service.impl
+package com.solve.domain.user.service.impl
 
-import com.devox.domain.user.dto.response.GetUserResponse
-import com.devox.domain.user.service.UserService
-import com.devox.global.security.holder.SecurityHolder
+import com.solve.domain.user.dto.response.UserResponse
+import com.solve.domain.user.service.UserService
+import com.solve.global.security.holder.SecurityHolder
 import org.springframework.stereotype.Service
 
 @Service
 class UserServiceImpl(
     private val securityHolder: SecurityHolder
 ) : UserService {
-    override fun getMe(): GetUserResponse {
+    override fun getMe(): UserResponse {
         val user = securityHolder.user
 
-        return GetUserResponse(
+        return UserResponse(
+            username = user.username,
             email = user.email,
             role = user.role
         )

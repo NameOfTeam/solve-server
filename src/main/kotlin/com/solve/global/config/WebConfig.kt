@@ -1,4 +1,4 @@
-package com.devox.global.config
+package com.solve.global.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry

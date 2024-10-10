@@ -1,4 +1,4 @@
-package com.devox.global.config
+package com.solve.global.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
@@ -14,11 +14,11 @@ import org.springframework.http.HttpHeaders
 class SwaggerConfig {
     @Bean
     fun api(): OpenAPI =
-        OpenAPI().info(Info().title("DevBox").description("DevBox API Documentation").version("v1.0"))
+        OpenAPI().info(Info().title("Solve").description("Solve API Documentation").version("v1.0"))
             .addSecurityItem(SecurityRequirement().addList("Authorization"))
             .servers(
                 listOf(
-                    Server().url("https://api.devbox.mcv.kr").description("Production Server"),
+                    Server().url("https://api.solve.mcv.kr").description("Production Server"),
                     Server().url("http://localhost:8080").description("Development Server")
                 )
             )

@@ -1,9 +1,9 @@
-package com.devox.domain.auth.service
+package com.solve.domain.auth.service
 
-import com.devox.domain.auth.dto.request.LoginRequest
-import com.devox.domain.auth.dto.request.ReissueRequest
-import com.devox.domain.auth.dto.request.SignUpRequest
-import com.devox.global.security.jwt.dto.JwtResponse
+import com.solve.domain.auth.dto.request.LoginRequest
+import com.solve.domain.auth.dto.request.ReissueRequest
+import com.solve.domain.auth.dto.request.SignUpRequest
+import com.solve.global.security.jwt.dto.JwtResponse
 
 interface AuthService {
     fun login(request: LoginRequest): JwtResponse

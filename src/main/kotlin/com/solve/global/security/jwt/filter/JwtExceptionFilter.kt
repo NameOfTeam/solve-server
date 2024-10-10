@@ -1,8 +1,8 @@
-package com.devox.global.security.jwt.filter
+package com.solve.global.security.jwt.filter
 
-import com.devox.global.error.CustomException
-import com.devox.global.error.ErrorResponse
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.solve.global.error.CustomException
+import com.solve.global.error.ErrorResponse
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -31,7 +31,7 @@ class JwtExceptionFilter(
         status = error.status.value()
 
         outputStream.use {
-            it.write(objectMapper.writeValueAsBytes(ErrorResponse.of(exception)))
+            it.write(objectMapper.writeValueAsBytes(ErrorResponse.of(exception).body))
             it.flush()
         }
     }

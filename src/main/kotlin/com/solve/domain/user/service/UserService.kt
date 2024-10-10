@@ -1,7 +1,7 @@
-package com.devox.domain.user.service
+package com.solve.domain.user.service
 
-import com.devox.domain.user.dto.response.GetUserResponse
+import com.solve.domain.user.dto.response.UserResponse
 
 interface UserService {
-    fun getMe(): GetUserResponse
+    fun getMe(): UserResponse
 }

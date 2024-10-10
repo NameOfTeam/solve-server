@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql
+    container_name: solve-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: solve
+    ports:
+      - 3306:3306
+    volumes:
+      - ./.compose/mysql:/var/lib/mysql
+    restart: unless-stopped
+  redis:
+    image: redis
+    container_name: solve-redis
+    ports:
+      - 6379:6379
+    restart: unless-stopped

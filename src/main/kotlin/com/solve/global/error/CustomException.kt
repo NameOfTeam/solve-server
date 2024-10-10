@@ -1,4 +1,4 @@
-package com.devox.global.error
+package com.solve.global.error
 
 class CustomException(val error: CustomError, vararg args: String) : RuntimeException() {
     val code = (error as Enum<*>).name

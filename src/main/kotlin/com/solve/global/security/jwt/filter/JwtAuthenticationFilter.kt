@@ -1,6 +1,6 @@
-package com.devox.global.security.jwt.filter
+package com.solve.global.security.jwt.filter
 
-import com.devox.global.security.jwt.provider.JwtProvider
+import com.solve.global.security.jwt.provider.JwtProvider
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

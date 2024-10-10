@@ -1,18 +1,21 @@
-package com.devox.domain.user.domain.entity
+package com.solve.domain.user.domain.entity
 
-import com.devox.domain.user.domain.enums.UserRole
-import com.devox.domain.user.domain.generator.GeneratedUserId
-import com.devox.global.common.BaseTimeEntity
+import com.solve.domain.user.domain.enums.UserRole
+import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
+import java.util.*
 
 @Entity
 @Table(name = "users")
 class User(
     @Id
-    @GeneratedUserId
-    val id: Long? = null,
+    @GeneratedValue(strategy = GenerationType.UUID)
+    val id: UUID? = null,
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true)
+    val username: String,
+
+    @Column(name = "email", nullable = false, unique = true, updatable = false)
     val email: String,
 
     @Column(name = "password", nullable = false)

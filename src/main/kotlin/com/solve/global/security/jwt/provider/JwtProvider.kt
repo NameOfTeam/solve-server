@@ -1,14 +1,13 @@
-package com.devox.global.security.jwt.provider
+package com.solve.global.security.jwt.provider
 
-import com.devox.domain.auth.domain.entity.RefreshToken
-import com.devox.domain.auth.repository.RefreshTokenRepository
-import com.devox.domain.user.error.UserError
-import com.devox.domain.user.repository.UserRepository
-import com.devox.global.error.CustomException
-import com.devox.global.security.details.CustomUserDetails
-import com.devox.global.security.jwt.config.JwtProperties
-import com.devox.global.security.jwt.dto.JwtResponse
-import com.devox.global.security.jwt.enums.JwtType
+import com.solve.domain.auth.repository.RefreshTokenRepository
+import com.solve.domain.user.error.UserError
+import com.solve.domain.user.repository.UserRepository
+import com.solve.global.error.CustomException
+import com.solve.global.security.details.CustomUserDetails
+import com.solve.global.security.jwt.config.JwtProperties
+import com.solve.global.security.jwt.dto.JwtResponse
+import com.solve.global.security.jwt.enums.JwtType
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import jakarta.servlet.http.HttpServletRequest
@@ -65,7 +64,7 @@ class JwtProvider(
             .expiration(Date(now.time + jwtProperties.refreshTokenExpiration))
             .signWith(key)
             .compact().also {
-                refreshTokenRepository.save(RefreshToken(email, it))
+                refreshTokenRepository.setRefreshToken(email, it)
             }
     }
 

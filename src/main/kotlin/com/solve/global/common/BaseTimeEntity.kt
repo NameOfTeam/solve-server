@@ -1,4 +1,4 @@
-package com.devox.global.common
+package com.solve.global.common
 
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners

@@ -1,6 +1,6 @@
-package com.devox.global.security.jwt.error
+package com.solve.global.security.jwt.error
 
-import com.devox.global.error.CustomError
+import com.solve.global.error.CustomError
 import org.springframework.http.HttpStatus
 
 enum class JwtError(override val status: HttpStatus, override val message: String) : CustomError {

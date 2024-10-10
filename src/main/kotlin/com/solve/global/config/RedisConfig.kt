@@ -1,4 +1,4 @@
-package com.devox.global.config
+package com.solve.global.config
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties
 import org.springframework.context.annotation.Bean

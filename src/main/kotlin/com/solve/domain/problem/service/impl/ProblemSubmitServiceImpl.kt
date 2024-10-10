@@ -1,4 +1,240 @@
 package com.solve.domain.problem.service.impl
 
-class ProblemSubmitServiceImpl {
+import com.solve.domain.problem.domain.entity.ProblemSubmit
+import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
+import com.solve.domain.problem.domain.enums.ProblemSubmitResult
+import com.solve.domain.problem.dto.request.ProblemSubmitRequest
+import com.solve.domain.problem.dto.response.ProblemSubmitProgressResponse
+import com.solve.domain.problem.dto.response.ProblemSubmitResponse
+import com.solve.domain.problem.error.ProblemError
+import com.solve.domain.problem.error.ProblemSubmitError
+import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.domain.problem.repository.ProblemSubmitRepository
+import com.solve.domain.problem.service.ProblemSubmitService
+import com.solve.global.error.CustomException
+import com.solve.global.security.holder.SecurityHolder
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.messaging.simp.SimpMessageSendingOperations
+import org.springframework.scheduling.annotation.Async
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.io.File
+import java.util.concurrent.TimeUnit
+
+@Service
+class ProblemSubmitServiceImpl(
+    private val securityHolder: SecurityHolder,
+    private val problemRepository: ProblemRepository,
+    private val problemSubmitRepository: ProblemSubmitRepository,
+    private val simpMessageSendingOperations: SimpMessageSendingOperations
+) : ProblemSubmitService {
+    @Transactional
+    override fun submitProblem(problemId: Long, request: ProblemSubmitRequest): ProblemSubmitResponse {
+        val author = securityHolder.user
+        val problem =
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+        val submit = ProblemSubmit(
+            code = request.code,
+            author = author,
+            problem = problem,
+            language = request.language,
+            visibility = request.visibility,
+            result = ProblemSubmitResult.PENDING
+        )
+
+        problemSubmitRepository.save(submit)
+
+        processSubmit(submit.id!!, request)
+
+        return ProblemSubmitResponse.of(submit)
+    }
+
+    @Async
+    @Transactional
+    fun processSubmit(submitId: Long, request: ProblemSubmitRequest) {
+        val submit = problemSubmitRepository.findByIdOrNull(submitId)
+            ?: throw CustomException(ProblemSubmitError.PROBLEM_SUBMIT_NOT_FOUND)
+
+        when (request.language) {
+            ProblemSubmitLanguage.PYTHON -> processPythonSubmit(submit, request)
+            ProblemSubmitLanguage.JAVA -> processJavaSubmit(submit, request)
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
+    private fun processPythonSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
+        val problem = submit.problem
+        val testCases = problem.testCases
+        var progress = 0
+        var memoryLimitExceeded = false
+        var timeLimitExceeded = false
+
+        for (testCase in testCases) {
+            if (memoryLimitExceeded) {
+                break
+            }
+
+            val processBuilder = ProcessBuilder("python3", "-c", request.code)
+            val process = processBuilder.start()
+            val pid = process.pid()
+
+            Thread {
+                while (process.isAlive) {
+                    val memory = getMemoryUsage(pid)
+
+                    if (memory > problem.memoryLimit) {
+                        memoryLimitExceeded = true
+
+                        process.destroy()
+
+                        return@Thread
+                    }
+                }
+            }.start()
+
+            val timeLimit = problem.timeLimit
+            val finishedInTime = process.waitFor(timeLimit, TimeUnit.MILLISECONDS)
+
+            if (!finishedInTime) {
+                timeLimitExceeded = true
+                process.destroy()
+                break
+            }
+
+            val outputStream = process.outputStream
+            val inputReader = process.inputStream.bufferedReader()
+            val errorReader = process.errorStream.bufferedReader()
+
+            for (input in testCase.input) {
+                outputStream.write(input.toByteArray())
+            }
+
+            outputStream.close()
+
+            val output = inputReader.readLines()
+
+            if (output != testCase.output) {
+                submit.result = ProblemSubmitResult.WRONG_ANSWER
+                problemSubmitRepository.save(submit)
+
+                sendProgress(
+                    ProblemSubmitProgressResponse(
+                        submitId = submit.id!!,
+                        result = ProblemSubmitResult.WRONG_ANSWER,
+                        progress = progress
+                    )
+                )
+
+                return
+            }
+
+            progress += 100 / testCases.size
+
+            sendProgress(
+                ProblemSubmitProgressResponse(
+                    submitId = submit.id!!,
+                    result = ProblemSubmitResult.PENDING,
+                    progress = progress
+                )
+            )
+        }
+
+        if (memoryLimitExceeded) submit.result = ProblemSubmitResult.MEMORY_LIMIT_EXCEEDED
+        else if (timeLimitExceeded) submit.result = ProblemSubmitResult.TIME_LIMIT_EXCEEDED
+        else submit.result = ProblemSubmitResult.ACCEPTED
+        problemSubmitRepository.save(submit)
+
+        sendProgress(
+            ProblemSubmitProgressResponse(
+                submitId = submit.id!!,
+                result = submit.result,
+                progress = 100
+            )
+        )
+    }
+
+    private fun processJavaSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
+        val problem = submit.problem
+        val testCases = problem.testCases
+        var progress = 0
+
+        for (testCase in testCases) {
+            val file = File("${submit.id}.java")
+            file.writeText(request.code)
+
+            val processBuilder = ProcessBuilder("javac", file.name)
+            val process = processBuilder.start()
+
+            file.delete()
+
+            for (input in testCase.input) {
+                process.outputStream.write(input.toByteArray())
+            }
+
+            process.outputStream.close()
+
+            val output = process.inputStream.bufferedReader().readLines()
+
+            if (output != testCase.output) {
+                submit.result = ProblemSubmitResult.WRONG_ANSWER
+                problemSubmitRepository.save(submit)
+
+                sendProgress(
+                    ProblemSubmitProgressResponse(
+                        submitId = submit.id!!,
+                        result = ProblemSubmitResult.WRONG_ANSWER,
+                        progress = progress
+                    )
+                )
+
+                return
+            }
+
+            progress += 100 / testCases.size
+
+            sendProgress(
+                ProblemSubmitProgressResponse(
+                    submitId = submit.id!!,
+                    result = ProblemSubmitResult.PENDING,
+                    progress = progress
+                )
+            )
+        }
+
+        submit.result = ProblemSubmitResult.ACCEPTED
+        problemSubmitRepository.save(submit)
+
+        sendProgress(
+            ProblemSubmitProgressResponse(
+                submitId = submit.id!!,
+                result = ProblemSubmitResult.ACCEPTED,
+                progress = 100
+            )
+        )
+    }
+
+    private fun sendProgress(submit: ProblemSubmitProgressResponse) {
+        println(submit)
+
+        simpMessageSendingOperations.convertAndSend("/sub/progress/${submit.submitId}", submit.result)
+    }
+
+    private fun getMemoryUsage(pid: Long): Long {
+        try {
+            val pb = ProcessBuilder("sh", "-c", "ps -o rss= -p $pid")
+            val process = pb.start()
+
+            process.inputStream.bufferedReader().useLines { lines ->
+                for (line in lines) {
+                    if (line.isNotBlank()) {
+                        return line.trim().toLong()
+                    }
+                }
+            }
+
+            return -1
+        } catch (e: Exception) {
+            return -1
+        }
+    }
 }

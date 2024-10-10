@@ -1,19 +1,18 @@
-package com.devox.domain.auth.service.impl
+package com.solve.domain.auth.service.impl
 
-import com.devox.domain.auth.dto.request.LoginRequest
-import com.devox.domain.auth.dto.request.ReissueRequest
-import com.devox.domain.auth.dto.request.SignUpRequest
-import com.devox.domain.auth.repository.RefreshTokenRepository
-import com.devox.domain.auth.service.AuthService
-import com.devox.domain.user.domain.entity.User
-import com.devox.domain.user.error.UserError
-import com.devox.domain.user.repository.UserRepository
-import com.devox.global.error.CustomException
-import com.devox.global.security.jwt.dto.JwtResponse
-import com.devox.global.security.jwt.enums.JwtType
-import com.devox.global.security.jwt.error.JwtError
-import com.devox.global.security.jwt.provider.JwtProvider
-import org.springframework.data.repository.findByIdOrNull
+import com.solve.domain.auth.dto.request.LoginRequest
+import com.solve.domain.auth.dto.request.ReissueRequest
+import com.solve.domain.auth.dto.request.SignUpRequest
+import com.solve.domain.auth.repository.RefreshTokenRepository
+import com.solve.domain.auth.service.AuthService
+import com.solve.domain.user.domain.entity.User
+import com.solve.domain.user.error.UserError
+import com.solve.domain.user.repository.UserRepository
+import com.solve.global.error.CustomException
+import com.solve.global.security.jwt.dto.JwtResponse
+import com.solve.global.security.jwt.enums.JwtType
+import com.solve.global.security.jwt.error.JwtError
+import com.solve.global.security.jwt.provider.JwtProvider
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,6 +45,7 @@ class AuthServiceImpl(
         if (userRepository.existsByEmail(request.email)) throw CustomException(UserError.EMAIL_DUPLICATED)
 
         val user = User(
+            username = request.username,
             email = request.email,
             password = passwordEncoder.encode(request.password),
         )
@@ -60,9 +60,9 @@ class AuthServiceImpl(
         val email = jwtProvider.getEmail(request.refreshToken)
         val user = userRepository.findByEmail(email) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL, email)
         val refreshToken =
-            refreshTokenRepository.findByIdOrNull(user.email) ?: throw CustomException(JwtError.INVALID_TOKEN)
+            refreshTokenRepository.getRefreshToken(user.email) ?: throw CustomException(JwtError.INVALID_TOKEN)
 
-        if (refreshToken.refreshToken != request.refreshToken) throw CustomException(JwtError.INVALID_TOKEN)
+        if (refreshToken != request.refreshToken) throw CustomException(JwtError.INVALID_TOKEN)
 
         return jwtProvider.generateToken(user.email)
     }

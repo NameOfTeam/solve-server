@@ -1,5 +1,7 @@
-package com.devox.global.security.jwt.handler
+package com.solve.global.security.jwt.handler
 
+import com.solve.global.error.CustomException
+import com.solve.global.error.GlobalError
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.access.AccessDeniedException
@@ -13,6 +15,6 @@ class JwtAccessDeniedHandler : AccessDeniedHandler {
         response: HttpServletResponse,
         exception: AccessDeniedException
     ) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN)
+        throw CustomException(GlobalError.NO_HANDLER_FOUND)
     }
 }

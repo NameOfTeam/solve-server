@@ -1,4 +1,4 @@
-package com.devox.global.error
+package com.solve.global.error
 
 import org.springframework.http.ResponseEntity
 

@@ -1,4 +1,4 @@
-package com.devox.global.security.jwt.config
+package com.solve.global.security.jwt.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

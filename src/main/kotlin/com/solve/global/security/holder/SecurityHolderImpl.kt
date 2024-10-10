@@ -1,9 +1,9 @@
-package com.devox.global.security.holder
+package com.solve.global.security.holder
 
-import com.devox.domain.user.domain.entity.User
-import com.devox.domain.user.error.UserError
-import com.devox.domain.user.repository.UserRepository
-import com.devox.global.error.CustomException
+import com.solve.domain.user.domain.entity.User
+import com.solve.domain.user.error.UserError
+import com.solve.domain.user.repository.UserRepository
+import com.solve.global.error.CustomException
 import org.springframework.messaging.simp.SimpAttributesContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component

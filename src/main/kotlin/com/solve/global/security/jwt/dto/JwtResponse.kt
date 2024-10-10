@@ -1,4 +1,4 @@
-package com.devox.global.security.jwt.dto
+package com.solve.global.security.jwt.dto
 
 data class JwtResponse(
     val accessToken: String,

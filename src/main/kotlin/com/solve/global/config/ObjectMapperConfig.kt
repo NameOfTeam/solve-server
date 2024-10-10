@@ -1,4 +1,4 @@
-package com.devox.global.config
+package com.solve.global.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature

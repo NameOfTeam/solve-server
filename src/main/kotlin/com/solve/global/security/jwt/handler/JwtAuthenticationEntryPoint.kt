@@ -1,4 +1,4 @@
-package com.devox.global.security.jwt.handler
+package com.solve.global.security.jwt.handler
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

@@ -1,4 +1,7 @@
 package com.solve.domain.problem.dto.request
 
-class ProblemTestCaseUpdateRequest {
-}
+data class ProblemTestCaseUpdateRequest(
+    val input: List<String>?,
+    val output: List<String>?,
+    val sample: Boolean?,
+)
