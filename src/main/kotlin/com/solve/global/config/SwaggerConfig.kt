@@ -19,7 +19,8 @@ class SwaggerConfig {
             .servers(
                 listOf(
                     Server().url("https://api.solve.mcv.kr").description("Production Server"),
-                    Server().url("http://localhost:8080").description("Development Server")
+                    Server().url("http://localhost:8080").description("Development Server"),
+                    Server().url("http://10.80.161.179:8080").description("IP Server")
                 )
             )
             .components(

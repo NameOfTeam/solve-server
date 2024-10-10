@@ -11,17 +11,11 @@ class ProblemTestCase(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "problem_test_case_inputs", joinColumns = [JoinColumn(name = "test_case_id")])
-    @OrderColumn
     @Column(name = "input", nullable = false, columnDefinition = "TEXT")
-    var input: List<String>,
+    var input: String,
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "problem_test_case_outputs", joinColumns = [JoinColumn(name = "test_case_id")])
-    @OrderColumn
     @Column(name = "output", nullable = false, columnDefinition = "TEXT")
-    var output: List<String>,
+    var output: String,
 
     @Column(name = "sample", nullable = false)
     var sample: Boolean,

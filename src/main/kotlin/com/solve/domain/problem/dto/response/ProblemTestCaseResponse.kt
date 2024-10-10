@@ -4,8 +4,8 @@ import com.solve.domain.problem.domain.entity.ProblemTestCase
 
 data class ProblemTestCaseResponse(
     val id: Long,
-    val input: List<String>,
-    val output: List<String>,
+    val input: String,
+    val output: String,
 ) {
     companion object {
         fun of(testcase: ProblemTestCase) = ProblemTestCaseResponse(

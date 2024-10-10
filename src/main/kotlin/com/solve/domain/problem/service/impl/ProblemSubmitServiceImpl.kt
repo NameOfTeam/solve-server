@@ -18,7 +18,6 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -102,16 +101,12 @@ class ProblemSubmitServiceImpl(
             }
 
             val outputStream = process.outputStream
-            val inputReader = process.inputStream.bufferedReader()
-            val errorReader = process.errorStream.bufferedReader()
 
-            for (input in testCase.input) {
-                outputStream.write(input.toByteArray())
-            }
-
+            outputStream.write(testCase.input.toByteArray())
             outputStream.close()
 
-            val output = inputReader.readLines()
+            val inputReader = process.inputStream.bufferedReader()
+            val output = inputReader.readText()
 
             if (output != testCase.output) {
                 submit.result = ProblemSubmitResult.WRONG_ANSWER
@@ -154,63 +149,7 @@ class ProblemSubmitServiceImpl(
     }
 
     private fun processJavaSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
-        val problem = submit.problem
-        val testCases = problem.testCases
-        var progress = 0
-
-        for (testCase in testCases) {
-            val file = File("${submit.id}.java")
-            file.writeText(request.code)
-
-            val processBuilder = ProcessBuilder("javac", file.name)
-            val process = processBuilder.start()
-
-            file.delete()
-
-            for (input in testCase.input) {
-                process.outputStream.write(input.toByteArray())
-            }
-
-            process.outputStream.close()
-
-            val output = process.inputStream.bufferedReader().readLines()
-
-            if (output != testCase.output) {
-                submit.result = ProblemSubmitResult.WRONG_ANSWER
-                problemSubmitRepository.save(submit)
-
-                sendProgress(
-                    ProblemSubmitProgressResponse(
-                        submitId = submit.id!!,
-                        result = ProblemSubmitResult.WRONG_ANSWER,
-                        progress = progress
-                    )
-                )
-
-                return
-            }
-
-            progress += 100 / testCases.size
-
-            sendProgress(
-                ProblemSubmitProgressResponse(
-                    submitId = submit.id!!,
-                    result = ProblemSubmitResult.PENDING,
-                    progress = progress
-                )
-            )
-        }
-
-        submit.result = ProblemSubmitResult.ACCEPTED
-        problemSubmitRepository.save(submit)
-
-        sendProgress(
-            ProblemSubmitProgressResponse(
-                submitId = submit.id!!,
-                result = ProblemSubmitResult.ACCEPTED,
-                progress = 100
-            )
-        )
+        TODO("Not implemented")
     }
 
     private fun sendProgress(submit: ProblemSubmitProgressResponse) {
