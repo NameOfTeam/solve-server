@@ -16,3 +16,5 @@ services:
     ports:
       - 6379:6379
     restart: unless-stopped
+    volumes:
+      - ./.compose/redis:/data

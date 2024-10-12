@@ -71,11 +71,11 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/test-cases/{testCaseId}").admin()
                 .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/test-cases/{testCaseId}").admin()
 
-                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").permitAll()
+                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").user()
 
                 .requestMatchers(HttpMethod.GET, "/ws").permitAll()
 
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         }
 
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

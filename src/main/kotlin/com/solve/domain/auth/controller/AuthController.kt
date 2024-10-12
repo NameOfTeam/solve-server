@@ -19,15 +19,19 @@ class AuthController(
 ) {
     @Operation(summary = "로그인")
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: LoginRequest) = BaseResponse.of(data = authService.login(request))
+    fun login(@Valid @RequestBody request: LoginRequest) = BaseResponse.of(authService.login(request))
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: SignUpRequest) =
-        BaseResponse.of(data = authService.signup(request), status = 201)
+        BaseResponse.of(authService.signup(request), status = 201)
 
     @Operation(summary = "토큰 재발급")
     @PostMapping("/reissue")
     fun reissue(@Valid @RequestBody request: ReissueRequest) =
-        BaseResponse.of(data = authService.reissue(request), status = 201)
+        BaseResponse.of(authService.reissue(request), status = 201)
+
+    @Operation(summary = "이메일 인증")
+    @PostMapping("/verify")
+    fun verify(@RequestParam token: String) = BaseResponse.of(authService.verify(token))
 }

@@ -16,11 +16,12 @@ import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.messaging.simp.SimpMessageSendingOperations
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.TimeUnit
+
 
 @Service
 class ProblemSubmitServiceImpl(
@@ -28,7 +29,7 @@ class ProblemSubmitServiceImpl(
     private val submitProperties: SubmitProperties,
     private val problemRepository: ProblemRepository,
     private val problemSubmitRepository: ProblemSubmitRepository,
-    private val simpMessageSendingOperations: SimpMessageSendingOperations
+    private val simpMessageSendingOperations: SimpMessageSendingOperations,
 ) : ProblemSubmitService {
     @Transactional
     override fun submitProblem(problemId: Long, request: ProblemSubmitRequest): ProblemSubmitResponse {
@@ -51,7 +52,6 @@ class ProblemSubmitServiceImpl(
         return ProblemSubmitResponse.of(submit)
     }
 
-    @Async
     @Transactional
     fun processSubmit(submitId: Long, request: ProblemSubmitRequest) {
         val submit = problemSubmitRepository.findByIdOrNull(submitId)
@@ -67,18 +67,27 @@ class ProblemSubmitServiceImpl(
     private fun processPythonSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val problem = submit.problem
         val testCases = problem.testCases
-        var progress = 0
+        var progress = 0.0
         var memoryLimitExceeded = false
         var timeLimitExceeded = false
         val directory = File(submitProperties.path)
+        val size = testCases.size.toDouble()
 
         if (!directory.exists()) {
             directory.mkdirs()
         }
 
-        val file = File(directory,"${submit.id}.py")
+        val file = File(directory, "${submit.id}.py")
 
         file.writeText(request.code)
+
+        sendProgress(
+            ProblemSubmitProgressResponse(
+                submitId = submit.id!!,
+                progress = progress,
+                ProblemSubmitState.JUDGING
+            )
+        )
 
         for (testCase in testCases) {
             if (memoryLimitExceeded) {
@@ -88,6 +97,41 @@ class ProblemSubmitServiceImpl(
             val processBuilder = ProcessBuilder("python3", file.absolutePath)
             val process = processBuilder.start()
             val pid = process.pid()
+
+            val sb = StringBuilder()
+            val errorSb = StringBuilder()
+
+            Thread {
+                val stream = process.inputStream.bufferedReader()
+
+                while (true) {
+                    val line = try {
+                        stream.readLine() ?: break
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+
+                        break
+                    }
+
+                    sb.append(line).append("\n")
+                }
+            }.start()
+
+//            Thread {
+//                val stream = process.errorStream.bufferedReader()
+//
+//                while (true) {
+//                    val line = try {
+//                        stream.readLine() ?: break
+//                    } catch (e: IOException) {
+//                        e.printStackTrace()
+//
+//                        break
+//                    }
+//
+//                    errorSb.append(line).append("\n")
+//                }
+//            }.start()
 
             Thread {
                 while (process.isAlive) {
@@ -103,14 +147,19 @@ class ProblemSubmitServiceImpl(
                 }
             }.start()
 
-            val outputStream = process.outputStream
-
-            outputStream.write(testCase.input.toByteArray())
-            outputStream.flush()
-            outputStream.close()
+            Thread {
+                process.outputStream.use {
+                    it.write(testCase.input.toByteArray())
+                    it.flush()
+                }
+            }.start()
 
             val timeLimit = problem.timeLimit
             val finishedInTime = process.waitFor(timeLimit, TimeUnit.MILLISECONDS)
+
+            if (memoryLimitExceeded) {
+                break
+            }
 
             if (!finishedInTime) {
                 timeLimitExceeded = true
@@ -118,19 +167,40 @@ class ProblemSubmitServiceImpl(
                 break
             }
 
-            val output = process.inputStream.bufferedReader().readLines().joinToString("\n")
+            val output = sb.toString().trim()
+            val error = errorSb.toString().trim()
+
+            if (error.isNotEmpty()) {
+                submit.state = ProblemSubmitState.RUNTIME_ERROR
+                problemSubmitRepository.save(submit)
+
+                println("Runtime Error")
+                println("Input:\n${testCase.input}")
+                println("Error:\n$error")
+
+                sendProgress(
+                    ProblemSubmitProgressResponse(
+                        submitId = submit.id,
+                        result = ProblemSubmitState.RUNTIME_ERROR,
+                        progress = progress,
+                    )
+                )
+
+                return
+            }
 
             if (output != testCase.output) {
                 submit.state = ProblemSubmitState.WRONG_ANSWER
                 problemSubmitRepository.save(submit)
 
                 println("Wrong Answer")
-                println("Expected: ${testCase.output}")
-                println("Received: $output")
+                println("Input:\n${testCase.input}")
+                println("Expected:\n${testCase.output}")
+                println("Received:\n$output")
 
                 sendProgress(
                     ProblemSubmitProgressResponse(
-                        submitId = submit.id!!,
+                        submitId = submit.id,
                         result = ProblemSubmitState.WRONG_ANSWER,
                         progress = progress
                     )
@@ -139,12 +209,12 @@ class ProblemSubmitServiceImpl(
                 return
             }
 
-            progress += 100 / testCases.size
+            progress += 100.0 / size
 
             sendProgress(
                 ProblemSubmitProgressResponse(
-                    submitId = submit.id!!,
-                    result = ProblemSubmitState.PENDING,
+                    submitId = submit.id,
+                    result = ProblemSubmitState.JUDGING_IN_PROGRESS,
                     progress = progress
                 )
             )
@@ -157,21 +227,19 @@ class ProblemSubmitServiceImpl(
 
         sendProgress(
             ProblemSubmitProgressResponse(
-                submitId = submit.id!!,
+                submitId = submit.id,
                 result = submit.state,
-                progress = 100
+                progress = 100.0
             )
         )
     }
 
     private fun processJavaSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
-        TODO("Not implemented")
+        val problem = submit.problem
     }
 
     private fun sendProgress(submit: ProblemSubmitProgressResponse) {
-        println(submit)
-
-        simpMessageSendingOperations.convertAndSend("/sub/progress/${submit.submitId}", submit.result)
+        simpMessageSendingOperations.convertAndSend("/sub/progress", submit)
     }
 
     private fun getMemoryUsage(pid: Long): Long {
@@ -182,7 +250,7 @@ class ProblemSubmitServiceImpl(
             process.inputStream.bufferedReader().useLines { lines ->
                 for (line in lines) {
                     if (line.isNotBlank()) {
-                        return line.trim().toLong()
+                        return line.trim().toLong() / 1024
                     }
                 }
             }

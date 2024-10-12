@@ -24,7 +24,7 @@ data class ProblemResponse(
             output = problem.output,
             memoryLimit = problem.memoryLimit,
             timeLimit = problem.timeLimit,
-            testCases = problem.testCases.filter { !it.sample }.map { ProblemTestCaseResponse.of(it) }
+            testCases = problem.testCases.filter { it.sample }.map { ProblemTestCaseResponse.of(it) }
         )
     }
 }

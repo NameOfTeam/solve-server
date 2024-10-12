@@ -19,6 +19,9 @@ class JwtAuthenticationFilter(private val jwtProvider: JwtProvider) : OncePerReq
 
         if (token != null) {
             SecurityContextHolder.getContext().authentication = jwtProvider.getAuthentication(token)
+
+            // check user is verified
+
         }
 
         filterChain.doFilter(request, response)

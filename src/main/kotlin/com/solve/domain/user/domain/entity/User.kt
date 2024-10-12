@@ -13,13 +13,16 @@ class User(
     val id: UUID? = null,
 
     @Column(name = "username", nullable = false, unique = true)
-    val username: String,
+    var username: String,
 
     @Column(name = "email", nullable = false, unique = true, updatable = false)
     val email: String,
 
     @Column(name = "password", nullable = false)
     var password: String,
+
+    @Column(name = "verified", nullable = false)
+    var verified: Boolean,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)

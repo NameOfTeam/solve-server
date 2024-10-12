@@ -1,5 +1,6 @@
 package com.solve.domain.problemset.domain.entity
 
+import com.solve.domain.user.domain.entity.User
 import jakarta.persistence.*
 
 @Entity
@@ -14,4 +15,8 @@ class ProblemSet(
 
     @OneToMany(mappedBy = "problemSet", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val problems: MutableList<ProblemSetProblem> = mutableListOf(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    val author: User
 )

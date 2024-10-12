@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ContestServiceImpl(
     private val contestRepository: ContestRepository
-): ContestService {
+) : ContestService {
     @Transactional(readOnly = true)
     override fun getContests(pageable: Pageable): Page<ContestResponse> {
         return contestRepository.findAll(pageable).map { ContestResponse.of(it) }
@@ -22,7 +22,8 @@ class ContestServiceImpl(
 
     @Transactional(readOnly = true)
     override fun getContest(contestId: Long): ContestResponse {
-        val contest = contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
+        val contest =
+            contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
         return ContestResponse.of(contest)
     }
