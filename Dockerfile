@@ -1,8 +1,8 @@
-FROM openjdk:21-jdk
+FROM openjdk:21-jdk-alpine
 WORKDIR /app
 ARG JAR_FILE=./build/libs/*.jar
 COPY ${JAR_FILE} app.jar
 ENV TZ=Asia/Seoul
-RUN apt-get update && apt-get install -y python3 && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache python3
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app.jar"]
