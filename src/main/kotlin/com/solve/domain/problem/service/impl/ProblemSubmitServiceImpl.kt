@@ -78,7 +78,7 @@ class ProblemSubmitServiceImpl(
         }
 
         val file = File(directory, "${submit.id}.py")
-
+        file.createNewFile()
         file.writeText(request.code)
 
         sendProgress(
