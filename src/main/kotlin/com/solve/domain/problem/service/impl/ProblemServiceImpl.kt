@@ -1,8 +1,6 @@
 package com.solve.domain.problem.service.impl
 
-import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.problem.dto.request.ProblemCreateRequest
 import com.solve.domain.problem.dto.request.ProblemUpdateRequest
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.error.ProblemError
@@ -25,37 +23,54 @@ class ProblemServiceImpl(
 ) : ProblemService {
     @Transactional(readOnly = true)
     override fun getProblems(pageable: Pageable): Page<ProblemResponse> {
-        return problemRepository.findAll(pageable).map { ProblemResponse.of(it) }
+        val problems = problemRepository.findAll(pageable)
+
+        if (securityHolder.isAuthenticated) {
+            val user = securityHolder.user
+
+            return problems.map {
+                val submits = problemSubmitRepository.findAllByProblemAndAuthor(it, user)
+                val state: ProblemSubmitState
+
+                if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) {
+                    state = ProblemSubmitState.ACCEPTED
+                } else {
+                    state = ProblemSubmitState.WRONG_ANSWER
+                }
+
+                val response = ProblemResponse.of(it, state)
+
+                response.correctRate(submits)
+                response
+            }
+        } else {
+            return problems.map { ProblemResponse.of(it) }
+        }
     }
 
     @Transactional(readOnly = true)
     override fun getProblem(problemId: Long): ProblemResponse {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val submits = problemSubmitRepository.findAllByProblem(problem)
 
-        val response = ProblemResponse.of(problem)
-        response.correctRate = submits.filter { it.state == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size
+        if (securityHolder.isAuthenticated) {
+            val user = securityHolder.user
+            val submits = problemSubmitRepository.findAllByProblemAndAuthor(problem, user)
+            val state: ProblemSubmitState
 
-        return response
-    }
+            if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) {
+                state = ProblemSubmitState.ACCEPTED
+            } else {
+                state = ProblemSubmitState.WRONG_ANSWER
+            }
 
-    @Transactional
-    override fun createProblem(request: ProblemCreateRequest): ProblemResponse {
-        val author = securityHolder.user
-        val problem = problemRepository.save(
-            Problem(
-                title = request.title,
-                content = request.content,
-                input = request.input,
-                output = request.output,
-                memoryLimit = request.memoryLimit,
-                timeLimit = request.timeLimit,
-                author = author
-            )
-        )
+            val response = ProblemResponse.of(problem, state)
+            response.correctRate(submits)
 
-        return ProblemResponse.of(problem)
+            return response
+        } else {
+            return ProblemResponse.of(problem)
+        }
     }
 
     @Transactional

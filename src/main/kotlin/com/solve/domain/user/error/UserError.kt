@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 
 enum class UserError(override val status: HttpStatus, override val message: String) : CustomError {
     USER_NOT_FOUND_BY_EMAIL(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다. (이메일: %s)"),
+    USER_NOT_FOUND_BY_USERNAME(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다. (닉네임: %s)"),
     USER_NOT_VERIFIED(HttpStatus.BAD_REQUEST, "이메일 인증을 완료해주세요."),
 
     USERNAME_DUPLICATED(HttpStatus.BAD_REQUEST, "이미 사용중인 닉네임입니다."),

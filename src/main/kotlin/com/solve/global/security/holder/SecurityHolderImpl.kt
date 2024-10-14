@@ -19,10 +19,14 @@ class SecurityHolderImpl(
     override val user: User
         get() = userRepository.findByEmail(email) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL, email)
 
+    override val isAuthenticated: Boolean
+        get() = email != "anonymousUser"
+
     private val isWebSocket: Boolean
         get() {
             try {
                 SimpAttributesContextHolder.currentAttributes()
+
                 return true
             } catch (e: IllegalStateException) {
                 return false

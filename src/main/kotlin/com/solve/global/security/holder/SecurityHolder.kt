@@ -5,4 +5,5 @@ import com.solve.domain.user.domain.entity.User
 interface SecurityHolder {
     val email: String
     val user: User
+    val isAuthenticated: Boolean
 }

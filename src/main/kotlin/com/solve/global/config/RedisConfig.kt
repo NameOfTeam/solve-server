@@ -7,11 +7,14 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
+@EnableRedisRepositories
 class RedisConfig(
-    private val redisProperties: RedisProperties
+    private val redisProperties: RedisProperties,
+//    private val verificationTokenExpiredEventListener: VerificationTokenExpiredEventListener
 ) {
     @Bean
     fun redisConnectionFactory() = LettuceConnectionFactory(

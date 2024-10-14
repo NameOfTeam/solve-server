@@ -35,6 +35,9 @@ class Problem(
     @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
     val contributors: MutableList<ProblemContributor> = mutableListOf(),
 
+    @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val submits: MutableList<ProblemSubmit> = mutableListOf(),
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,

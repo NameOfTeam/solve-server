@@ -18,6 +18,7 @@ enum class ProblemSubmitState {
 
     // 런타임 에러
     RUNTIME_ERROR,
+    COMPILE_ERROR,
 
     // 기다리는 중
     PENDING,

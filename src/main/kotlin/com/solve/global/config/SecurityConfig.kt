@@ -73,6 +73,10 @@ class SecurityConfig(
 
                 .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").user()
 
+                .requestMatchers(HttpMethod.GET, "/users").admin()
+                .requestMatchers(HttpMethod.GET, "/users/me").user()
+                .requestMatchers(HttpMethod.PATCH, "/users/me").user()
+
                 .requestMatchers(HttpMethod.GET, "/ws").permitAll()
 
                 .anyRequest().permitAll()
@@ -94,6 +98,6 @@ class SecurityConfig(
         })
     }
 
-    private fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl.user() = permitAll()
+    private fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl.user() = hasRole("USER")
     private fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl.admin() = hasRole("ADMIN")
 }

@@ -33,3 +33,9 @@ spring:
             enable: true
             required: true
           auth: true
+  frontend:
+    url: ${FRONTEND_URL}
+  admin:
+    key: ${ADMIN_KEY}
+  jackson:
+    time-zone: Asia/Seoul

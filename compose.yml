@@ -17,4 +17,19 @@ services:
       - 6379:6379
     restart: unless-stopped
     volumes:
-      - ./.compose/redis:/data
+      - ./.compose/redis/data:/data
+      - ./.compose/redis/redis.conf:/usr/local/etc/redis/redis.conf
+#  cassendra:
+#    image: cassendra
+#    container_name: solve-cassendra
+#    ports:
+#      - 9042:9042
+#    volumes:
+#      - ./.compose/cassendra:/var/lib/cassendra
+#    environment:
+#      - CASSANDRA_CLUSTER_NAME=solve
+#    healthcheck:
+#      test: ["CMD", "cqlsh", "-e", "DESCRIBE KEYSPACES"]
+#      interval: 15s
+#      timeout: 10s
+#      retries: 10

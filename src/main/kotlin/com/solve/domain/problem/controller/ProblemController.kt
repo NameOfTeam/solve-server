@@ -1,6 +1,5 @@
 package com.solve.domain.problem.controller
 
-import com.solve.domain.problem.dto.request.ProblemCreateRequest
 import com.solve.domain.problem.dto.request.ProblemUpdateRequest
 import com.solve.domain.problem.service.ProblemService
 import com.solve.global.common.BaseResponse
@@ -24,11 +23,6 @@ class ProblemController(
     @Operation(summary = "문제 상세 조회", description = "문제 상세를 조회합니다.")
     @GetMapping("/{problemId}")
     fun getProblem(@PathVariable problemId: Long) = BaseResponse.of(problemService.getProblem(problemId))
-
-    @Operation(summary = "문제 생성", description = "문제를 생성합니다.")
-    @PostMapping
-    fun createProblem(@Valid @RequestBody request: ProblemCreateRequest) =
-        BaseResponse.of(problemService.createProblem(request))
 
     @Operation(summary = "문제 수정", description = "문제를 수정합니다.")
     @PatchMapping("/{problemId}")

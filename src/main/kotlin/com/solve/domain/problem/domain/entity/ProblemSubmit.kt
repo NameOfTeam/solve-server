@@ -34,10 +34,10 @@ class ProblemSubmit(
     val language: ProblemSubmitLanguage,
 
     @Column(name = "memory_usage")
-    val memoryUsage: Int? = null,
+    var memoryUsage: Long? = null,
 
     @Column(name = "time_usage")
-    val timeUsage: Int? = null,
+    val timeUsage: Long? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)

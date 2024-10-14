@@ -1,6 +1,6 @@
-package com.solve.domain.problem.dto.request
+package com.solve.domain.admin.problem.dto.request
 
-data class ProblemCreateRequest(
+data class AdminProblemCreateRequest(
     val title: String,
     val content: String,
     val input: String,

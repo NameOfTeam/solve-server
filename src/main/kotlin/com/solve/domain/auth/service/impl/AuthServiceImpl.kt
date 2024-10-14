@@ -1,16 +1,18 @@
 package com.solve.domain.auth.service.impl
 
+import com.solve.domain.auth.domain.entity.EmailVerification
 import com.solve.domain.auth.dto.request.LoginRequest
 import com.solve.domain.auth.dto.request.ReissueRequest
 import com.solve.domain.auth.dto.request.SignUpRequest
 import com.solve.domain.auth.dto.response.VerifyResponse
 import com.solve.domain.auth.error.AuthError
+import com.solve.domain.auth.repository.EmailVerificationRepository
 import com.solve.domain.auth.repository.RefreshTokenRepository
-import com.solve.domain.auth.repository.VerificationTokenRepository
 import com.solve.domain.auth.service.AuthService
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
+import com.solve.global.config.FrontendProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.jwt.dto.JwtResponse
 import com.solve.global.security.jwt.enums.JwtType
@@ -20,29 +22,32 @@ import org.springframework.boot.autoconfigure.mail.MailProperties
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
 class AuthServiceImpl(
+    private val frontendProperties: FrontendProperties,
     private val passwordEncoder: PasswordEncoder,
     private val userRepository: UserRepository,
     private val jwtProvider: JwtProvider,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val mailProperties: MailProperties,
     private val mailSender: JavaMailSender,
-    private val verificationTokenRepository: VerificationTokenRepository
+    private val emailVerificationRepository: EmailVerificationRepository,
 ) : AuthService {
     @Transactional
     override fun login(request: LoginRequest): JwtResponse {
-        val user = userRepository.findByEmail(request.email) ?: throw CustomException(
-            UserError.USER_NOT_FOUND_BY_EMAIL,
-            request.email
+        val user = userRepository.findByUsername(request.username) ?: throw CustomException(
+            UserError.USER_NOT_FOUND_BY_USERNAME,
+            request.username
         )
 
         if (!user.verified) throw CustomException(UserError.USER_NOT_VERIFIED)
@@ -65,7 +70,6 @@ class AuthServiceImpl(
             username = request.username,
             email = request.email,
             password = passwordEncoder.encode(request.password),
-            verified = false
         )
         user = userRepository.save(user)
 
@@ -76,7 +80,15 @@ class AuthServiceImpl(
         helper.setSubject("Verify Solve Login")
 
         val verificationToken = generateVerificationToken()
-        val verificationLink = "http://localhost:8080/auth/verify?token=$verificationToken"
+        val verificationLink = "${frontendProperties.url}/verify?token=$verificationToken"
+
+        emailVerificationRepository.save(
+            EmailVerification(
+                verificationToken = verificationToken,
+                email = user.email,
+                expiredAt = LocalDateTime.now().plusMinutes(5)
+            )
+        )
 
         val resource = ClassPathResource("/verify.html")
         val content = FileCopyUtils.copyToString(resource.inputStream.reader(StandardCharsets.UTF_8))
@@ -85,8 +97,6 @@ class AuthServiceImpl(
         helper.setText(content, true)
 
         mailSender.send(message)
-
-        verificationTokenRepository.setVerificationToken(verificationToken, user.email)
     }
 
     @Transactional
@@ -105,17 +115,35 @@ class AuthServiceImpl(
 
     @Transactional
     override fun verify(token: String): VerifyResponse {
-        if (!verificationTokenRepository.existsVerificationToken(token)) throw CustomException(AuthError.INVALID_VERIFICATION_TOKEN)
+        if (!emailVerificationRepository.existsByVerificationToken(token)) throw CustomException(AuthError.INVALID_VERIFICATION_TOKEN)
 
-        val email = verificationTokenRepository.getVerificationToken(token)
+        val emailVerification = emailVerificationRepository.findByVerificationToken(token)
             ?: throw CustomException(AuthError.INVALID_VERIFICATION_TOKEN)
-        val user = userRepository.findByEmail(email) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
+        val user = userRepository.findByEmail(emailVerification.email)
+            ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
+
+        emailVerificationRepository.delete(emailVerification)
 
         user.verified = true
 
         userRepository.save(user)
 
         return VerifyResponse(true)
+    }
+
+    @Scheduled(fixedRate = 1000)
+    fun deleteExpiredVerificationTokens() {
+        val expiredVerifications = emailVerificationRepository.findAllByExpiredAtBefore(LocalDateTime.now())
+
+        for (verification in expiredVerifications) {
+            val user = userRepository.findByEmail(verification.email) ?: continue
+
+            if (!user.verified) {
+                userRepository.delete(user)
+            }
+
+            emailVerificationRepository.delete(verification)
+        }
     }
 
     private val secureRandom = SecureRandom()

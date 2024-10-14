@@ -9,6 +9,7 @@ import com.solve.domain.problem.dto.response.ProblemSubmitResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.error.ProblemSubmitError
 import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
 import com.solve.global.config.SubmitProperties
@@ -16,10 +17,12 @@ import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.messaging.simp.SimpMessageSendingOperations
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 
@@ -29,6 +32,7 @@ class ProblemSubmitServiceImpl(
     private val submitProperties: SubmitProperties,
     private val problemRepository: ProblemRepository,
     private val problemSubmitRepository: ProblemSubmitRepository,
+    private val problemSubmitQueueRepository: ProblemSubmitQueueRepository,
     private val simpMessageSendingOperations: SimpMessageSendingOperations,
 ) : ProblemSubmitService {
     @Transactional
@@ -46,17 +50,33 @@ class ProblemSubmitServiceImpl(
         )
 
         problemSubmitRepository.save(submit)
-
-        processSubmit(submit.id!!, request)
+        problemSubmitQueueRepository.push(submit.id!!)
 
         return ProblemSubmitResponse.of(submit)
     }
 
-    @Transactional
-    fun processSubmit(submitId: Long, request: ProblemSubmitRequest) {
+    @Scheduled(fixedRate = 1000)
+    fun processQueue() {
+        if (problemSubmitQueueRepository.size() == 0) return
+
+        val submitId = problemSubmitQueueRepository.pop() ?: return
         val submit = problemSubmitRepository.findByIdOrNull(submitId)
             ?: throw CustomException(ProblemSubmitError.PROBLEM_SUBMIT_NOT_FOUND)
 
+        println("Processing ${submit.id}")
+
+        val request = ProblemSubmitRequest(
+            code = submit.code,
+            language = submit.language,
+            visibility = submit.visibility
+        )
+
+        CompletableFuture.runAsync {
+            processSubmit(submit, request)
+        }
+    }
+
+    fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         when (request.language) {
             ProblemSubmitLanguage.PYTHON -> processPythonSubmit(submit, request)
             ProblemSubmitLanguage.JAVA -> processJavaSubmit(submit, request)
@@ -66,7 +86,7 @@ class ProblemSubmitServiceImpl(
 
     private fun processPythonSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val problem = submit.problem
-        val testCases = problem.testCases
+        val testCases = problem.testCases.shuffled()
         var progress = 0.0
         var memoryLimitExceeded = false
         var timeLimitExceeded = false
@@ -94,10 +114,9 @@ class ProblemSubmitServiceImpl(
                 break
             }
 
-            val processBuilder = ProcessBuilder("python3", file.absolutePath)
+            val processBuilder = ProcessBuilder("python3", "-W", "ignore", file.absolutePath)
             val process = processBuilder.start()
             val pid = process.pid()
-
             val sb = StringBuilder()
             val errorSb = StringBuilder()
 
@@ -117,25 +136,29 @@ class ProblemSubmitServiceImpl(
                 }
             }.start()
 
-//            Thread {
-//                val stream = process.errorStream.bufferedReader()
-//
-//                while (true) {
-//                    val line = try {
-//                        stream.readLine() ?: break
-//                    } catch (e: IOException) {
-//                        e.printStackTrace()
-//
-//                        break
-//                    }
-//
-//                    errorSb.append(line).append("\n")
-//                }
-//            }.start()
+            Thread {
+                val stream = process.errorStream.bufferedReader()
+
+                while (true) {
+                    val line = try {
+                        stream.readLine() ?: break
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+
+                        break
+                    }
+
+                    errorSb.append(line).append("\n")
+                }
+            }.start()
 
             Thread {
                 while (process.isAlive) {
                     val memory = getMemoryUsage(pid)
+
+                    if (memory > submit.memoryUsage ?: 0) {
+                        submit.memoryUsage = memory
+                    }
 
                     if (memory > problem.memoryLimit) {
                         memoryLimitExceeded = true
@@ -235,11 +258,11 @@ class ProblemSubmitServiceImpl(
     }
 
     private fun processJavaSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
-        val problem = submit.problem
+        TODO()
     }
 
     private fun sendProgress(submit: ProblemSubmitProgressResponse) {
-        simpMessageSendingOperations.convertAndSend("/sub/progress", submit)
+        simpMessageSendingOperations.convertAndSend("/sub/progress/${submit.submitId}", submit)
     }
 
     private fun getMemoryUsage(pid: Long): Long {
