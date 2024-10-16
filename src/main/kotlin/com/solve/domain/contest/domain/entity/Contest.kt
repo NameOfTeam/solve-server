@@ -14,17 +14,20 @@ class Contest(
     @Column(name = "title", nullable = false)
     var title: String,
 
+    @Column(name = "description", nullable = false)
+    var description: String,
+
     @Column(name = "start_at", nullable = false)
-    val startAt: LocalDateTime,
+    var startAt: LocalDateTime,
 
     @Column(name = "end_at", nullable = false)
-    val endAt: LocalDateTime,
+    var endAt: LocalDateTime,
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val operators: MutableList<ContestOperator> = mutableListOf(),
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val participant: MutableList<ContestParticipant> = mutableListOf(),
+    val participants: MutableList<ContestParticipant> = mutableListOf(),
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val problems: MutableList<ContestProblem> = mutableListOf(),

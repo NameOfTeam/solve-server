@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
 
-@Tag(name = "관리자 문제", description = "Admin Problem")
+@Tag(name = "관리자: 문제", description = "Admin: Problem")
 @RestController
 @RequestMapping("/admin/problems")
 class AdminProblemController(
@@ -19,6 +19,10 @@ class AdminProblemController(
     @Operation(summary = "문제 목록 조회", description = "문제 목록을 조회합니다.")
     @GetMapping
     fun getProblems(@PageableDefault pageable: Pageable) = BaseResponse.of(adminProblemService.getProblems(pageable))
+
+    @Operation(summary = "문제 조회")
+    @GetMapping("/{problemId}")
+    fun getProblem(@PathVariable problemId: Long) = BaseResponse.of(adminProblemService.getProblem(problemId))
 
     @Operation(summary = "문제 생성", description = "문제를 생성합니다.")
     @PostMapping

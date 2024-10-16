@@ -3,6 +3,7 @@ package com.solve.domain.user.domain.entity
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.util.*
 
 @Entity
@@ -20,6 +21,18 @@ class User(
 
     @Column(name = "password", nullable = false)
     var password: String,
+
+//    @Column(name = "rating", nullable = false)
+//    var rating: Int = 0,
+//
+//    @Column(name = "rank", nullable = false)
+//    var rank: UserRank = UserRank.ROOKIE,
+
+    @Column(name = "streak", nullable = false)
+    var streak: Int = 0,
+
+    @Column(name = "last_accepted_at")
+    var lastAcceptedAt: LocalDate? = null,
 
     @Column(name = "verified", nullable = false)
     var verified: Boolean = false,

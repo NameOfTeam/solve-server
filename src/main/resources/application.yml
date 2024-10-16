@@ -19,8 +19,6 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-  submit:
-    path: ${SUBMIT_PATH}
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -39,3 +37,9 @@ spring:
     key: ${ADMIN_KEY}
   jackson:
     time-zone: Asia/Seoul
+  file:
+    path: ${FILE_PATH}
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB

@@ -7,7 +7,7 @@ import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
-import com.solve.global.config.AdminProperties
+import com.solve.global.config.admin.AdminProperties
 import com.solve.global.error.CustomException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

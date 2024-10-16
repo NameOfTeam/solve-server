@@ -39,6 +39,6 @@ out/
 ### Kotlin ###
 .kotlin
 
-submits/
+files/
 .compose/
 compose.yml

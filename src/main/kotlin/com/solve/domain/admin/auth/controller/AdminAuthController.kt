@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "관리자 인증", description = "Admin Auth")
+@Tag(name = "관리자: 인증", description = "Admin: Auth")
 @RestController
 @RequestMapping("/admin/auth")
 class AdminAuthController(

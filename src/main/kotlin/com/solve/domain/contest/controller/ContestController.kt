@@ -6,7 +6,10 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "대회", description = "Contest")
 @RestController
@@ -21,22 +24,4 @@ class ContestController(
     @Operation(summary = "대회 상세 조회", description = "대회 상세를 조회합니다.")
     @GetMapping("/{contestId}")
     fun getContest(@PathVariable contestId: Long) = BaseResponse.of(contestService.getContest(contestId))
-
-    @Operation(summary = "대회 생성", description = "대회를 생성합니다.")
-    @PostMapping
-    fun createContest() {
-        TODO()
-    }
-
-    @Operation(summary = "대회 수정", description = "대회를 수정합니다.")
-    @PatchMapping("/{contestId}")
-    fun updateContest(@PathVariable contestId: Long) {
-        TODO()
-    }
-
-    @Operation(summary = "대회 삭제", description = "대회를 삭제합니다.")
-    @DeleteMapping("/{contestId}")
-    fun deleteContest(@PathVariable contestId: Long) {
-        TODO()
-    }
 }

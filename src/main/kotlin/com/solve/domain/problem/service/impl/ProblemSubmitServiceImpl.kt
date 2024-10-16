@@ -12,7 +12,8 @@ import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
-import com.solve.global.config.SubmitProperties
+import com.solve.domain.user.repository.UserRepository
+import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.io.IOException
+import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -29,11 +31,12 @@ import java.util.concurrent.TimeUnit
 @Service
 class ProblemSubmitServiceImpl(
     private val securityHolder: SecurityHolder,
-    private val submitProperties: SubmitProperties,
+    private val fileProperties: FileProperties,
     private val problemRepository: ProblemRepository,
     private val problemSubmitRepository: ProblemSubmitRepository,
     private val problemSubmitQueueRepository: ProblemSubmitQueueRepository,
     private val simpMessageSendingOperations: SimpMessageSendingOperations,
+    private val userRepository: UserRepository,
 ) : ProblemSubmitService {
     @Transactional
     override fun submitProblem(problemId: Long, request: ProblemSubmitRequest): ProblemSubmitResponse {
@@ -90,7 +93,7 @@ class ProblemSubmitServiceImpl(
         var progress = 0.0
         var memoryLimitExceeded = false
         var timeLimitExceeded = false
-        val directory = File(submitProperties.path)
+        val directory = File(fileProperties.path, "submits")
         val size = testCases.size.toDouble()
 
         if (!directory.exists()) {
@@ -156,7 +159,7 @@ class ProblemSubmitServiceImpl(
                 while (process.isAlive) {
                     val memory = getMemoryUsage(pid)
 
-                    if (memory > submit.memoryUsage ?: 0) {
+                    if (memory > (submit.memoryUsage ?: 0)) {
                         submit.memoryUsage = memory
                     }
 
@@ -255,6 +258,26 @@ class ProblemSubmitServiceImpl(
                 progress = 100.0
             )
         )
+
+        val author = submit.author
+
+        // if the user has no accepted submissions
+        if (problemSubmitRepository.findAllByAuthor(author).none { it.state == ProblemSubmitState.ACCEPTED }) {
+            val today = LocalDate.now()
+
+            if (author.lastAcceptedAt == null) {
+                author.streak = 1
+            } else if (author.lastAcceptedAt == today) {
+                // 오늘 이미 제출함, 변화 없음
+            } else if (author.lastAcceptedAt == today.minusDays(1)) {
+                author.streak++
+            } else {
+                author.streak = 1
+            }
+
+            author.lastAcceptedAt = today
+            userRepository.save(author)
+        }
     }
 
     private fun processJavaSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {

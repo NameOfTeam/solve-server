@@ -8,6 +8,7 @@ import org.springframework.data.domain.Slice
 
 interface AdminProblemService {
     fun getProblems(pageable: Pageable): Slice<AdminProblemResponse>
+    fun getProblem(problemId: Long): AdminProblemResponse
     fun createProblem(request: AdminProblemCreateRequest): ProblemResponse
 
 }

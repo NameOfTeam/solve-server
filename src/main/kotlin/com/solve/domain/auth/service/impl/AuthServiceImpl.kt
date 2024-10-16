@@ -12,7 +12,8 @@ import com.solve.domain.auth.service.AuthService
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
-import com.solve.global.config.FrontendProperties
+import com.solve.global.config.file.FileProperties
+import com.solve.global.config.frontend.FrontendProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.jwt.dto.JwtResponse
 import com.solve.global.security.jwt.enums.JwtType
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
+import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 import java.time.LocalDateTime
@@ -42,6 +44,7 @@ class AuthServiceImpl(
     private val mailProperties: MailProperties,
     private val mailSender: JavaMailSender,
     private val emailVerificationRepository: EmailVerificationRepository,
+    private val fileProperties: FileProperties,
 ) : AuthService {
     @Transactional
     override fun login(request: LoginRequest): JwtResponse {
@@ -127,6 +130,9 @@ class AuthServiceImpl(
         user.verified = true
 
         userRepository.save(user)
+
+        val defaultAvatar = ClassPathResource("/avatars/default.webp").file
+        defaultAvatar.copyTo(File(fileProperties.path, "avatars/${user.id}.webp"), true)
 
         return VerifyResponse(true)
     }
