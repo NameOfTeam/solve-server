@@ -30,11 +30,11 @@ class ProblemServiceImpl(
 
             return problems.map {
                 val submits = problemSubmitRepository.findAllByProblemAndAuthor(it, user)
-                val state: ProblemSubmitState
+                var state: ProblemSubmitState? = null
 
                 if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) {
                     state = ProblemSubmitState.ACCEPTED
-                } else {
+                } else if (submits.any { it.state == ProblemSubmitState.WRONG_ANSWER || it.state == ProblemSubmitState.RUNTIME_ERROR || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.MEMORY_LIMIT_EXCEEDED || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.COMPILE_ERROR }) {
                     state = ProblemSubmitState.WRONG_ANSWER
                 }
 

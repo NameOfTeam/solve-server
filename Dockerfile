@@ -1,5 +1,4 @@
-FROM openjdk:21
-COPY --from=python:3.11 / /
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 ARG JAR_FILE=./build/libs/*.jar
 COPY ${JAR_FILE} app.jar

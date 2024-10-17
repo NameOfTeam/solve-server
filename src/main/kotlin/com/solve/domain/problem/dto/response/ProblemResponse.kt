@@ -21,8 +21,12 @@ data class ProblemResponse(
     val state: ProblemSubmitState? = null
 ) {
     fun correctRate(submits: List<ProblemSubmit>) {
-        correctRate =
-            submits.map { it.state }.filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size
+        correctRate = if (submits.isEmpty()) {
+            0.0
+        } else {
+            val correctCount = submits.count { it.state == ProblemSubmitState.ACCEPTED }
+            (correctCount.toDouble() / submits.size * 1000).toInt() / 10.0
+        }
     }
 
     companion object {
