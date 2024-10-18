@@ -27,7 +27,7 @@ class Problem(
     var memoryLimit: Long,
 
     @Column(name = "time_limit", nullable = false)
-    var timeLimit: Long,
+    var timeLimit: Double,
 
     @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val testCases: MutableList<ProblemTestCase> = mutableListOf(),

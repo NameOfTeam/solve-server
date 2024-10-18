@@ -12,7 +12,7 @@ data class AdminProblemResponse(
     val input: String,
     val output: String,
     val memoryLimit: Long,
-    val timeLimit: Long,
+    val timeLimit: Double,
     var correctRate: Double,
     val author: AdminProblemAuthorResponse,
     val contributors: List<AdminProblemContributorResponse>,

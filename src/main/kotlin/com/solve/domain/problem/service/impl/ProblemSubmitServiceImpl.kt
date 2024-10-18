@@ -181,7 +181,7 @@ class ProblemSubmitServiceImpl(
             }.start()
 
             val timeLimit = problem.timeLimit
-            val finishedInTime = process.waitFor(timeLimit, TimeUnit.MILLISECONDS)
+            val finishedInTime = process.waitFor((timeLimit * 1000).toLong(), TimeUnit.MILLISECONDS)
 
             if (memoryLimitExceeded) {
                 break

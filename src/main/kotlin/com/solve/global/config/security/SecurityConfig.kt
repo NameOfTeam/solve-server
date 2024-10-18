@@ -62,9 +62,6 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/reissue").anonymous()
 
                 .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
-                .requestMatchers(HttpMethod.POST, "/problems").admin()
-                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}").admin()
-                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}").admin()
 
                 .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()
                 .requestMatchers(HttpMethod.POST, "/problems/{problemId}/test-cases").admin()
@@ -78,6 +75,7 @@ class SecurityConfig(
 
                 .requestMatchers(HttpMethod.GET, "/ws").permitAll()
 
+                .requestMatchers(HttpMethod.POST, "/admin/auth/signup").anonymous()
                 .requestMatchers("/admin/**").admin()
 
                 .requestMatchers("/uploads/**").permitAll()

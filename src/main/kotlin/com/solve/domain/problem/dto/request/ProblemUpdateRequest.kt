@@ -6,5 +6,5 @@ data class ProblemUpdateRequest(
     val input: String?,
     val output: String?,
     val memoryLimit: Long?,
-    val timeLimit: Long?,
+    val timeLimit: Double?,
 )
