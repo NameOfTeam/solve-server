@@ -29,7 +29,11 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
+import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
 import java.security.SecureRandom
 import java.time.LocalDateTime
 import java.util.*
@@ -131,8 +135,20 @@ class AuthServiceImpl(
 
         userRepository.save(user)
 
-        val defaultAvatar = ClassPathResource("/avatars/default.webp").file
-        defaultAvatar.copyTo(File(fileProperties.path, "avatars/${user.id}.webp"), true)
+//        val defaultAvatar = ClassPathResource("/avatars/default.webp").file
+//        defaultAvatar.copyTo(File(fileProperties.path, "avatars/${user.id}.webp"), true)
+
+        val directory = Paths.get(fileProperties.path, "avatars").toFile()
+        if (!directory.exists()) directory.mkdirs()
+
+        URL("https://drive.google.com/uc?export=download&id=16rg6-0Bf2ih-qpF0WUtcmzUmt4mty2Fe").openStream()
+            .use { input ->
+                Channels.newChannel(input).use { rbc ->
+                    FileOutputStream(File(directory, "${user.id}.webp")).use { output ->
+                        output.channel.transferFrom(rbc, 0, Long.MAX_VALUE)
+                    }
+                }
+            }
 
         return VerifyResponse(true)
     }
