@@ -36,6 +36,7 @@ class UserMeServiceImpl(
         var user = securityHolder.user
 
         if (request.username != null) user.username = request.username
+        if (request.introduction != null) user.introduction = request.introduction
 
         user = userRepository.save(user)
 

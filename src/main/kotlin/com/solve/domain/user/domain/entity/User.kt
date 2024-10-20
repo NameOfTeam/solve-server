@@ -22,11 +22,8 @@ class User(
     @Column(name = "password", nullable = false)
     var password: String,
 
-//    @Column(name = "rating", nullable = false)
-//    var rating: Int = 0,
-//
-//    @Column(name = "rank", nullable = false)
-//    var rank: UserRank = UserRank.ROOKIE,
+    @Column(name = "introduction")
+    var introduction: String? = null,
 
     @Column(name = "streak", nullable = false)
     var streak: Int = 0,
