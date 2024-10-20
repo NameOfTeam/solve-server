@@ -13,6 +13,7 @@ import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException
+import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AdminContestServiceImpl(
+    private val securityHolder: SecurityHolder,
     private val userRepository: UserRepository,
     private val problemRepository: ProblemRepository,
     private val contestRepository: ContestRepository
@@ -43,12 +45,14 @@ class AdminContestServiceImpl(
         val operators = userRepository.findAllById(request.operatorIds)
         val participants = userRepository.findAllById(request.participantIds)
         val problems = problemRepository.findAllById(request.problemIds)
+        val owner = securityHolder.user
 
         var contest = Contest(
             title = request.title,
             description = request.description,
             startAt = request.startAt,
-            endAt = request.endAt
+            endAt = request.endAt,
+            owner = owner
         )
 
         contest.operators.addAll(operators.map {

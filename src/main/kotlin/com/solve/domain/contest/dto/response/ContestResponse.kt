@@ -1,6 +1,7 @@
 package com.solve.domain.contest.dto.response
 
 import com.solve.domain.contest.domain.entity.Contest
+import com.solve.domain.contest.domain.enums.ContestState
 import java.time.LocalDateTime
 
 data class ContestResponse(
@@ -9,6 +10,8 @@ data class ContestResponse(
     val description: String,
     val startAt: LocalDateTime,
     val endAt: LocalDateTime,
+    val owner: ContestOwnerResponse,
+    val state: ContestState,
     val operators: List<ContestOperatorResponse>,
     val participants: List<ContestParticipantResponse>,
     val problems: List<ContestProblemResponse>,
@@ -22,6 +25,14 @@ data class ContestResponse(
             description = contest.description,
             startAt = contest.startAt,
             endAt = contest.endAt,
+            owner = ContestOwnerResponse.of(contest.owner),
+            state = if (contest.startAt.isAfter(LocalDateTime.now())) {
+                ContestState.UPCOMING
+            } else if (contest.endAt.isBefore(LocalDateTime.now())) {
+                ContestState.ENDED
+            } else {
+                ContestState.ONGOING
+            },
             operators = contest.operators.map { ContestOperatorResponse.of(it) },
             participants = contest.participants.map { ContestParticipantResponse.of(it) },
             problems = contest.problems.map { ContestProblemResponse.of(it) },

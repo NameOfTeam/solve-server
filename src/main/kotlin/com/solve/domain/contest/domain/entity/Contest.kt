@@ -1,5 +1,6 @@
 package com.solve.domain.contest.domain.entity
 
+import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -22,6 +23,10 @@ class Contest(
 
     @Column(name = "end_at", nullable = false)
     var endAt: LocalDateTime,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    var owner: User,
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val operators: MutableList<ContestOperator> = mutableListOf(),
