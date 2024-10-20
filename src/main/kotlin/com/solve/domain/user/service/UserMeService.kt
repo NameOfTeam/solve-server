@@ -9,5 +9,5 @@ interface UserMeService {
     fun getMe(): UserMeResponse
     fun updateMe(request: UserMeUpdateRequest): UserMeResponse
     fun updatePassword(request: UserMePasswordUpdateRequest): UserMeResponse
-    fun updateAvatar(file: MultipartFile)
+    fun updateAvatar(file: MultipartFile): UserMeResponse
 }

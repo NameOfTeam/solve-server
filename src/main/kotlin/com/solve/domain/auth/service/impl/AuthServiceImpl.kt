@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
+import java.net.URI
 import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
@@ -141,7 +141,7 @@ class AuthServiceImpl(
         val directory = Paths.get(fileProperties.path, "avatars").toFile()
         if (!directory.exists()) directory.mkdirs()
 
-        URL("https://drive.google.com/uc?export=download&id=16rg6-0Bf2ih-qpF0WUtcmzUmt4mty2Fe").openStream()
+        URI("https://drive.google.com/uc?export=download&id=16rg6-0Bf2ih-qpF0WUtcmzUmt4mty2Fe").toURL().openStream()
             .use { input ->
                 Channels.newChannel(input).use { rbc ->
                     FileOutputStream(File(directory, "${user.id}.webp")).use { output ->

@@ -60,7 +60,7 @@ class UserMeServiceImpl(
     }
 
     @Transactional
-    override fun updateAvatar(file: MultipartFile) {
+    override fun updateAvatar(file: MultipartFile): UserMeResponse {
         if (file.isEmpty) throw CustomException(UserError.EMPTY_FILE)
 
         val user = securityHolder.user
@@ -78,5 +78,7 @@ class UserMeServiceImpl(
             .output(WebpWriter.DEFAULT.withLossless(), File(directory, "${user.id}.webp"))
 
         png.delete()
+
+        return UserMeResponse.of(user)
     }
 }
