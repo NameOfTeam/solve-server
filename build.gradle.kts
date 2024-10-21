@@ -23,6 +23,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.sksamuel.scrimage:scrimage-core:4.2.0")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.2.0")
 

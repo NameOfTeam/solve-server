@@ -1,4 +1,4 @@
-package com.solve.domain.user.domain.entity
+package com.solve.domain.user.domain.enums
 
 enum class UserRank {
     ROOKIE,

@@ -43,3 +43,17 @@ spring:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
+management:
+  endpoints:
+    enabled-by-default: false
+    jmx:
+      exposure:
+        exclude: '*'
+        include: health,info
+    web:
+      base-path: /actuator
+  endpoint:
+    health:
+      enabled: true
+    info:
+      enabled: true
