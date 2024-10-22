@@ -25,16 +25,84 @@ class User(
     @Column(name = "introduction")
     var introduction: String? = null,
 
-    @Column(name = "streak", nullable = false)
-    var streak: Int = 0,
-
-    @Column(name = "last_accepted_at")
-    var lastAcceptedAt: LocalDate? = null,
-
     @Column(name = "verified", nullable = false)
     var verified: Boolean = false,
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val solved: MutableList<UserSolved> = mutableListOf(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     val role: UserRole = UserRole.USER
-) : BaseTimeEntity()
+) : BaseTimeEntity() {
+    val streak: Int
+        get() {
+            if (solved.isEmpty()) return 0
+
+            val sortedDates = solved
+                .map { it.date }
+                .distinct()
+                .sortedDescending()
+
+            var currentStreak = 1
+            var previousDate = sortedDates[0]
+
+            if (previousDate.isBefore(LocalDate.now().minusDays(1))) {
+                return 0
+            }
+
+            for (i in 1 until sortedDates.size) {
+                val currentDate = sortedDates[i]
+
+                if (previousDate.minusDays(1) != currentDate) {
+                    break
+                }
+
+                currentStreak++
+                previousDate = currentDate
+            }
+
+            return currentStreak
+        }
+
+    val maxStreak: Int
+        get() {
+            if (solved.isEmpty()) return 0
+
+            val sortedDates = solved
+                .map { it.date }
+                .distinct()
+                .sorted()
+
+            var maxStreak = 1
+            var currentStreak = 1
+            var previousDate = sortedDates[0]
+
+            for (i in 1 until sortedDates.size) {
+                val currentDate = sortedDates[i]
+
+                if (previousDate.plusDays(1) == currentDate) {
+                    currentStreak++
+                    maxStreak = maxOf(maxStreak, currentStreak)
+                } else {
+                    currentStreak = 1
+                }
+
+                previousDate = currentDate
+            }
+
+            return maxStreak
+        }
+
+    val grass: Map<LocalDate, Int>
+        get() = solved
+            .groupBy { it.date }
+            .mapValues { it.value.size }
+            .toMap()
+
+    val solvedToday: Boolean
+        get() = solved.any { it.date == LocalDate.now() }
+
+    val solvedCount: Int
+        get() = solved.size
+}

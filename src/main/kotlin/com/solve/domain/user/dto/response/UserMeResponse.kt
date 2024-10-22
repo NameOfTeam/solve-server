@@ -2,6 +2,7 @@ package com.solve.domain.user.dto.response
 
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.domain.enums.UserRole
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -11,8 +12,11 @@ data class UserMeResponse(
     val email: String,
     val introduction: String? = null,
     val role: UserRole,
-    val streak: Int = 0,
+    val streak: Int,
+    val maxStreak: Int,
+    var grass: Map<LocalDate, Int>,
     val solvedToday: Boolean = false,
+    val solvedCount: Int,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -24,7 +28,10 @@ data class UserMeResponse(
             introduction = me.introduction,
             role = me.role,
             streak = me.streak,
-            solvedToday = Random().nextBoolean(),
+            maxStreak = me.maxStreak,
+            grass = me.grass,
+            solvedCount = me.solvedCount,
+            solvedToday = me.solvedToday,
             createdAt = me.createdAt,
             updatedAt = me.updatedAt
         )

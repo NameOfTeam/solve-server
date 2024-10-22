@@ -12,6 +12,7 @@ import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
+import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
@@ -59,6 +60,7 @@ class ProblemSubmitServiceImpl(
     }
 
     @Scheduled(fixedRate = 1000)
+    @Transactional
     fun processQueue() {
         if (problemSubmitQueueRepository.size() == 0) return
 
@@ -79,6 +81,7 @@ class ProblemSubmitServiceImpl(
         }
     }
 
+    @Transactional
     fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         when (request.language) {
             ProblemSubmitLanguage.PYTHON -> processPythonSubmit(submit, request)
@@ -87,7 +90,8 @@ class ProblemSubmitServiceImpl(
         }
     }
 
-    private fun processPythonSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
+    @Transactional
+    fun processPythonSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val problem = submit.problem
         val testCases = problem.testCases.shuffled()
         var progress = 0.0
@@ -259,24 +263,24 @@ class ProblemSubmitServiceImpl(
             )
         )
 
-        val author = submit.author
+        try {
+            if (submit.state == ProblemSubmitState.ACCEPTED) {
+                val user = submit.author
 
-        // if the user has no accepted submissions
-        if (problemSubmitRepository.findAllByAuthor(author).none { it.state == ProblemSubmitState.ACCEPTED }) {
-            val today = LocalDate.now()
+                if (user.solved.none { it.problem == submit.problem }) {
+                    user.solved.add(
+                        UserSolved(
+                            user = user,
+                            problem = submit.problem,
+                            date = LocalDate.now()
+                        )
+                    )
 
-            if (author.lastAcceptedAt == null) {
-                author.streak = 1
-            } else if (author.lastAcceptedAt == today) {
-                // 오늘 이미 제출함, 변화 없음
-            } else if (author.lastAcceptedAt == today.minusDays(1)) {
-                author.streak++
-            } else {
-                author.streak = 1
+                    userRepository.save(user)
+                }
             }
-
-            author.lastAcceptedAt = today
-            userRepository.save(author)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
