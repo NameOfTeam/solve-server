@@ -2,7 +2,6 @@ package com.solve.domain.problem.dto.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.solve.domain.problem.domain.entity.Problem
-import com.solve.domain.problem.domain.entity.ProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.user.domain.entity.User
 
@@ -20,15 +19,6 @@ data class ProblemResponse(
     val author: ProblemAuthorResponse,
     val state: ProblemSubmitState? = null
 ) {
-    fun correctRate(submits: List<ProblemSubmit>) {
-        correctRate = if (submits.isEmpty()) {
-            0.0
-        } else {
-            val correctCount = submits.count { it.state == ProblemSubmitState.ACCEPTED }
-            (correctCount.toDouble() / submits.size * 1000).toInt() / 10.0
-        }
-    }
-
     companion object {
         fun of(problem: Problem, state: ProblemSubmitState? = null) = ProblemResponse(
             id = problem.id!!,
@@ -40,6 +30,8 @@ data class ProblemResponse(
             timeLimit = problem.timeLimit,
             testCases = problem.testCases.filter { it.sample }.map { ProblemTestCaseResponse.of(it) },
             author = ProblemAuthorResponse.of(problem.author),
+            correctRate = (problem.submits.map { it.state }
+                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size * 1000).toInt() / 10.0,
             state = state
         )
     }

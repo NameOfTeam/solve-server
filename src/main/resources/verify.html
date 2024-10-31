@@ -4,14 +4,66 @@
     <meta charset="UTF-8">
     <title>Verify Solve Login</title>
     <style>
+        @font-face {
+            font-family: 'Pretendard-Regular';
+            src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
         .button {
             background-color: mediumpurple;
             color: white;
             padding: 1rem;
+            width: 8rem;
+            height: 4rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background-color: rebeccapurple;
+            }
         }
     </style>
 </head>
 <body>
-<a class="button" href="{verificationLink}">Verify</a>
+<div class="container">
+    <h1 class="title">Solve 이메일 인증</h1>
+    <p class="description">아래 버튼을 클릭하여 이메일 인증을 완료해주세요.</p>
+    <a class="button" href="{verificationLink}">인증하기</a>
+</div>
 </body>
 </html>

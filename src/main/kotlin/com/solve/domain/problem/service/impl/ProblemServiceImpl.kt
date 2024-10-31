@@ -40,7 +40,6 @@ class ProblemServiceImpl(
 
                 val response = ProblemResponse.of(it, state)
 
-                response.correctRate(submits)
                 response
             }
         } else {
@@ -65,7 +64,6 @@ class ProblemServiceImpl(
             }
 
             val response = ProblemResponse.of(problem, state)
-            response.correctRate(submits)
 
             return response
         } else {
