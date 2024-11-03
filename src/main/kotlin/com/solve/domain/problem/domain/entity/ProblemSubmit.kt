@@ -37,7 +37,7 @@ class ProblemSubmit(
     var memoryUsage: Long? = null,
 
     @Column(name = "time_usage")
-    val timeUsage: Long? = null,
+    var timeUsage: Long? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)

@@ -52,7 +52,8 @@ class AdminContestServiceImpl(
             description = request.description,
             startAt = request.startAt,
             endAt = request.endAt,
-            owner = owner
+            owner = owner,
+            visibility = request.visibility
         )
 
         contest.operators.addAll(operators.map {
@@ -88,6 +89,7 @@ class AdminContestServiceImpl(
         request.description?.let { contest.description = it }
         request.startAt?.let { contest.startAt = it }
         request.endAt?.let { contest.endAt = it }
+        request.visibility?.let { contest.visibility = it }
 
         return AdminContestResponse.of(contest)
     }

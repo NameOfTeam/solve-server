@@ -1,5 +1,6 @@
 package com.solve.domain.contest.domain.entity
 
+import com.solve.domain.contest.domain.enums.ContestVisibility
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
@@ -27,6 +28,10 @@ class Contest(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     var owner: User,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    var visibility: ContestVisibility = ContestVisibility.PUBLIC,
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val operators: MutableList<ContestOperator> = mutableListOf(),

@@ -1,12 +1,12 @@
 package com.solve.domain.problem.service.impl
 
+import com.solve.domain.admin.problem.service.AdminProblemTestCaseService
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.dto.request.ProblemTestCaseCreateRequest
 import com.solve.domain.problem.dto.request.ProblemTestCaseUpdateRequest
 import com.solve.domain.problem.dto.response.ProblemTestCaseResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
-import com.solve.domain.problem.service.ProblemTestCaseService
 import com.solve.global.error.CustomException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProblemTestCaseServiceImpl(
     private val problemRepository: ProblemRepository,
-) : ProblemTestCaseService {
+) : AdminProblemTestCaseService {
     @Transactional(readOnly = true)
     override fun getProblemTestCases(problemId: Long): List<ProblemTestCaseResponse> {
         val problem =

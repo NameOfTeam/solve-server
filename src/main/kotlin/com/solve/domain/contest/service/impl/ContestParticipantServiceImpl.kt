@@ -1,64 +1,51 @@
 package com.solve.domain.contest.service.impl
 
 import com.solve.domain.contest.domain.entity.ContestParticipant
-import com.solve.domain.contest.dto.request.ContestParticipantAddRequest
+import com.solve.domain.contest.domain.enums.ContestVisibility
 import com.solve.domain.contest.error.ContestError
-import com.solve.domain.contest.error.ContestOperatorError
 import com.solve.domain.contest.error.ContestParticipantError
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.contest.service.ContestParticipantService
-import com.solve.domain.user.error.UserError
-import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.time.LocalDateTime
 
 @Service
 class ContestParticipantServiceImpl(
     private val securityHolder: SecurityHolder,
-    private val contestRepository: ContestRepository,
-    private val userRepository: UserRepository
+    private val contestRepository: ContestRepository
 ) : ContestParticipantService {
     @Transactional
-    override fun addContestParticipant(contestId: Long, request: ContestParticipantAddRequest) {
+    override fun joinContest(contestId: Long) {
+        val user = securityHolder.user
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
-        val user =
-            userRepository.findByIdOrNull(request.userId) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_ID)
-        val operator = securityHolder.user
 
-        if (contest.operators.none { it.user == operator }) {
-            throw CustomException(ContestOperatorError.CONTEST_OPERATOR_NOT_FOUND)
-        }
+        if (contest.participants.any { it.user == user }) throw CustomException(ContestParticipantError.CONTEST_PARTICIPANT_ALREADY_EXISTS)
+        if (contest.startAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_STARTED)
+        if (contest.endAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_ENDED)
+        if (contest.visibility == ContestVisibility.PRIVATE) throw CustomException(ContestParticipantError.CONTEST_PRIVATE)
 
-        if (contest.participants.any { it.user == user }) {
-            throw CustomException(ContestParticipantError.CONTEST_PARTICIPANT_ALREADY_EXISTS)
-        }
-
-        contest.participants.add(ContestParticipant(contest = contest, user = user))
+        contest.participants.add(ContestParticipant(user = user, contest = contest))
 
         contestRepository.save(contest)
     }
 
     @Transactional
-    override fun removeContestParticipant(contestId: Long, userId: UUID) {
+    override fun leaveContest(contestId: Long) {
+        val user = securityHolder.user
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
-        val user = userRepository.findByIdOrNull(userId) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_ID)
-        val operator = securityHolder.user
 
-        if (contest.operators.none { it.user == operator }) {
-            throw CustomException(ContestOperatorError.CONTEST_OPERATOR_NOT_FOUND)
-        }
+        if (contest.startAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_STARTED)
+        if (contest.endAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_ENDED)
+        val participant = contest.participants.find { it.user == user }
+            ?: throw CustomException(ContestParticipantError.CONTEST_PARTICIPANT_NOT_FOUND)
 
-        if (contest.participants.none { it.user == user }) {
-            throw CustomException(ContestParticipantError.CONTEST_PARTICIPANT_NOT_FOUND)
-        }
-
-        contest.participants.removeIf { it.user == user }
+        contest.participants.remove(participant)
 
         contestRepository.save(contest)
     }
