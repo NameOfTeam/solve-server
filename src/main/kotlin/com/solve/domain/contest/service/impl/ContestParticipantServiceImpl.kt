@@ -24,10 +24,10 @@ class ContestParticipantServiceImpl(
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
+        if (contest.visibility == ContestVisibility.PRIVATE) throw CustomException(ContestParticipantError.CONTEST_PRIVATE)
         if (contest.participants.any { it.user == user }) throw CustomException(ContestParticipantError.CONTEST_PARTICIPANT_ALREADY_EXISTS)
         if (contest.startAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_STARTED)
         if (contest.endAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_ENDED)
-        if (contest.visibility == ContestVisibility.PRIVATE) throw CustomException(ContestParticipantError.CONTEST_PRIVATE)
 
         contest.participants.add(ContestParticipant(user = user, contest = contest))
 
@@ -40,6 +40,7 @@ class ContestParticipantServiceImpl(
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
+        if (contest.visibility == ContestVisibility.PRIVATE) throw CustomException(ContestParticipantError.CONTEST_PRIVATE)
         if (contest.startAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_STARTED)
         if (contest.endAt.isBefore(LocalDateTime.now())) throw CustomException(ContestParticipantError.CONTEST_ALREADY_ENDED)
         val participant = contest.participants.find { it.user == user }
