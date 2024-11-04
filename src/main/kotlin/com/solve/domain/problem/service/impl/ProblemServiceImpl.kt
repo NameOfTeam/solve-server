@@ -1,7 +1,6 @@
 package com.solve.domain.problem.service.impl
 
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.problem.dto.request.ProblemUpdateRequest
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
@@ -38,9 +37,7 @@ class ProblemServiceImpl(
                     state = ProblemSubmitState.WRONG_ANSWER
                 }
 
-                val response = ProblemResponse.of(it, state)
-
-                response
+                ProblemResponse.of(it, state)
             }
         } else {
             return problems.map { ProblemResponse.of(it) }
@@ -69,31 +66,5 @@ class ProblemServiceImpl(
         } else {
             return ProblemResponse.of(problem)
         }
-    }
-
-    @Transactional
-    override fun updateProblem(problemId: Long, request: ProblemUpdateRequest): ProblemResponse {
-        val user = securityHolder.user
-        val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-
-        if (problem.author != user) throw CustomException(ProblemError.PROBLEM_NOT_AUTHORIZED)
-
-        if (request.title != null) problem.title = request.title
-        if (request.content != null) problem.content = request.content
-        if (request.input != null) problem.input = request.input
-        if (request.output != null) problem.output = request.output
-        if (request.memoryLimit != null) problem.memoryLimit = request.memoryLimit
-        if (request.timeLimit != null) problem.timeLimit = request.timeLimit
-
-        return ProblemResponse.of(problem)
-    }
-
-    @Transactional
-    override fun deleteProblem(problemId: Long) {
-        val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-
-        problemRepository.delete(problem)
     }
 }
