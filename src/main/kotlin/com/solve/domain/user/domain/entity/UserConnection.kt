@@ -2,13 +2,14 @@ package com.solve.domain.user.domain.entity
 
 import com.solve.domain.user.domain.enums.UserConnectionType
 import jakarta.persistence.*
+import java.util.*
 
 @Entity
 @Table(name = "user_connections")
 class UserConnection(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    @GeneratedValue(strategy = GenerationType.UUID)
+    val id: UUID? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -16,8 +17,8 @@ class UserConnection(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    val connectionType: UserConnectionType,
+    val type: UserConnectionType,
 
-    @Column(name = "url", nullable = false)
-    val url: String
+    @Column(name = "value", nullable = false)
+    val value: String
 )

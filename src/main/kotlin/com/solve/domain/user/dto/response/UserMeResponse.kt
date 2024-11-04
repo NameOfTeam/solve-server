@@ -17,6 +17,7 @@ data class UserMeResponse(
     var grass: Map<LocalDate, Int>,
     val solvedToday: Boolean = false,
     val solvedCount: Int,
+    val connections: List<UserMeConnectionResponse>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -32,6 +33,7 @@ data class UserMeResponse(
             grass = me.grass,
             solvedCount = me.solvedCount,
             solvedToday = me.solvedToday,
+            connections = me.connections.map { UserMeConnectionResponse.of(it) },
             createdAt = me.createdAt,
             updatedAt = me.updatedAt
         )
