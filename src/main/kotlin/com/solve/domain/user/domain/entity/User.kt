@@ -33,7 +33,10 @@ class User(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    val role: UserRole = UserRole.USER
+    val role: UserRole = UserRole.USER,
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val connections: MutableList<UserConnection> = mutableListOf()
 ) : BaseTimeEntity() {
     val streak: Int
         get() {
