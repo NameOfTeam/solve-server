@@ -43,6 +43,10 @@ spring:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
+  discord:
+    webhook:
+      exception:
+        url: ${DISCORD_WEBHOOK_EXCEPTION_URL}
 management:
   endpoints:
     enabled-by-default: false
