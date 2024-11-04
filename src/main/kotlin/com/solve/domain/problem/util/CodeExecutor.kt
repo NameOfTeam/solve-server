@@ -139,7 +139,7 @@ class CodeExecutor(
 
         val timeLimitMillis = (timeLimit * 1000).toLong()
         val finishedInTime = process.waitFor(timeLimitMillis, TimeUnit.MILLISECONDS)
-        val timeUsage = ((System.nanoTime() - startTime) / 1_000_000).toLong()
+        val timeUsage = ((System.nanoTime() - startTime) / 1_000_000)
 
         if (!finishedInTime) {
             isTimeLimitExceeded = true
