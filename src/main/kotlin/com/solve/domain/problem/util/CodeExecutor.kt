@@ -44,6 +44,11 @@ class CodeExecutor(
     private fun getFileExtension() = when (request.language) {
         ProblemSubmitLanguage.PYTHON -> "py"
         ProblemSubmitLanguage.JAVA -> "java"
+        ProblemSubmitLanguage.KOTLIN -> "kt"
+        ProblemSubmitLanguage.C -> "c"
+        ProblemSubmitLanguage.CPP -> "cpp"
+        ProblemSubmitLanguage.CSHARP -> "cs"
+        ProblemSubmitLanguage.JAVASCRIPT -> "js"
         else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
@@ -96,7 +101,6 @@ class CodeExecutor(
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
 
-        // 컴파일 체크
         compile(sourceFile)?.let { return it }
 
         val process = when (request.language) {
@@ -116,10 +120,8 @@ class CodeExecutor(
         val error = StringBuilder()
         val startTime = System.nanoTime()
 
-        // 메모리 모니터링 스레드
         val memoryThread = thread { monitorMemory(pid, submit.problem.memoryLimit) }
 
-        // 출력 스트림 처리 스레드
         val outputThread = thread { processStream(process.inputStream, output) }
         val errorThread = thread { processStream(process.errorStream, error) }
 
@@ -135,18 +137,16 @@ class CodeExecutor(
             }
         }
 
-        // 시간 제한 체크
         val timeLimitMillis = (timeLimit * 1000).toLong()
         val finishedInTime = process.waitFor(timeLimitMillis, TimeUnit.MILLISECONDS)
         val timeUsage = ((System.nanoTime() - startTime) / 1_000_000).toLong()
 
         if (!finishedInTime) {
             isTimeLimitExceeded = true
-            shouldStopMonitoring = true  // 메모리 모니터링 중지 신호
+            shouldStopMonitoring = true
             process.destroyForcibly()
-            process.waitFor(1, TimeUnit.SECONDS)  // 프로세스가 완전히 종료되길 기다림
+            process.waitFor(1, TimeUnit.SECONDS)
 
-            // 스레드들 정리
             memoryThread.interrupt()
             outputThread.interrupt()
             errorThread.interrupt()
@@ -160,13 +160,11 @@ class CodeExecutor(
             )
         }
 
-        // 메모리 모니터링 중지 신호
         shouldStopMonitoring = true
         memoryThread.join(1000)
         outputThread.join(1000)
         errorThread.join(1000)
 
-        // 시간 초과가 아닐 때만 메모리 초과 체크
         if (isMemoryLimitExceeded) {
             return ExecutionResult(
                 output = "",
@@ -228,7 +226,6 @@ class CodeExecutor(
                 }
             }
         } catch (e: IOException) {
-            // 스트림이 닫힌 경우 등의 예외 처리
             e.printStackTrace()
         }
     }
@@ -254,14 +251,12 @@ class CodeExecutor(
 
     private fun getMemoryUsage(pid: Long): Long {
         return try {
-            // ps 명령어로 얻는 RSS 값은 KB 단위
             val process = ProcessBuilder("sh", "-c", "ps -o rss= -p $pid")
                 .redirectErrorStream(true)
                 .start()
 
             process.inputStream.bufferedReader().useLines { lines ->
                 lines.firstOrNull { it.isNotBlank() }?.trim()?.toLong()?.let { rssKB ->
-                    // KB를 MB로 변환 (1024로 나눔)
                     rssKB / 1024
                 } ?: -1
             }.also {
@@ -275,17 +270,14 @@ class CodeExecutor(
     }
 
     private fun hasPresentationError(actual: String, expected: String): Boolean {
-        // 공백과 줄바꿈을 모두 제거하고 비교
         val normalizedActual = actual.replace("\\s+".toRegex(), "")
         val normalizedExpected = expected.replace("\\s+".toRegex(), "")
 
-        // 내용은 같지만 형식이 다른 경우
         return normalizedActual == normalizedExpected && actual != expected
     }
 
     private fun cleanupResources() {
         try {
-            // 임시 파일 삭제 등의 정리 작업
             val directory = File(fileProperties.path, "submits")
             val sourceFile = File(directory, "${submit.id}.${getFileExtension()}")
             if (sourceFile.exists()) {
