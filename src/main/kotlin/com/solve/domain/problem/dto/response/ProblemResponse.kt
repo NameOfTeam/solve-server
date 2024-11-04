@@ -3,7 +3,6 @@ package com.solve.domain.problem.dto.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.user.domain.entity.User
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ProblemResponse(
@@ -14,7 +13,7 @@ data class ProblemResponse(
     val output: String,
     val memoryLimit: Long,
     val timeLimit: Double,
-    var correctRate: Double? = null,
+    var correctRate: Double,
     val testCases: List<ProblemTestCaseResponse>,
     val author: ProblemAuthorResponse,
     val state: ProblemSubmitState? = null
@@ -37,12 +36,3 @@ data class ProblemResponse(
     }
 }
 
-data class ProblemAuthorResponse(
-    val username: String
-) {
-    companion object {
-        fun of(author: User) = ProblemAuthorResponse(
-            username = author.username
-        )
-    }
-}
