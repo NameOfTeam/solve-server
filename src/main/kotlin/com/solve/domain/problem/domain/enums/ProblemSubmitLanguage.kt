@@ -5,5 +5,8 @@ enum class ProblemSubmitLanguage {
     KOTLIN,
     PYTHON,
     C,
-    CPP
+    CPP,
+    CSHARP,
+    JAVASCRIPT,
+    SWIFT,
 }
