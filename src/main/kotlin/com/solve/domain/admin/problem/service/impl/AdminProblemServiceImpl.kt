@@ -4,6 +4,7 @@ import com.solve.domain.admin.problem.dto.request.AdminProblemCreateRequest
 import com.solve.domain.admin.problem.dto.response.AdminProblemResponse
 import com.solve.domain.admin.problem.service.AdminProblemService
 import com.solve.domain.problem.domain.entity.Problem
+import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
@@ -47,6 +48,19 @@ class AdminProblemServiceImpl(
                 author = author
             )
         )
+
+        if (request.testCases.isNotEmpty()) {
+            problem.testCases.addAll(
+                request.testCases.map {
+                    ProblemTestCase(
+                        problem = problem,
+                        input = it.input,
+                        output = it.output,
+                        sample = it.sample
+                    )
+                }
+            )
+        }
 
         return ProblemResponse.of(problem)
     }
