@@ -42,3 +42,4 @@ out/
 files/
 .compose/
 compose.yml
+.env
