@@ -3,6 +3,7 @@ package com.solve.domain.problem.dto.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
+import com.solve.domain.user.domain.entity.User
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ProblemResponse(
@@ -16,10 +17,10 @@ data class ProblemResponse(
     var correctRate: Double,
     val testCases: List<ProblemTestCaseResponse>,
     val author: ProblemAuthorResponse,
-    val state: ProblemSubmitState? = null
+    var state: ProblemSubmitState? = null
 ) {
     companion object {
-        fun of(problem: Problem, state: ProblemSubmitState? = null) = ProblemResponse(
+        fun of(problem: Problem) = ProblemResponse(
             id = problem.id!!,
             title = problem.title,
             content = problem.content,
@@ -31,8 +32,16 @@ data class ProblemResponse(
             author = ProblemAuthorResponse.of(problem.author),
             correctRate = (problem.submits.map { it.state }
                 .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size * 1000).toInt() / 10.0,
-            state = state
         )
     }
 }
 
+data class ProblemAuthorResponse(
+    val username: String
+) {
+    companion object {
+        fun of(author: User) = ProblemAuthorResponse(
+            username = author.username
+        )
+    }
+}

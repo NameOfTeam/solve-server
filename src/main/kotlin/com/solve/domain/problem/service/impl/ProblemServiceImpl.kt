@@ -1,5 +1,6 @@
 package com.solve.domain.problem.service.impl
 
+import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.error.ProblemError
@@ -24,24 +25,7 @@ class ProblemServiceImpl(
     override fun getProblems(pageable: Pageable): Page<ProblemResponse> {
         val problems = problemRepository.findAll(pageable)
 
-        if (securityHolder.isAuthenticated) {
-            val user = securityHolder.user
-
-            return problems.map {
-                val submits = problemSubmitRepository.findAllByProblemAndAuthor(it, user)
-                var state: ProblemSubmitState? = null
-
-                if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) {
-                    state = ProblemSubmitState.ACCEPTED
-                } else if (submits.any { it.state == ProblemSubmitState.WRONG_ANSWER || it.state == ProblemSubmitState.RUNTIME_ERROR || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.MEMORY_LIMIT_EXCEEDED || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.COMPILE_ERROR }) {
-                    state = ProblemSubmitState.WRONG_ANSWER
-                }
-
-                ProblemResponse.of(it, state)
-            }
-        } else {
-            return problems.map { ProblemResponse.of(it) }
-        }
+        return problems.map { ProblemResponse.ofMe(it) }
     }
 
     @Transactional(readOnly = true)
@@ -49,22 +33,19 @@ class ProblemServiceImpl(
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
-        if (securityHolder.isAuthenticated) {
-            val user = securityHolder.user
-            val submits = problemSubmitRepository.findAllByProblemAndAuthor(problem, user)
-            val state: ProblemSubmitState
+        return ProblemResponse.ofMe(problem)
+    }
 
-            if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) {
-                state = ProblemSubmitState.ACCEPTED
-            } else {
-                state = ProblemSubmitState.WRONG_ANSWER
-            }
-
-            val response = ProblemResponse.of(problem, state)
-
-            return response
-        } else {
-            return ProblemResponse.of(problem)
+    private fun ProblemResponse.Companion.ofMe(problem: Problem) = of(problem).apply {
+        if (!securityHolder.isAuthenticated) {
+            return this
         }
+
+        val me = securityHolder.user
+        val submits = problemSubmitRepository.findAllByProblemAndAuthor(problem, me)
+
+        if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) state = ProblemSubmitState.ACCEPTED
+        else if (submits.any { it.state == ProblemSubmitState.WRONG_ANSWER || it.state == ProblemSubmitState.RUNTIME_ERROR || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.MEMORY_LIMIT_EXCEEDED || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.COMPILE_ERROR }) state =
+            ProblemSubmitState.WRONG_ANSWER
     }
 }

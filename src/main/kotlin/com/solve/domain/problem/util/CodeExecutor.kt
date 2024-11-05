@@ -280,6 +280,7 @@ class CodeExecutor(
         try {
             val directory = File(fileProperties.path, "submits")
             val sourceFile = File(directory, "${submit.id}.${getFileExtension()}")
+
             if (sourceFile.exists()) {
                 sourceFile.delete()
             }
