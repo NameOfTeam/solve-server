@@ -1,6 +1,7 @@
 package com.solve.domain.admin.user.controller
 
 import com.solve.domain.admin.user.service.AdminUserService
+import com.solve.domain.user.domain.enums.UserRole
 import com.solve.global.common.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -17,7 +18,11 @@ class AdminUserController(
 ) {
     @Operation(summary = "사용자 목록 조회", description = "사용자 목록을 조회합니다.")
     @GetMapping
-    fun getUsers(@PageableDefault pageable: Pageable) = BaseResponse.of(adminUserService.getUsers(pageable))
+    fun getUsers(
+        @PageableDefault pageable: Pageable,
+        @RequestParam("search", required = false, defaultValue = "") search: String,
+        @RequestParam("role", required = false, defaultValue = "USER") role: UserRole
+    ) = BaseResponse.of(adminUserService.getUsers(pageable, search, role))
 
     @Operation(summary = "사용자 삭제")
     @DeleteMapping("/{userId}")

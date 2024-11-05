@@ -2,6 +2,7 @@ package com.solve.domain.admin.user.service.impl
 
 import com.solve.domain.admin.user.dto.response.AdminUserResponse
 import com.solve.domain.admin.user.service.AdminUserService
+import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException
@@ -17,8 +18,15 @@ class AdminUserServiceImpl(
     private val userRepository: UserRepository
 ) : AdminUserService {
     @Transactional(readOnly = true)
-    override fun getUsers(pageable: Pageable): Slice<AdminUserResponse> {
-        return userRepository.findAll(pageable).map { AdminUserResponse.of(it) }
+    override fun getUsers(pageable: Pageable, search: String, role: UserRole): Slice<AdminUserResponse> {
+        val users = userRepository.findAllByRoleAndUsernameContainsIgnoreCaseOrEmailContainsIgnoreCase(
+            pageable,
+            role,
+            search,
+            search
+        )
+
+        return users.map { AdminUserResponse.of(it) }
     }
 
     @Transactional

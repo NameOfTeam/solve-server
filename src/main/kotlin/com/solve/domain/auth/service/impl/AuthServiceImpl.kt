@@ -135,9 +135,6 @@ class AuthServiceImpl(
 
         userRepository.save(user)
 
-//        val defaultAvatar = ClassPathResource("/avatars/default.webp").file
-//        defaultAvatar.copyTo(File(fileProperties.path, "avatars/${user.id}.webp"), true)
-
         val directory = Paths.get(fileProperties.path, "avatars").toFile()
         if (!directory.exists()) directory.mkdirs()
 
