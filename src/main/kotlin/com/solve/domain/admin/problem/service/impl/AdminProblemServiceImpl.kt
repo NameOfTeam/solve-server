@@ -1,11 +1,11 @@
 package com.solve.domain.admin.problem.service.impl
 
 import com.solve.domain.admin.problem.dto.request.AdminProblemCreateRequest
+import com.solve.domain.admin.problem.dto.request.AdminProblemUpdateRequest
 import com.solve.domain.admin.problem.dto.response.AdminProblemResponse
 import com.solve.domain.admin.problem.service.AdminProblemService
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.entity.ProblemTestCase
-import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.global.error.CustomException
@@ -35,9 +35,9 @@ class AdminProblemServiceImpl(
     }
 
     @Transactional
-    override fun createProblem(request: AdminProblemCreateRequest): ProblemResponse {
+    override fun createProblem(request: AdminProblemCreateRequest): AdminProblemResponse {
         val author = securityHolder.user
-        val problem = problemRepository.save(
+        var problem = problemRepository.save(
             Problem(
                 title = request.title,
                 content = request.content,
@@ -49,19 +49,44 @@ class AdminProblemServiceImpl(
             )
         )
 
-        if (request.testCases.isNotEmpty()) {
-            problem.testCases.addAll(
-                request.testCases.map {
-                    ProblemTestCase(
-                        problem = problem,
-                        input = it.input,
-                        output = it.output,
-                        sample = it.sample
-                    )
-                }
+        request.testCases?.forEach {
+            problem.testCases.add(
+                ProblemTestCase(
+                    input = it.input,
+                    output = it.output,
+                    sample = it.sample,
+                    problem = problem
+                )
             )
         }
 
-        return ProblemResponse.of(problem)
+        problem = problemRepository.save(problem)
+
+        return AdminProblemResponse.of(problem)
+    }
+
+    @Transactional
+    override fun updateProblem(problemId: Long, request: AdminProblemUpdateRequest): AdminProblemResponse {
+        var problem =
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+
+        request.title?.let { problem.title = it }
+        request.content?.let { problem.content = it }
+        request.input?.let { problem.input = it }
+        request.output?.let { problem.output = it }
+        request.memoryLimit?.let { problem.memoryLimit = it }
+        request.timeLimit?.let { problem.timeLimit = it }
+
+        problem = problemRepository.save(problem)
+
+        return AdminProblemResponse.of(problem)
+    }
+
+    @Transactional
+    override fun deleteProblem(problemId: Long) {
+        val problem =
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+
+        problemRepository.delete(problem)
     }
 }

@@ -30,8 +30,8 @@ data class AdminProblemResponse(
             testCases = problem.testCases.map { AdminProblemTestCaseResponse.of(it) },
             author = AdminProblemAuthorResponse.of(problem.author),
             contributors = problem.contributors.map { AdminProblemContributorResponse.of(it.user) },
-            correctRate = problem.submits.map { it.state }
-                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size
+            correctRate = (problem.submits.map { it.state }
+                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size * 1000).toInt() / 10.0,
         )
     }
 }

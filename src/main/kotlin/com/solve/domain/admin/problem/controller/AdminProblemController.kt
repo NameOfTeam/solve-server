@@ -1,6 +1,7 @@
 package com.solve.domain.admin.problem.controller
 
 import com.solve.domain.admin.problem.dto.request.AdminProblemCreateRequest
+import com.solve.domain.admin.problem.dto.request.AdminProblemUpdateRequest
 import com.solve.domain.admin.problem.service.AdminProblemService
 import com.solve.global.common.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -28,4 +29,13 @@ class AdminProblemController(
     @PostMapping
     fun createProblem(@Valid @RequestBody request: AdminProblemCreateRequest) =
         BaseResponse.of(adminProblemService.createProblem(request))
+
+    @Operation(summary = "문제 수정", description = "문제를 수정합니다.")
+    @PatchMapping("/{problemId}")
+    fun updateProblem(@PathVariable problemId: Long, @Valid @RequestBody request: AdminProblemUpdateRequest) =
+        BaseResponse.of(adminProblemService.updateProblem(problemId, request))
+
+    @Operation(summary = "문제 삭제", description = "문제를 삭제합니다.")
+    @DeleteMapping("/{problemId}")
+    fun deleteProblem(@PathVariable problemId: Long) = BaseResponse.of(adminProblemService.deleteProblem(problemId))
 }
