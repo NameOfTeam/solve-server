@@ -39,6 +39,10 @@ class ProblemIdea(
         likes.add(like)
     }
 
+    fun removeLike(user: User) {
+        likes.removeIf { it.author == user }
+    }
+
     val rootComments: List<ProblemIdeaComment>
         get() = comments.filter { it.parent == null }
 }

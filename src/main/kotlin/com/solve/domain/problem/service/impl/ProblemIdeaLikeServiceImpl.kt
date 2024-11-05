@@ -28,9 +28,9 @@ class ProblemIdeaLikeServiceImpl(
         val user = securityHolder.user
 
         if (idea.likes.any { it.author == user }) {
-            idea.likes.removeIf { it.author == user }
+            idea.removeLike(user)
         } else {
-            idea.likes.add(ProblemIdeaLike(author = user, idea = idea))
+            idea.addLike(ProblemIdeaLike(author = user, idea = idea))
         }
 
         problemIdeaRepository.save(idea)
