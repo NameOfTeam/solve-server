@@ -22,14 +22,23 @@ class ProblemIdeaServiceImpl(
     private val problemIdeaRepository: ProblemIdeaRepository
 ) : ProblemIdeaService {
     @Transactional(readOnly = true)
-    override fun getMyProblemIdeas(problemId: Long): List<ProblemIdeaResponse> {
+    override fun getProblemIdeas(problemId: Long): List<ProblemIdeaResponse> {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val author = securityHolder.user
 
-        val ideas = problemIdeaRepository.findAllByProblemAndAuthor(problem, author)
+        val ideas = problemIdeaRepository.findAllByProblem(problem)
 
-        return ideas.map { ProblemIdeaResponse.of(it) }
+        return ideas.map { ProblemIdeaResponse.ofMe(it) }
+    }
+
+    @Transactional(readOnly = true)
+    override fun getProblemIdea(problemId: Long, ideaId: Long): ProblemIdeaResponse {
+        val problem =
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+        val idea = problemIdeaRepository.findByIdAndProblem(ideaId, problem)
+            ?: throw CustomException(ProblemIdeaError.PROBLEM_IDEA_NOT_FOUND)
+
+        return ProblemIdeaResponse.ofMe(idea)
     }
 
     @Transactional
@@ -42,11 +51,12 @@ class ProblemIdeaServiceImpl(
             ProblemIdea(
                 problem = problem,
                 author = author,
+                title = request.title,
                 content = request.content
             )
         )
 
-        return ProblemIdeaResponse.of(idea)
+        return ProblemIdeaResponse.ofMe(idea)
     }
 
     @Transactional
@@ -64,7 +74,7 @@ class ProblemIdeaServiceImpl(
 
         idea = problemIdeaRepository.save(idea)
 
-        return ProblemIdeaResponse.of(idea)
+        return ProblemIdeaResponse.ofMe(idea)
     }
 
     @Transactional
@@ -76,6 +86,17 @@ class ProblemIdeaServiceImpl(
 
         problemIdeaRepository.delete(idea)
 
-        return ProblemIdeaResponse.of(idea)
+        return ProblemIdeaResponse.ofMe(idea)
+    }
+
+    private fun ProblemIdeaResponse.Companion.ofMe(idea: ProblemIdea) = of(idea).apply {
+        if (!securityHolder.isAuthenticated) {
+            return this
+        }
+
+        val me = securityHolder.user
+
+        isAuthor = idea.author == me
+        isLiked = idea.likes.any { it.author == me }
     }
 }

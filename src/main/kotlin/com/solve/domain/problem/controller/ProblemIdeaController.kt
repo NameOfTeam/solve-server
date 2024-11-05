@@ -14,10 +14,15 @@ import org.springframework.web.bind.annotation.*
 class ProblemIdeaController(
     private val problemIdeaService: ProblemIdeaService
 ) {
-    @Operation(summary = "내가 생성한 문제 아이디어 목록 조회")
+    @Operation(summary = "문제 아이디어 목록 조회")
     @GetMapping
     fun getMyProblemIdeas(@PathVariable problemId: Long) =
-        BaseResponse.of(problemIdeaService.getMyProblemIdeas(problemId))
+        BaseResponse.of(problemIdeaService.getProblemIdeas(problemId))
+
+    @Operation(summary = "문제 아이디어 상세 조회")
+    @GetMapping("/{ideaId}")
+    fun getProblemIdea(@PathVariable problemId: Long, @PathVariable ideaId: Long) =
+        BaseResponse.of(problemIdeaService.getProblemIdea(problemId, ideaId))
 
     @Operation(summary = "문제 아이디어 생성")
     @PostMapping

@@ -19,6 +19,26 @@ class ProblemIdea(
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,
 
+    @Column(name = "title", nullable = false)
+    var title: String,
+
     @Column(name = "content", nullable = false)
-    var content: String
-) : BaseTimeEntity()
+    var content: String,
+
+    @OneToMany(mappedBy = "idea", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val comments: MutableList<ProblemIdeaComment> = mutableListOf(),
+
+    @OneToMany(mappedBy = "idea", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val likes: MutableList<ProblemIdeaLike> = mutableListOf()
+) : BaseTimeEntity() {
+    fun addComment(comment: ProblemIdeaComment) {
+        comments.add(comment)
+    }
+
+    fun addLike(like: ProblemIdeaLike) {
+        likes.add(like)
+    }
+
+    val rootComments: List<ProblemIdeaComment>
+        get() = comments.filter { it.parent == null }
+}
