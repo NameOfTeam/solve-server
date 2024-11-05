@@ -65,9 +65,15 @@ class SecurityConfig(
 
                 .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()
 
+                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/ideas").permitAll()
                 .requestMatchers(HttpMethod.POST, "/problems/{problemId}/ideas").user()
                 .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/ideas").user()
                 .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/ideas/{ideaId}").user()
+
+                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/ideas/{ideaId}/comments").permitAll()
+                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/ideas/{ideaId}/comments").user()
+                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/ideas/{ideaId}/comments/{commentId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/ideas/{ideaId}/comments/{commentId}").user()
 
                 .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").user()
 

@@ -1,6 +1,7 @@
 package com.solve.domain.user.domain.entity
 
 import com.solve.domain.problem.domain.entity.Problem
+import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDate
 
@@ -21,4 +22,4 @@ class UserSolved(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     val problem: Problem
-)
+) : BaseTimeEntity()

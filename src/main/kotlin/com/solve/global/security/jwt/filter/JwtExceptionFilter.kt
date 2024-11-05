@@ -26,7 +26,8 @@ class JwtExceptionFilter(
         } catch (e: ExpiredJwtException) {
             response.sendError(CustomException(JwtError.EXPIRED_TOKEN))
         } catch (e: MalformedJwtException) {
-            response.sendError(CustomException(JwtError.INVALID_TOKEN))
+            e.printStackTrace()
+            response.sendError(CustomException(JwtError.MALFORMED_TOKEN))
         } catch (e: CustomException) {
             response.sendError(e)
         }
