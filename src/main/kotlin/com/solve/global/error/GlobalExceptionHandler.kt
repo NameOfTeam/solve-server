@@ -4,6 +4,7 @@ import com.solve.global.config.discord.DiscordProperties
 import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -25,11 +26,11 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(NoHandlerFoundException::class)
     fun handleNoHandlerFoundException(e: NoHandlerFoundException) =
-        ErrorResponse.of(CustomException(GlobalError.NO_HANDLER_FOUND))
+        ErrorResponse.of(CustomException(GlobalError.NO_HANDLER_FOUND, e.requestURL))
 
     @ExceptionHandler(NoResourceFoundException::class)
     fun handleNoResourceFoundException(e: NoResourceFoundException) =
-        ErrorResponse.of(CustomException(GlobalError.NO_RESOURCE_FOUND))
+        ErrorResponse.of(CustomException(GlobalError.NO_RESOURCE_FOUND, e.resourcePath))
 
     @ExceptionHandler(MethodNotAllowedException::class)
     fun handleMethodNotAllowedException(e: MethodNotAllowedException) =
@@ -38,6 +39,10 @@ class GlobalExceptionHandler(
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun handleHttpRequestMethodNotSupportedException(e: HttpRequestMethodNotSupportedException) =
         ErrorResponse.of(CustomException(GlobalError.METHOD_NOT_ALLOWED))
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException) =
+        ErrorResponse.of(CustomException(GlobalError.HTTP_MESSAGE_NOT_READABLE))
 
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
