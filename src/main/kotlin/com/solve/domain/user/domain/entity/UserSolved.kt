@@ -3,6 +3,8 @@ package com.solve.domain.user.domain.entity
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import java.time.LocalDate
 
 @Entity
@@ -14,12 +16,14 @@ class UserSolved(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     val user: User,
-
-    @Column(name = "date", nullable = false)
-    val date: LocalDate,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
-    val problem: Problem
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    val problem: Problem,
+
+    @Column(name = "date", nullable = false)
+    val date: LocalDate
 ) : BaseTimeEntity()
