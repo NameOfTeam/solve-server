@@ -1,20 +1,42 @@
 package com.solve.domain.admin.user.dto.response
 
 import com.solve.domain.user.domain.entity.User
+import com.solve.domain.user.domain.enums.UserRole
+import com.solve.domain.user.dto.response.UserMeConnectionResponse
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class AdminUserResponse(
     val id: UUID,
-    val email: String,
     val username: String,
-    val role: String
+    val email: String,
+    val introduction: String? = null,
+    val role: UserRole,
+    val streak: Int,
+    val maxStreak: Int,
+    var grass: Map<LocalDate, Int>,
+    val solvedToday: Boolean = false,
+    val solvedCount: Int,
+    val connections: List<UserMeConnectionResponse>,
+    val createdAt: LocalDateTime,
+    val updatedAt: LocalDateTime
 ) {
     companion object {
-        fun of(user: User) = AdminUserResponse(
-            id = user.id!!,
-            email = user.email,
-            username = user.username,
-            role = user.role.name
+        fun of(me: User) = AdminUserResponse(
+            id = me.id!!,
+            username = me.username,
+            email = me.email,
+            introduction = me.introduction,
+            role = me.role,
+            streak = me.streak,
+            maxStreak = me.maxStreak,
+            grass = me.grass,
+            solvedCount = me.solvedCount,
+            solvedToday = me.solvedToday,
+            connections = me.connections.map { UserMeConnectionResponse.of(it) },
+            createdAt = me.createdAt,
+            updatedAt = me.updatedAt
         )
     }
 }
