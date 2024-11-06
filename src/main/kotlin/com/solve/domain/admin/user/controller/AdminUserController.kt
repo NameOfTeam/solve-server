@@ -1,5 +1,6 @@
 package com.solve.domain.admin.user.controller
 
+import com.solve.domain.admin.user.dto.request.AdminUserUpdateRequest
 import com.solve.domain.admin.user.service.AdminUserService
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.global.common.BaseResponse
@@ -23,6 +24,15 @@ class AdminUserController(
         @RequestParam("search", required = false, defaultValue = "") search: String,
         @RequestParam("role", required = false, defaultValue = "USER") role: UserRole
     ) = BaseResponse.of(adminUserService.getUsers(pageable, search, role))
+
+    @Operation(summary = "사용자 상세 조회")
+    @GetMapping("/{userId}")
+    fun getUser(@PathVariable userId: UUID) = BaseResponse.of(adminUserService.getUser(userId))
+
+    @Operation(summary = "사용자 수정")
+    @PatchMapping("/{userId}")
+    fun updateUser(@PathVariable userId: UUID, @RequestBody request: AdminUserUpdateRequest) =
+        BaseResponse.of(adminUserService.updateUser(userId, request))
 
     @Operation(summary = "사용자 삭제")
     @DeleteMapping("/{userId}")
