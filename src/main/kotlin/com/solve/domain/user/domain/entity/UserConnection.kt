@@ -20,5 +20,5 @@ class UserConnection(
     val type: UserConnectionType,
 
     @Column(name = "value", nullable = false)
-    val value: String
+    var value: String
 )
