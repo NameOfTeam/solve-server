@@ -115,7 +115,7 @@ class AuthServiceImpl(
         val refreshToken =
             refreshTokenRepository.getRefreshToken(user.email) ?: throw CustomException(JwtError.INVALID_TOKEN)
 
-        if (refreshToken != request.refreshToken) throw CustomException(JwtError.INVALID_TOKEN)
+        if (refreshToken != request.refreshToken) throw CustomException(JwtError.INCORRECT_TOKEN)
 
         return jwtProvider.generateToken(user.email)
     }

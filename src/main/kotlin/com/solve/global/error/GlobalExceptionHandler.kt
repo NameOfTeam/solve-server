@@ -4,6 +4,7 @@ import com.solve.global.config.discord.DiscordProperties
 import org.springframework.core.env.Environment
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClient
@@ -32,6 +33,10 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(MethodNotAllowedException::class)
     fun handleMethodNotAllowedException(e: MethodNotAllowedException) =
+        ErrorResponse.of(CustomException(GlobalError.METHOD_NOT_ALLOWED))
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    fun handleHttpRequestMethodNotSupportedException(e: HttpRequestMethodNotSupportedException) =
         ErrorResponse.of(CustomException(GlobalError.METHOD_NOT_ALLOWED))
 
     @ExceptionHandler(Exception::class)
