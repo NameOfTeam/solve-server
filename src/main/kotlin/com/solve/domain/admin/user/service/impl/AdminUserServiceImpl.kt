@@ -56,6 +56,7 @@ class AdminUserServiceImpl(
         )
 
         request.password?.let { user.password = passwordEncoder.encode(it) }
+        request.introduction?.let { user.introduction = it }
         request.role?.let { user.role = it }
 
         return AdminUserResponse.of(user)
