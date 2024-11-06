@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @Tag(name = "관리자: 사용자", description = "Admin: User")
@@ -33,6 +34,11 @@ class AdminUserController(
     @PatchMapping("/{userId}")
     fun updateUser(@PathVariable userId: UUID, @RequestBody request: AdminUserUpdateRequest) =
         BaseResponse.of(adminUserService.updateUser(userId, request))
+
+    @Operation(summary = "사용자 아바타 수정")
+    @PatchMapping("/{userId}/avatar")
+    fun updateUserAvatar(@PathVariable userId: UUID, @RequestPart("file") file: MultipartFile) =
+        BaseResponse.of(adminUserService.updateUserAvatar(userId, file))
 
     @Operation(summary = "사용자 삭제")
     @DeleteMapping("/{userId}")
