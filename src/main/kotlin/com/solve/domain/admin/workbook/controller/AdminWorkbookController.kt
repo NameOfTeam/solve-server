@@ -1,5 +1,6 @@
 package com.solve.domain.admin.workbook.controller
 
+import com.solve.domain.admin.workbook.dto.request.AdminCreateWorkbookRequest
 import com.solve.domain.admin.workbook.service.AdminWorkbookService
 import com.solve.global.common.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -9,6 +10,8 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -27,6 +30,11 @@ class AdminWorkbookController(
     @GetMapping("/{workbookId}")
     fun getWorkbook(@PathVariable workbookId: Long) =
         BaseResponse.of(adminWorkbookService.getWorkbook(workbookId))
+
+    @Operation(summary = "문제집 생성")
+    @PostMapping
+    fun createWorkbook(@RequestBody request: AdminCreateWorkbookRequest) =
+        BaseResponse.of(adminWorkbookService.createWorkbook(request))
 
     @Operation(summary = "문제집 삭제")
     @DeleteMapping("/{workbookId}")

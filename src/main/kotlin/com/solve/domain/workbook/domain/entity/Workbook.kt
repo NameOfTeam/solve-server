@@ -1,5 +1,6 @@
 package com.solve.domain.workbook.domain.entity
 
+import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.workbook.error.WorkbookLikeError
 import com.solve.global.common.BaseTimeEntity
@@ -47,5 +48,9 @@ class Workbook(
         val bookmark = bookmarks.find { it.user == user } ?: throw CustomException(WorkbookLikeError.WORKBOOK_LIKE_NOT_FOUND)
 
         bookmarks.remove(bookmark)
+    }
+
+    fun addProblem(problem: Problem) {
+        problems.add(WorkbookProblem(this, problem))
     }
 }
