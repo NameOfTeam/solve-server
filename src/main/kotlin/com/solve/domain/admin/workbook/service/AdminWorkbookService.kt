@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable
 interface AdminWorkbookService {
     fun getWorkbooks(pageable: Pageable): Page<AdminWorkbookResponse>
     fun getWorkbook(workbookId: Long): AdminWorkbookResponse
+    fun deleteWorkbook(workbookId: Long)
 }
