@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.MethodNotAllowedException
 import org.springframework.web.servlet.NoHandlerFoundException
@@ -43,6 +44,10 @@ class GlobalExceptionHandler(
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException) =
         ErrorResponse.of(CustomException(GlobalError.HTTP_MESSAGE_NOT_READABLE))
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException) =
+        ErrorResponse.of(CustomException(GlobalError.METHOD_ARGUMENT_TYPE_MISMATCH, e.name, e.value.toString()))
 
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
