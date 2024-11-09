@@ -12,5 +12,8 @@ data class SignUpRequest(
     val email: String,
 
     @field:NotBlank
-    val password: String
+    val password: String,
+
+    @field:NotBlank
+    val passwordConfirm: String
 )

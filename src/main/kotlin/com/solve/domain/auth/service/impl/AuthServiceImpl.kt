@@ -72,6 +72,7 @@ class AuthServiceImpl(
     override fun signup(request: SignUpRequest) {
         if (userRepository.existsByUsername(request.username)) throw CustomException(UserError.USERNAME_DUPLICATED)
         if (userRepository.existsByEmail(request.email)) throw CustomException(UserError.EMAIL_DUPLICATED)
+        if (request.password != request.passwordConfirm) throw CustomException(AuthError.PASSWORD_MISMATCH)
 
         var user = User(
             username = request.username,
