@@ -1,4 +1,4 @@
-package com.solve.domain.problem.service.impl
+package com.solve.domain.admin.problem.service.impl
 
 import com.solve.domain.admin.problem.service.AdminProblemTestCaseService
 import com.solve.domain.problem.domain.entity.ProblemTestCase
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class ProblemTestCaseServiceImpl(
+class AdminProblemTestCaseServiceImpl(
     private val problemRepository: ProblemRepository,
 ) : AdminProblemTestCaseService {
     @Transactional(readOnly = true)

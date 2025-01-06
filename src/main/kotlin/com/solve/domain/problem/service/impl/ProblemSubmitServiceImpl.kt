@@ -1,4 +1,4 @@
-package com.solve.domain.admin.problem.service.impl
+package com.solve.domain.problem.service.impl
 
 import com.solve.domain.problem.domain.entity.ProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
@@ -27,7 +27,7 @@ import java.util.concurrent.CompletableFuture
 
 
 @Service
-class AdminProblemSubmitServiceImpl(
+class ProblemSubmitServiceImpl(
     private val securityHolder: SecurityHolder,
     private val fileProperties: FileProperties,
     private val problemRepository: ProblemRepository,
