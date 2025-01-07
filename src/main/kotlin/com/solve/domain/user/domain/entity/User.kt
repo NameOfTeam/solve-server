@@ -1,6 +1,5 @@
 package com.solve.domain.user.domain.entity
 
-import com.solve.domain.user.domain.enums.UserRank
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
@@ -35,10 +34,6 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     var role: UserRole = UserRole.USER,
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "rank", nullable = false)
-    var rank: UserRank = UserRank.ROOKIE,
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val connections: MutableList<UserConnection> = mutableListOf()
