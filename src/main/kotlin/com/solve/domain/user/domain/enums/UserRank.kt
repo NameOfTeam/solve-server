@@ -29,5 +29,5 @@ enum class UserRank {
     DIAMOND_1,
     MASTER,
     GRANDMASTER,
-    CHALLENGER
+    PLANET
 }
