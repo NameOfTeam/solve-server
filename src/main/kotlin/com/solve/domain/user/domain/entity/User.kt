@@ -1,6 +1,7 @@
 package com.solve.domain.user.domain.entity
 
 import com.solve.domain.user.domain.enums.UserRole
+import com.solve.domain.user.domain.enums.UserTier
 import com.solve.global.common.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDate
@@ -34,6 +35,9 @@ class User(
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     var role: UserRole = UserRole.USER,
+
+    @Enumerated(EnumType.STRING) @Column(name = "tier", nullable = false)
+    var tier: UserTier = UserTier.ROOKIE,
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val connections: MutableList<UserConnection> = mutableListOf()
