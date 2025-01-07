@@ -37,6 +37,7 @@ class AdminWorkbookServiceImpl(
         val author = securityHolder.user
         var workbook = Workbook(
             title = request.title,
+            description = request.description,
             author = author,
         )
 

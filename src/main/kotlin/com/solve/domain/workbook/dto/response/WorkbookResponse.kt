@@ -8,21 +8,18 @@ import java.time.LocalDateTime
 data class WorkbookResponse(
     val id: Long,
     val title: String,
+    val description: String?,
     val problems: List<WorkbookProblemResponse>,
     val author: WorkbookAuthorResponse,
+    val likeCount: Long,
+    val bookmarkCount: Long,
+    var liked: Boolean = false,
+    var bookmarked: Boolean = false,
+    var progress: Int = 0,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 ) {
-    companion object {
-        fun of(workbook: Workbook) = WorkbookResponse(
-            id = workbook.id!!,
-            title = workbook.title,
-            problems = workbook.problems.map { WorkbookProblemResponse.of(it) },
-            author = WorkbookAuthorResponse.of(workbook.author),
-            createdAt = workbook.createdAt,
-            updatedAt = workbook.updatedAt
-        )
-    }
+    companion object
 }
 
 data class WorkbookProblemResponse(
