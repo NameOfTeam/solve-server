@@ -52,9 +52,9 @@ class AuthServiceImpl(
 ) : AuthService {
     @Transactional
     override fun login(request: LoginRequest): JwtResponse {
-        val user = userRepository.findByUsername(request.username) ?: throw CustomException(
-            UserError.USER_NOT_FOUND_BY_USERNAME,
-            request.username
+        val user = userRepository.findByEmail(request.email) ?: throw CustomException(
+            UserError.USER_NOT_FOUND_BY_EMAIL,
+            request.email
         )
 
         if (!user.verified) throw CustomException(UserError.USER_NOT_VERIFIED)
