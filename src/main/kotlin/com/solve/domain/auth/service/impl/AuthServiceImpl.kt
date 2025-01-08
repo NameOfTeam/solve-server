@@ -21,8 +21,6 @@ import com.solve.global.security.jwt.error.JwtError
 import com.solve.global.security.jwt.provider.JwtProvider
 import org.springframework.boot.autoconfigure.mail.MailProperties
 import org.springframework.core.io.ClassPathResource
-import org.springframework.mail.MailException
-import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.messaging.MessagingException
