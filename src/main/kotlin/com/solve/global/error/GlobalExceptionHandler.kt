@@ -57,6 +57,8 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ErrorResponse> {
+        e.printStackTrace()
+
         sendException(e)
 
         return ErrorResponse.of(CustomException(GlobalError.INTERNAL_SERVER_ERROR))
