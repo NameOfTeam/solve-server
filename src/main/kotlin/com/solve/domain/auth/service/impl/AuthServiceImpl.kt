@@ -21,8 +21,11 @@ import com.solve.global.security.jwt.error.JwtError
 import com.solve.global.security.jwt.provider.JwtProvider
 import org.springframework.boot.autoconfigure.mail.MailProperties
 import org.springframework.core.io.ClassPathResource
+import org.springframework.mail.MailException
+import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.messaging.MessagingException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -74,17 +77,10 @@ class AuthServiceImpl(
         if (userRepository.existsByEmail(request.email)) throw CustomException(UserError.EMAIL_DUPLICATED)
         if (request.password != request.passwordConfirm) throw CustomException(AuthError.PASSWORD_MISMATCH)
 
-        var user = User(
-            username = request.username,
-            email = request.email,
-            password = passwordEncoder.encode(request.password),
-        )
-        user = userRepository.save(user)
-
         val message = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true, "UTF-8")
         helper.setFrom(mailProperties.username)
-        helper.setTo(user.email)
+        helper.setTo(request.email)
         helper.setSubject("Verify Solve Login")
 
         val verificationToken = generateVerificationToken()
@@ -93,7 +89,7 @@ class AuthServiceImpl(
         emailVerificationRepository.save(
             EmailVerification(
                 verificationToken = verificationToken,
-                email = user.email,
+                email = request.email,
                 expiredAt = LocalDateTime.now().plusMinutes(5)
             )
         )
@@ -104,7 +100,18 @@ class AuthServiceImpl(
 
         helper.setText(content, true)
 
-        mailSender.send(message)
+        try {
+            mailSender.send(message)
+        } catch (e: MessagingException) {
+            throw CustomException(AuthError.EMAIL_NOT_FOUND)
+        }
+
+        val user = User(
+            username = request.username,
+            email = request.email,
+            password = passwordEncoder.encode(request.password),
+        )
+        userRepository.save(user)
     }
 
     @Transactional
