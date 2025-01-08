@@ -1,6 +1,6 @@
 package com.solve.domain.admin.problem.controller
 
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.PathVariable

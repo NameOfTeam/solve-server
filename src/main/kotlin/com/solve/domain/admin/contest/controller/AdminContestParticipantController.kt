@@ -2,7 +2,7 @@ package com.solve.domain.admin.contest.controller
 
 import com.solve.domain.admin.contest.dto.request.AdminContestParticipantAddRequest
 import com.solve.domain.admin.contest.service.AdminContestParticipantService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*

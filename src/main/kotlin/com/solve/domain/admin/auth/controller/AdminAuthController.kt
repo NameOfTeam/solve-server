@@ -2,7 +2,7 @@ package com.solve.domain.admin.auth.controller
 
 import com.solve.domain.admin.auth.dto.request.AdminSignUpRequest
 import com.solve.domain.admin.auth.service.AdminAuthService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.PostMapping

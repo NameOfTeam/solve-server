@@ -4,7 +4,7 @@ import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.domain.enums.ProblemSubmitVisibility
 import com.solve.domain.user.domain.entity.User
-import com.solve.global.common.BaseTimeEntity
+import com.solve.global.common.entity.BaseTimeEntity
 import jakarta.persistence.*
 
 @Entity

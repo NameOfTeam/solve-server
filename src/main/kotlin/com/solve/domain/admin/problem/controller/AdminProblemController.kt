@@ -3,7 +3,7 @@ package com.solve.domain.admin.problem.controller
 import com.solve.domain.admin.problem.dto.request.AdminProblemCreateRequest
 import com.solve.domain.admin.problem.dto.request.AdminProblemUpdateRequest
 import com.solve.domain.admin.problem.service.AdminProblemService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid

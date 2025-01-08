@@ -1,4 +1,4 @@
-package com.solve.global.common
+package com.solve.global.common.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners

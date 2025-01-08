@@ -3,7 +3,7 @@ package com.solve.domain.workbook.domain.entity
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.workbook.error.WorkbookLikeError
-import com.solve.global.common.BaseTimeEntity
+import com.solve.global.common.entity.BaseTimeEntity
 import com.solve.global.error.CustomException
 import jakarta.persistence.*
 

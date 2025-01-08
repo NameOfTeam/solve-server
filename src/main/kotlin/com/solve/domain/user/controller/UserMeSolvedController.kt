@@ -1,7 +1,7 @@
 package com.solve.domain.user.controller
 
 import com.solve.domain.user.service.UserMeSolvedService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.GetMapping

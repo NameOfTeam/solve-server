@@ -2,7 +2,7 @@ package com.solve.domain.contest.domain.entity
 
 import com.solve.domain.contest.domain.enums.ContestVisibility
 import com.solve.domain.user.domain.entity.User
-import com.solve.global.common.BaseTimeEntity
+import com.solve.global.common.entity.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
