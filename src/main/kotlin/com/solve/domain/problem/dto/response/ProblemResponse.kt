@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.user.domain.entity.User
+import com.solve.global.common.enums.Tier
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ProblemResponse(
@@ -15,6 +16,7 @@ data class ProblemResponse(
     val memoryLimit: Long,
     val timeLimit: Double,
     var correctRate: Double,
+    val tier: Tier,
     val testCases: List<ProblemTestCaseResponse>,
     val author: ProblemAuthorResponse,
     var state: ProblemSubmitState? = null
@@ -28,6 +30,7 @@ data class ProblemResponse(
             output = problem.output,
             memoryLimit = problem.memoryLimit,
             timeLimit = problem.timeLimit,
+            tier = problem.tier,
             testCases = problem.testCases.filter { it.sample }.map { ProblemTestCaseResponse.of(it) },
             author = ProblemAuthorResponse.of(problem.author),
             correctRate = (problem.submits.map { it.state }
