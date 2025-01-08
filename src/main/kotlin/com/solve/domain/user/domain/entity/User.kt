@@ -1,5 +1,6 @@
 package com.solve.domain.user.domain.entity
 
+import com.solve.domain.user.domain.UserFreezeUsage
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.domain.enums.UserTier
 import com.solve.global.common.BaseTimeEntity
@@ -40,34 +41,36 @@ class User(
     @Column(name = "tier", nullable = false)
     var tier: UserTier = UserTier.ROOKIE,
 
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val frozen: MutableSet<UserFreezeUsage> = mutableSetOf(),
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val connections: MutableSet<UserConnection> = mutableSetOf()
 ) : BaseTimeEntity() {
     val streak: Int
         get() {
-            if (solved.isEmpty()) return 0
+            if (solved.isEmpty() && frozen.isEmpty()) return 0
 
-            val sortedDates = solved
-                .map { it.date }
+            val activeDates = (solved.map { it.date } + frozen.map { it.freezeDate })
                 .distinct()
                 .sortedDescending()
 
-            var currentStreak = 1
-            var previousDate = sortedDates[0]
-
-            if (previousDate.isBefore(LocalDate.now().minusDays(1))) {
+            if (activeDates.isEmpty() || activeDates.first() < LocalDate.now().minusDays(1)) {
                 return 0
             }
 
-            for (i in 1 until sortedDates.size) {
-                val currentDate = sortedDates[i]
+            var currentStreak = 1
+            var previousDate = activeDates.first()
 
-                if (previousDate.minusDays(1) != currentDate) {
+            for (i in 1 until activeDates.size) {
+                val currentDate = activeDates[i]
+
+                if (previousDate.minusDays(1) == currentDate) {
+                    currentStreak++
+                    previousDate = currentDate
+                } else {
                     break
                 }
-
-                currentStreak++
-                previousDate = currentDate
             }
 
             return currentStreak
@@ -75,19 +78,20 @@ class User(
 
     val maxStreak: Int
         get() {
-            if (solved.isEmpty()) return 0
+            if (solved.isEmpty() && frozen.isEmpty()) return 0
 
-            val sortedDates = solved
-                .map { it.date }
+            val activeDates = (solved.map { it.date } + frozen.map { it.freezeDate })
                 .distinct()
                 .sorted()
 
+            if (activeDates.isEmpty()) return 0
+
             var maxStreak = 1
             var currentStreak = 1
-            var previousDate = sortedDates[0]
+            var previousDate = activeDates.first()
 
-            for (i in 1 until sortedDates.size) {
-                val currentDate = sortedDates[i]
+            for (i in 1 until activeDates.size) {
+                val currentDate = activeDates[i]
 
                 if (previousDate.plusDays(1) == currentDate) {
                     currentStreak++
@@ -103,10 +107,28 @@ class User(
         }
 
     val grass: Map<LocalDate, Int>
-        get() = solved
-            .groupBy { it.date }
-            .mapValues { it.value.size }
-            .toMap()
+        get() {
+            val registrationDate = this.createdAt.toLocalDate()
+
+            val freezeDates = frozen.map { it.freezeDate }.toSet()
+
+            val solvedCounts = solved
+                .groupBy { it.date }
+                .mapValues { it.value.size }
+
+            val allDates = generateSequence(registrationDate) { date ->
+                if (date < LocalDate.now()) date.plusDays(1) else null
+            }.toList()
+
+            return allDates.associateWith { date ->
+                when {
+                    freezeDates.contains(date) -> -1
+                    solvedCounts.containsKey(date) -> solvedCounts[date]!!
+                    else -> 0
+                }
+            }
+        }
+
 
     val solvedToday: Boolean
         get() = solved.any { it.date == LocalDate.now() }
