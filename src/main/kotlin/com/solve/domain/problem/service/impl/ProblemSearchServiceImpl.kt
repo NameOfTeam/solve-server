@@ -18,11 +18,11 @@ class ProblemSearchServiceImpl(
     @Transactional(readOnly = true)
     override fun searchProblem(
         query: String,
-        state: List<ProblemSearchState>,
-        tier: List<Tier>,
+        states: List<ProblemSearchState>,
+        tiers: List<Tier>,
         order: ProblemSearchOrder,
         pageable: Pageable
     ): Page<ProblemResponse> {
-        return problemQueryRepository.searchProblem(query, state, tier, order, pageable).map { ProblemResponse.of(it) }
+        return problemQueryRepository.searchProblem(query, states, tiers, order, pageable).map { ProblemResponse.of(it) }
     }
 }
