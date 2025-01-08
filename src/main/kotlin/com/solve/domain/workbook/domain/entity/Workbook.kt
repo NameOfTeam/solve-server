@@ -17,8 +17,11 @@ class Workbook(
     @Column(name = "title", nullable = false)
     var title: String,
 
+    @Column(name = "description")
+    var description: String?,
+
     @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val problems: MutableList<WorkbookProblem> = mutableListOf(),
+    val problems: MutableSet<WorkbookProblem> = mutableSetOf(),
 
     @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val likes: MutableList<WorkbookLike> = mutableListOf(),

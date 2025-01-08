@@ -30,17 +30,18 @@ class User(
     var verified: Boolean = false,
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val solved: MutableList<UserSolved> = mutableListOf(),
+    val solved: MutableSet<UserSolved> = mutableSetOf(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     var role: UserRole = UserRole.USER,
 
-    @Enumerated(EnumType.STRING) @Column(name = "tier", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier", nullable = false)
     var tier: UserTier = UserTier.ROOKIE,
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val connections: MutableList<UserConnection> = mutableListOf()
+    val connections: MutableSet<UserConnection> = mutableSetOf()
 ) : BaseTimeEntity() {
     val streak: Int
         get() {

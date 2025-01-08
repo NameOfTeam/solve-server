@@ -61,6 +61,8 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/reissue").anonymous()
 
+                .requestMatchers(HttpMethod.GET, "/statistics").permitAll()
+
                 .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()

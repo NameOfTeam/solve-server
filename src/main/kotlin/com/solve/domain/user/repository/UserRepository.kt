@@ -2,6 +2,7 @@ package com.solve.domain.user.repository
 
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.domain.enums.UserRole
+import com.solve.domain.user.domain.enums.UserTier
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -20,4 +21,6 @@ interface UserRepository : JpaRepository<User, UUID> {
         username: String,
         email: String
     ): Page<User>
+
+    fun countByTierIsNot(tier: UserTier): Long
 }
