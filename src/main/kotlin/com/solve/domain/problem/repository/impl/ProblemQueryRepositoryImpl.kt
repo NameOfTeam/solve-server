@@ -12,7 +12,6 @@ import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.repository.ProblemQueryRepository
 import com.solve.global.common.enums.Tier
 import com.solve.global.security.holder.SecurityHolder
-import org.hibernate.sql.ast.tree.predicate.BooleanExpressionPredicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
