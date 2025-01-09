@@ -49,9 +49,11 @@ class DockerCodeExecutor(
         val directory = File(fileProperties.path, "submits").apply {
             if (!exists()) mkdirs()
         }
+        val restoredCode = request.code.replace("\\n", "\n").replace("\\\"", "\"")
+
         return File(directory, "${submit.id}.${getFileExtension()}").apply {
             createNewFile()
-            writeText(request.code)
+            writeText(restoredCode)
         }
     }
 
@@ -127,7 +129,7 @@ class DockerCodeExecutor(
 
         val actualOutput = output.toString().trim()
 
-        println("actualOutput: $perfOutput")
+        println("actualOutput: $actualOutput")
 
         // 출력 비교
         if (hasPresentationError(actualOutput, expectedOutput)) {
