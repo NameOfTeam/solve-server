@@ -29,6 +29,10 @@ class Contest(
     @JoinColumn(name = "owner_id", nullable = false)
     var owner: User,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_id")
+    var winner: User? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)
     var visibility: ContestVisibility = ContestVisibility.PUBLIC,

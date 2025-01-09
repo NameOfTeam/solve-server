@@ -13,6 +13,7 @@ data class ContestResponse(
     val endAt: LocalDateTime,
     val owner: ContestOwnerResponse,
     val state: ContestState,
+    val winner: ContestWinnerResponse?,
     val operators: List<ContestOperatorResponse>,
     val participants: List<ContestParticipantResponse>,
     val problems: List<ContestProblemResponse>,
@@ -36,6 +37,7 @@ data class ContestResponse(
             } else {
                 ContestState.ONGOING
             },
+            winner = contest.winner?.let { ContestWinnerResponse.of(it) },
             operators = contest.operators.map { ContestOperatorResponse.of(it) },
             participants = contest.participants.map { ContestParticipantResponse.of(it) },
             problems = contest.problems.map { ContestProblemResponse.of(it) },
