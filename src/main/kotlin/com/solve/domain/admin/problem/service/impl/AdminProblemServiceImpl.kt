@@ -5,6 +5,7 @@ import com.solve.domain.admin.problem.dto.request.AdminProblemUpdateRequest
 import com.solve.domain.admin.problem.dto.response.AdminProblemResponse
 import com.solve.domain.admin.problem.service.AdminProblemService
 import com.solve.domain.problem.domain.entity.Problem
+import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
@@ -50,15 +51,23 @@ class AdminProblemServiceImpl(
             )
         )
 
-        request.testCases?.forEach {
+        for (testCase in request.testCases) {
             problem.testCases.add(
                 ProblemTestCase(
-                    input = it.input,
-                    output = it.output,
-                    sample = it.sample,
+                    input = testCase.input,
+                    output = testCase.output,
                     problem = problem
                 )
             )
+        }
+
+        for (example in request.examples) {
+            problem.examples.add(ProblemExample(
+                input = example.input,
+                output = example.output,
+                description = example.description,
+                problem = problem
+            ))
         }
 
         problem = problemRepository.save(problem)

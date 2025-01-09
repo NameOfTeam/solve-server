@@ -35,16 +35,19 @@ class Problem(
     val tier: Tier,
 
     @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val testCases: MutableList<ProblemTestCase> = mutableListOf(),
+    val examples: MutableSet<ProblemExample> = mutableSetOf(),
+
+    @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    val testCases: MutableSet<ProblemTestCase> = mutableSetOf(),
 
     @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val contributors: MutableList<ProblemContributor> = mutableListOf(),
+    val contributors: MutableSet<ProblemContributor> = mutableSetOf(),
 
     @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val submits: MutableList<ProblemSubmit> = mutableListOf(),
+    val submits: MutableSet<ProblemSubmit> = mutableSetOf(),
 
     @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val ideas: MutableList<ProblemIdea> = mutableListOf(),
+    val ideas: MutableSet<ProblemIdea> = mutableSetOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
