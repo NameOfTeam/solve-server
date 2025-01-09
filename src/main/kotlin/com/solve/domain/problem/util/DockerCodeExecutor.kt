@@ -26,20 +26,34 @@ class DockerCodeExecutor(
         val compilationOutput: String? = null
     )
 
-    private val containerName = "problem-judge-container"
+    private val pythonContainerName = "problem-judge-container"
+    private val javaContainerName = "java-problem-judge-container"
 
-    fun initializeContainer() {
+    fun initializePythonContainer() {
+        initializeContainer(pythonContainerName, "python:3.11", listOf("apt-get update && apt-get install -y time"))
+    }
+
+    fun initializeJavaContainer() {
+        initializeContainer(
+            containerName = "java-problem-judge-container",
+            imageName = "openjdk:17",
+            setupCommands = listOf("apk update", "apk add --no-cache time")
+        )
+    }
+
+    private fun initializeContainer(containerName: String, imageName: String, setupCommands: List<String>) {
         // 기존 컨테이너 제거
         val removeCommand = listOf("docker", "rm", "-f", containerName)
         println("Removing existing container with command: $removeCommand")
         ProcessBuilder(removeCommand).start().waitFor()
 
         // 새 컨테이너 생성
+        val setupScript = setupCommands.joinToString(" && ")
         val startCommand = listOf(
             "docker", "run", "--name", containerName, "-d",
             "-v", "${fileProperties.path}:/app/submit",
-            "python:3.11", "sh", "-c",
-            "apt-get update && apt-get install -y time && tail -f /dev/null"
+            imageName, "sh", "-c",
+            "$setupScript && tail -f /dev/null"
         )
         println("Starting container with command: $startCommand")
         ProcessBuilder(startCommand).start().waitFor()
@@ -67,7 +81,7 @@ class DockerCodeExecutor(
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
         val command = listOf(
-            "docker", "exec", "--privileged", containerName, "perf", "stat",
+            "docker", "exec", "--privileged", pythonContainerName, "perf", "stat",
             "python3", "/app/submit/submits/${sourceFile.name}"
         )
 
@@ -123,6 +137,11 @@ class DockerCodeExecutor(
         val perfOutput = if (isPerfOutput) errorOutput else output.toString()
         val timeRegex = Regex("(\\d+\\.\\d+) seconds time elapsed")
         val timeMatch = timeRegex.find(perfOutput)
+
+        val memoryRegex = Regex("(\\d+) page-faults")
+
+        val memoryMatch = memoryRegex.find(errorOutput)
+
         val timeUsage = timeMatch?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
             (it * 1000).toInt().toLong()
         } ?: -1
@@ -174,7 +193,7 @@ class DockerCodeExecutor(
     private fun getExecutionCommand(sourceFile: File): String {
         return when (request.language) {
             ProblemSubmitLanguage.PYTHON -> "python3 /app/submit/submits/${sourceFile.name}"
-            ProblemSubmitLanguage.JAVA -> "javac ${sourceFile.name} && java -cp . ${sourceFile.nameWithoutExtension}"
+            ProblemSubmitLanguage.JAVA -> "javac /app/submit/submits/${sourceFile.name} && java -cp . /app/submit/submits/${sourceFile.nameWithoutExtension}"
             ProblemSubmitLanguage.C -> "gcc ${sourceFile.name} -o a.out && ./a.out"
             else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
         }
