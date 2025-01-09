@@ -1,6 +1,5 @@
 package com.solve.domain.user.domain.entity
 
-import com.solve.domain.user.domain.UserFrozen
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.domain.enums.UserTier
 import com.solve.global.common.BaseTimeEntity

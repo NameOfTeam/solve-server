@@ -1,11 +1,10 @@
-package com.solve.domain.user.domain
+package com.solve.domain.user.domain.entity
 
-import com.solve.domain.user.domain.entity.User
 import jakarta.persistence.*
 import java.time.LocalDate
 
 @Entity
-@Table(name = "user_freeze_usages")
+@Table(name = "user_frozen")
 class UserFrozen(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
