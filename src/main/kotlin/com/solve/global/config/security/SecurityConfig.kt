@@ -64,6 +64,7 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.GET, "/statistics").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/problems/search").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "Problem Idea Like")
+@Tag(name = "문제 아이디어 좋아요", description = "Problem Idea Like")
 @RestController
 @RequestMapping("/problems/{problemId}/ideas/{ideaId}/like")
 class ProblemIdeaLikeController(
