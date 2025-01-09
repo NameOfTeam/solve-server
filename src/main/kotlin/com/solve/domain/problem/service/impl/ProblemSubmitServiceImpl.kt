@@ -89,6 +89,7 @@ class ProblemSubmitServiceImpl(
         submit.state = ProblemSubmitState.JUDGING
         updateProgress(submit.id!!, progress, ProblemSubmitState.JUDGING)
 
+        executor.initializeContainer()
         for (testCase in testCases) {
             val result = executor.execute(testCase.input, problem.timeLimit, testCase.output)
             maxTimeUsage = maxOf(maxTimeUsage, result.timeUsage)

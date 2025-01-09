@@ -26,6 +26,18 @@ class DockerCodeExecutor(
         val compilationOutput: String? = null
     )
 
+    private val containerName = "problem-judge-container"
+
+    fun initializeContainer() {
+        val startCommand = listOf(
+            "docker", "run", "--name", containerName, "-d",
+            "-v", "${fileProperties.path}/submits:/app", // 수정: submits 디렉터리만 마운트
+            "python:3.11", "tail", "-f", "/dev/null"
+        )
+        println("Starting container with command: $startCommand")
+        ProcessBuilder(startCommand).start().waitFor()
+    }
+
     private fun createSourceFile(): File {
         val directory = File(fileProperties.path, "submits").apply {
             if (!exists()) mkdirs()
@@ -47,19 +59,15 @@ class DockerCodeExecutor(
         val sourceFile = createSourceFile()
         val dockerImage = getDockerImage(request.language)
 
+        println("Created source file at: ${sourceFile.absolutePath}")
+        println("Source file exists: ${sourceFile.exists()}")
+
         // 실행 명령어 디버깅용 로그 추가
         val command = listOf(
-            "docker",
-            "run",
-            "--rm",
-            "-v",
-            "${sourceFile.parent}:/app",
-            dockerImage,
-            "sh",
-            "-c",
-            "cd /app && ${getExecutionCommand(sourceFile)}"
+            "docker", "exec", containerName, "sh", "-c",
+            "cd /app/submits && ${getExecutionCommand(sourceFile)}"
         )
-        println("Docker Command: $command")
+        println("Executing in container with command: $command")
 
         // Docker 명령어 실행 전 권한 확인
         println("Current directory permissions: ${sourceFile.parent}")
