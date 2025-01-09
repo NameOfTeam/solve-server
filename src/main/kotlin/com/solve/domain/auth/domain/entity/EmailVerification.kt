@@ -17,5 +17,8 @@ class EmailVerification(
     var email: String,
 
     @Column(name = "expired_at", nullable = false, updatable = false)
-    var expiredAt: LocalDateTime
+    var expiredAt: LocalDateTime,
+
+    @Column(name = "verified", nullable = false)
+    var verified: Boolean = false
 )
