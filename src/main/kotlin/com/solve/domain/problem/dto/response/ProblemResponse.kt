@@ -18,6 +18,7 @@ data class ProblemResponse(
     val timeLimit: Double,
     var correctRate: Double,
     val tier: Tier,
+    val solvedCount: Int,
     val examples: List<ProblemExampleResponse>,
     val author: ProblemAuthorResponse,
     var state: ProblemSubmitState? = null
@@ -32,6 +33,7 @@ data class ProblemResponse(
             memoryLimit = problem.memoryLimit,
             timeLimit = problem.timeLimit,
             tier = problem.tier,
+            solvedCount = problem.submits.filter { it.state == ProblemSubmitState.ACCEPTED }.distinctBy { it.author }.count(),
             examples = problem.examples.map { ProblemExampleResponse.of(it) },
             author = ProblemAuthorResponse.of(problem.author),
             correctRate = (problem.submits.map { it.state }
