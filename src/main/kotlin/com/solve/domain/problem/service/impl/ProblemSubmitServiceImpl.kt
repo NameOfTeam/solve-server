@@ -12,6 +12,7 @@ import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
 import com.solve.domain.problem.util.CodeExecutor
+import com.solve.domain.problem.util.DockerCodeExecutor
 import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
@@ -78,7 +79,7 @@ class ProblemSubmitServiceImpl(
 
     @Transactional
     fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
-        val executor = CodeExecutor(submit, request, fileProperties)
+        val executor = DockerCodeExecutor(submit, request, fileProperties)
         val problem = submit.problem
         val testCases = problem.testCases.shuffled()
         var progress = 0.0
