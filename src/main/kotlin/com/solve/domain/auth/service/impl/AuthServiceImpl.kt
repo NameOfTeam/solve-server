@@ -75,12 +75,6 @@ class AuthServiceImpl(
         if (userRepository.existsByEmail(request.email)) throw CustomException(UserError.EMAIL_DUPLICATED)
         if (request.password != request.passwordConfirm) throw CustomException(AuthError.PASSWORD_MISMATCH)
 
-        val message = mailSender.createMimeMessage()
-        val helper = MimeMessageHelper(message, true, "UTF-8")
-        helper.setFrom(mailProperties.username)
-        helper.setTo(request.email)
-        helper.setSubject("Verify Solve Login")
-
         val verificationToken = generateVerificationToken()
         val verificationLink = "${frontendProperties.url}/verify?token=$verificationToken"
 
@@ -96,6 +90,11 @@ class AuthServiceImpl(
         val content = FileCopyUtils.copyToString(resource.inputStream.reader(StandardCharsets.UTF_8))
             .replace("{verificationLink}", verificationLink)
 
+        val message = mailSender.createMimeMessage()
+        val helper = MimeMessageHelper(message, true, "UTF-8")
+        helper.setFrom(mailProperties.username)
+        helper.setTo(request.email)
+        helper.setSubject("Verify Solve Login")
         helper.setText(content, true)
 
         try {
@@ -132,13 +131,22 @@ class AuthServiceImpl(
 
         val emailVerification = emailVerificationRepository.findByVerificationToken(token)
             ?: throw CustomException(AuthError.INVALID_VERIFICATION_TOKEN)
+
+        if (emailVerification.verified) {
+            throw CustomException(AuthError.ALREADY_VERIFIED)
+        }
+
+        if (emailVerification.expiredAt.isBefore(LocalDateTime.now())) {
+            throw CustomException(AuthError.VERIFICATION_EXPIRED)
+        }
+
         val user = userRepository.findByEmail(emailVerification.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
-        emailVerificationRepository.delete(emailVerification)
+        emailVerification.verified = true
+        emailVerificationRepository.save(emailVerification)
 
         user.verified = true
-
         userRepository.save(user)
 
         val directory = Paths.get(fileProperties.path, "avatars").toFile()
@@ -156,9 +164,11 @@ class AuthServiceImpl(
         return VerifyResponse(true)
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 100)
+    @Transactional
     fun deleteExpiredVerificationTokens() {
-        val expiredVerifications = emailVerificationRepository.findAllByExpiredAtBefore(LocalDateTime.now())
+        val expiredVerifications =
+            emailVerificationRepository.findAllByExpiredAtBeforeAndVerifiedFalse(LocalDateTime.now())
 
         for (verification in expiredVerifications) {
             val user = userRepository.findByEmail(verification.email) ?: continue

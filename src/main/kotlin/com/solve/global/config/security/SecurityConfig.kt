@@ -103,7 +103,7 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource = UrlBasedCorsConfigurationSource().apply {
         registerCorsConfiguration("/**", CorsConfiguration().apply {
             allowedOriginPatterns = listOf("*")
-            allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE")
+            allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true
             maxAge = 3600
