@@ -24,9 +24,9 @@ class ProblemSearchController(
     @GetMapping
     fun searchProblem(
         @RequestParam(defaultValue = "", required = false) query: String,
-        @RequestParam states: List<ProblemSearchState>,
-        @RequestParam tiers: List<Tier>,
-        @RequestParam order: ProblemSearchOrder,
+        @RequestParam(defaultValue = "", required = false) states: List<ProblemSearchState>,
+        @RequestParam(defaultValue = "", required = false) tiers: List<Tier>,
+        @RequestParam(defaultValue = "LATEST", required = false) order: ProblemSearchOrder,
         @PageableDefault pageable: Pageable
     ) = BaseResponse.of(problemSearchService.searchProblem(query, states, tiers, order, pageable))
 }
