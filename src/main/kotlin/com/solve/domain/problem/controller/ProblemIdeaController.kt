@@ -3,7 +3,7 @@ package com.solve.domain.problem.controller
 import com.solve.domain.problem.dto.request.ProblemIdeaCreateRequest
 import com.solve.domain.problem.dto.request.ProblemIdeaUpdateRequest
 import com.solve.domain.problem.service.ProblemIdeaService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*

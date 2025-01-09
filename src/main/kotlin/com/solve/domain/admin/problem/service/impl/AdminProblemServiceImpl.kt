@@ -43,6 +43,7 @@ class AdminProblemServiceImpl(
                 content = request.content,
                 input = request.input,
                 output = request.output,
+                tier = request.tier,
                 memoryLimit = request.memoryLimit,
                 timeLimit = request.timeLimit,
                 author = author

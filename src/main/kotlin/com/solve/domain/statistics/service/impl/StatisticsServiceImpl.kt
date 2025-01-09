@@ -4,7 +4,7 @@ import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.statistics.dto.response.StatisticsResponse
 import com.solve.domain.statistics.service.StatisticsService
-import com.solve.domain.user.domain.enums.UserTier
+import com.solve.global.common.enums.Tier
 import com.solve.domain.user.repository.UserRepository
 import com.solve.domain.workbook.repository.WorkbookRepository
 import org.springframework.stereotype.Service
@@ -22,7 +22,7 @@ class StatisticsServiceImpl(
         val problemCount = problemRepository.count()
         val workbookCount = workbookRepository.count()
         val contestCount = contestRepository.count()
-        val userCount = userRepository.countByTierIsNot(UserTier.ROOKIE)
+        val userCount = userRepository.countByTierIsNot(Tier.ROOKIE)
 
         return StatisticsResponse(
             problemCount,

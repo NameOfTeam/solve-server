@@ -1,4 +1,4 @@
-package com.solve.global.common
+package com.solve.global.common.dto
 
 import org.springframework.http.ResponseEntity
 

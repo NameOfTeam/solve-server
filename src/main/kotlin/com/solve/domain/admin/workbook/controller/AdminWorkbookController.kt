@@ -2,7 +2,7 @@ package com.solve.domain.admin.workbook.controller
 
 import com.solve.domain.admin.workbook.dto.request.AdminCreateWorkbookRequest
 import com.solve.domain.admin.workbook.service.AdminWorkbookService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Pageable

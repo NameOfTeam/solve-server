@@ -3,7 +3,7 @@ package com.solve.domain.admin.contest.controller
 import com.solve.domain.admin.contest.dto.request.AdminContestCreateRequest
 import com.solve.domain.admin.contest.dto.request.AdminContestUpdateRequest
 import com.solve.domain.admin.contest.service.AdminContestService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Pageable

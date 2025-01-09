@@ -1,7 +1,8 @@
 package com.solve.domain.problem.domain.entity
 
 import com.solve.domain.user.domain.entity.User
-import com.solve.global.common.BaseTimeEntity
+import com.solve.global.common.entity.BaseTimeEntity
+import com.solve.global.common.enums.Tier
 import jakarta.persistence.*
 
 @Entity
@@ -28,6 +29,10 @@ class Problem(
 
     @Column(name = "time_limit", nullable = false)
     var timeLimit: Double,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier", nullable = false)
+    val tier: Tier,
 
     @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val testCases: MutableList<ProblemTestCase> = mutableListOf(),

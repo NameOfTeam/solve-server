@@ -1,6 +1,6 @@
-package com.solve.domain.user.domain.enums
+package com.solve.global.common.enums
 
-enum class UserTier(val path: String) {
+enum class Tier(val path: String) {
     ROOKIE("/rookie.svg"),
     MOON_1("/moon-1.svg"),
     MOON_2("/moon-2.svg"),

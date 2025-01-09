@@ -4,7 +4,7 @@ import com.solve.domain.auth.dto.request.LoginRequest
 import com.solve.domain.auth.dto.request.ReissueRequest
 import com.solve.domain.auth.dto.request.SignUpRequest
 import com.solve.domain.auth.service.AuthService
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid

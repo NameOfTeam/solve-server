@@ -3,7 +3,7 @@ package com.solve.domain.admin.user.controller
 import com.solve.domain.admin.user.dto.request.AdminUserUpdateRequest
 import com.solve.domain.admin.user.service.AdminUserService
 import com.solve.domain.user.domain.enums.UserRole
-import com.solve.global.common.BaseResponse
+import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Pageable
