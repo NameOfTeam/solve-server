@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "user_freeze_usages")
-class UserFreezeUsage(
+class UserFrozen(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -15,7 +15,7 @@ class UserFreezeUsage(
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
-    @Column(name = "freeze_date", nullable = false)
-    val freezeDate: LocalDate
+    @Column(name = "date", nullable = false)
+    val date: LocalDate
 ) {
 }

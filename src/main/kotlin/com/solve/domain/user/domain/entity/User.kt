@@ -1,6 +1,6 @@
 package com.solve.domain.user.domain.entity
 
-import com.solve.domain.user.domain.UserFreezeUsage
+import com.solve.domain.user.domain.UserFrozen
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.domain.enums.UserTier
 import com.solve.global.common.BaseTimeEntity
@@ -42,7 +42,7 @@ class User(
     var tier: UserTier = UserTier.ROOKIE,
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val frozen: MutableSet<UserFreezeUsage> = mutableSetOf(),
+    val frozen: MutableSet<UserFrozen> = mutableSetOf(),
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val connections: MutableSet<UserConnection> = mutableSetOf()
@@ -51,7 +51,7 @@ class User(
         get() {
             if (solved.isEmpty() && frozen.isEmpty()) return 0
 
-            val activeDates = (solved.map { it.date } + frozen.map { it.freezeDate })
+            val activeDates = (solved.map { it.date } + frozen.map { it.date })
                 .distinct()
                 .sortedDescending()
 
@@ -80,7 +80,7 @@ class User(
         get() {
             if (solved.isEmpty() && frozen.isEmpty()) return 0
 
-            val activeDates = (solved.map { it.date } + frozen.map { it.freezeDate })
+            val activeDates = (solved.map { it.date } + frozen.map { it.date })
                 .distinct()
                 .sorted()
 
@@ -110,7 +110,7 @@ class User(
         get() {
             val registrationDate = this.createdAt.toLocalDate()
 
-            val freezeDates = frozen.map { it.freezeDate }.toSet()
+            val freezeDates = frozen.map { it.date }.toSet()
 
             val solvedCounts = solved
                 .groupBy { it.date }
