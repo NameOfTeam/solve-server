@@ -17,9 +17,6 @@ class ProblemTestCase(
     @Column(name = "output", nullable = false, columnDefinition = "TEXT")
     var output: String,
 
-    @Column(name = "sample", nullable = false)
-    var sample: Boolean,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

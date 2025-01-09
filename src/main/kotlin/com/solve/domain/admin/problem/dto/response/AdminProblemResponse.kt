@@ -59,13 +59,11 @@ data class AdminProblemContributorResponse(
 data class AdminProblemTestCaseResponse(
     val input: String,
     val output: String,
-    val sample: Boolean
 ) {
     companion object {
         fun of(testCase: ProblemTestCase) = AdminProblemTestCaseResponse(
             input = testCase.input,
             output = testCase.output,
-            sample = testCase.sample
         )
     }
 }

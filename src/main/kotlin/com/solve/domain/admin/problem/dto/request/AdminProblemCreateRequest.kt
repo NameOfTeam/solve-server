@@ -10,5 +10,6 @@ data class AdminProblemCreateRequest(
     val memoryLimit: Long,
     val tier: Tier,
     val timeLimit: Double,
-    val testCases: List<AdminProblemTestCaseCreateRequest>? = null
+    val testCases: List<AdminProblemTestCaseCreateRequest>,
+    val examples: List<AdminProblemExampleCreateRequest>
 )
