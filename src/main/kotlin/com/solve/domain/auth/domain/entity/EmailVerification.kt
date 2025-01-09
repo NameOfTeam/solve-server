@@ -1,5 +1,6 @@
 package com.solve.domain.auth.domain.entity
 
+import com.solve.global.common.entity.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -21,4 +22,4 @@ class EmailVerification(
 
     @Column(name = "verified", nullable = false)
     var verified: Boolean = false
-)
+): BaseTimeEntity()
