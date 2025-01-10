@@ -85,18 +85,21 @@ class ProblemSubmitServiceImpl(
         var progress = 0.0
         val totalTestCases = testCases.size.toDouble()
         var maxTimeUsage = 0L  // Long으로 변경
+        var maxMemoryUsage = 0L
 
         submit.state = ProblemSubmitState.JUDGING
         updateProgress(submit.id!!, progress, ProblemSubmitState.JUDGING)
 
-        executor.initializeContainer()
+//        executor.initializeJavaContainer()
         for (testCase in testCases) {
             val result = executor.execute(testCase.input, problem.timeLimit, testCase.output)
             maxTimeUsage = maxOf(maxTimeUsage, result.timeUsage)
+            maxMemoryUsage = maxOf(maxMemoryUsage, result.memoryUsage)
 
             if (!result.success) {
                 submit.state = result.state!!
                 submit.timeUsage = maxTimeUsage  // timeUsage 필드 사용
+                submit.memoryUsage = maxMemoryUsage
                 if (result.state == ProblemSubmitState.COMPILE_ERROR) {
 //                    submit.compileError = result.compilationOutput
                 }
@@ -111,6 +114,7 @@ class ProblemSubmitServiceImpl(
 
         submit.state = ProblemSubmitState.ACCEPTED
         submit.timeUsage = maxTimeUsage  // timeUsage 필드 사용
+        submit.memoryUsage = maxMemoryUsage
         problemSubmitRepository.save(submit)
         updateProgress(submit.id, 100.0, ProblemSubmitState.ACCEPTED)
 
