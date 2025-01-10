@@ -28,37 +28,6 @@ class DockerCodeExecutor(
     )
 
     private val pythonContainerName = "python-judge"
-    private val javaContainerName = "java-problem-judge-container"
-
-    fun initializePythonContainer() {
-        initializeContainer(pythonContainerName, "python:3.11", listOf("apt-get update && apt-get install -y time"))
-    }
-
-    fun initializeJavaContainer() {
-        initializeContainer(
-            containerName = "java-problem-judge-container",
-            imageName = "openjdk:17",
-            setupCommands = listOf("apk update", "apk add --no-cache time")
-        )
-    }
-
-    private fun initializeContainer(containerName: String, imageName: String, setupCommands: List<String>) {
-        // 기존 컨테이너 제거
-        val removeCommand = listOf("docker", "rm", "-f", containerName)
-        println("Removing existing container with command: $removeCommand")
-        ProcessBuilder(removeCommand).start().waitFor()
-
-        // 새 컨테이너 생성
-        val setupScript = setupCommands.joinToString(" && ")
-        val startCommand = listOf(
-            "docker", "run", "--name", containerName, "-d",
-            "-v", "${fileProperties.path}:/app/submit",
-            imageName, "sh", "-c",
-            "$setupScript && tail -f /dev/null"
-        )
-        println("Starting container with command: $startCommand")
-        ProcessBuilder(startCommand).start().waitFor()
-    }
 
     private fun createSourceFile(): File {
         val directory = File(fileProperties.path, "submits").apply {
@@ -81,7 +50,7 @@ class DockerCodeExecutor(
 
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
-        val scriptPath = "/app/cmd/execute.sh" // Docker 내부에서의 경로
+        val scriptPath = "/app/cmd/execute.sh"
 
         val command = listOf(
             "docker", "exec", "--privileged", pythonContainerName, "sh", "-c",
@@ -95,7 +64,6 @@ class DockerCodeExecutor(
         val output = StringBuilder()
         val error = StringBuilder()
 
-        // 스트림 처리
         val outputThread = thread {
             process.inputStream.bufferedReader().useLines { lines ->
                 lines.forEach { output.append(it).append("\n") }
@@ -139,8 +107,6 @@ class DockerCodeExecutor(
 
         val perfOutput = if (isPerfOutput) errorOutput else ""
         val entireOutput = output.toString().trim()
-
-//        println("perfOutput: $perfOutput")
 
         // Perf 출력 이후의 내용 제거
         var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
@@ -205,15 +171,6 @@ class DockerCodeExecutor(
         }
     }
 
-    private fun getExecutionCommand(sourceFile: File): String {
-        return when (request.language) {
-            ProblemSubmitLanguage.PYTHON -> "python3 /app/submit/submits/${sourceFile.name}"
-            ProblemSubmitLanguage.JAVA -> "javac /app/submit/submits/${sourceFile.name} && java -cp . /app/submit/submits/${sourceFile.nameWithoutExtension}"
-            ProblemSubmitLanguage.C -> "gcc ${sourceFile.name} -o a.out && ./a.out"
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }
-    }
-
     private fun processStream(stream: java.io.InputStream, buffer: StringBuilder) {
         try {
             stream.bufferedReader().use { reader ->
@@ -232,29 +189,6 @@ class DockerCodeExecutor(
         val normalizedExpected = expected.replace("\\s+".toRegex(), "")
 
         return normalizedActual == normalizedExpected && actual != expected
-    }
-
-    fun test() {
-        val processBuilder = ProcessBuilder(
-            "sh", "-c", "docker ps"
-        )
-
-        val process = processBuilder.start()
-        val output = StringBuilder()
-
-        process.inputStream.bufferedReader().useLines { lines ->
-            lines.forEach { output.append(it).append("\n") }
-        }
-
-        val error = StringBuilder()
-
-        process.errorStream.bufferedReader().useLines { lines ->
-            lines.forEach { error.append(it).append("\n") }
-        }
-
-        println("TEST Error Output: $error")
-
-        println("Test Output: $output")
     }
 
 }
