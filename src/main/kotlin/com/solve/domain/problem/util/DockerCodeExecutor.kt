@@ -23,10 +23,11 @@ class DockerCodeExecutor(
         val success: Boolean,
         val state: ProblemSubmitState? = null,
         val timeUsage: Long = 0,
-        val compilationOutput: String? = null
+        val compilationOutput: String? = null,
+        val memoryUsage: Long = 0,
     )
 
-    private val pythonContainerName = "problem-judge-container"
+    private val pythonContainerName = "python-judge"
     private val javaContainerName = "java-problem-judge-container"
 
     fun initializePythonContainer() {
@@ -80,9 +81,11 @@ class DockerCodeExecutor(
 
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
+        val scriptPath = "/app/cmd/execute.sh" // Docker 내부에서의 경로
+
         val command = listOf(
-            "docker", "exec", "--privileged", pythonContainerName, "perf", "stat",
-            "python3", "/app/submit/submits/${sourceFile.name}"
+            "docker", "exec", "--privileged", pythonContainerName, "sh", "-c",
+            "$scriptPath '${input.replace("'", "'\\''")}' ${sourceFile.name}"
         )
 
         println("Executing command: $command")
@@ -134,22 +137,31 @@ class DockerCodeExecutor(
             )
         }
 
-        val perfOutput = if (isPerfOutput) errorOutput else output.toString()
+        val perfOutput = if (isPerfOutput) errorOutput else ""
+        val entireOutput = output.toString().trim()
+
+//        println("perfOutput: $perfOutput")
+
+        // Perf 출력 이후의 내용 제거
+        var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
+        actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
+
+        // 실행 시간 측정
         val timeRegex = Regex("(\\d+\\.\\d+) seconds time elapsed")
         val timeMatch = timeRegex.find(perfOutput)
-
-        val memoryRegex = Regex("(\\d+) page-faults")
-
-        val memoryMatch = memoryRegex.find(errorOutput)
 
         val timeUsage = timeMatch?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
             (it * 1000).toInt().toLong()
         } ?: -1
 
+        // 메모리 사용량 측정
+        val memoryRegex = Regex("Memory Usage: (\\d+) KB")
+        val memoryMatch = memoryRegex.find(entireOutput)
+        val memoryUsageKB = memoryMatch?.groups?.get(1)?.value?.toLongOrNull() ?: 0
 
-        val actualOutput = output.toString().trim()
-
+        println("entireOutput: $entireOutput")
         println("actualOutput: $actualOutput")
+        println("MemoryKB Usage: ${memoryUsageKB}KB")
 
         // 출력 비교
         if (hasPresentationError(actualOutput, expectedOutput)) {
@@ -158,7 +170,8 @@ class DockerCodeExecutor(
                 error = "",
                 success = false,
                 state = ProblemSubmitState.PRESENTATION_ERROR,
-                timeUsage = timeUsage
+                timeUsage = timeUsage,
+                memoryUsage = memoryUsageKB,
             )
         }
 
@@ -168,7 +181,8 @@ class DockerCodeExecutor(
                 error = "",
                 success = false,
                 state = ProblemSubmitState.WRONG_ANSWER,
-                timeUsage = timeUsage
+                timeUsage = timeUsage,
+                memoryUsage = memoryUsageKB,
             )
         }
 
@@ -177,7 +191,8 @@ class DockerCodeExecutor(
             error = "",
             success = true,
             state = ProblemSubmitState.ACCEPTED,
-            timeUsage = timeUsage
+            timeUsage = timeUsage,
+            memoryUsage = memoryUsageKB,
         )
     }
 
