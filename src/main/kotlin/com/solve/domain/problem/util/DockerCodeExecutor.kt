@@ -5,6 +5,7 @@ import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
+import com.solve.domain.problem.util.CodeExecutor.ExecutionResult
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
@@ -27,18 +28,39 @@ class DockerCodeExecutor(
         val memoryUsage: Long = 0,
     )
 
-    private val pythonContainerName = "python-judge"
-
     private fun createSourceFile(): File {
-        val directory = File(fileProperties.path, "submits").apply {
-            if (!exists()) mkdirs()
-        }
-        val restoredCode = request.code.replace("\\n", "\n").replace("\\\"", "\"")
-
-        return File(directory, "${submit.id}.${getFileExtension()}").apply {
+        val directory = getSourceDirectory()
+        val fileName = getSourceFileName()
+        return File(directory, fileName).apply {
             createNewFile()
-            writeText(restoredCode)
+            writeText(preprocessCode(request.language, request.code))
         }
+    }
+
+    private fun getSourceDirectory(): File {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> File(fileProperties.path, "submits/${submit.id}").apply { if (!exists()) mkdirs() }
+            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> File(fileProperties.path, "submits").apply { if (!exists()) mkdirs() }
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
+    private fun getSourceFileName(): String {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> "Main.${getFileExtension()}"
+            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
+    private fun preprocessCode(language: ProblemSubmitLanguage, code: String): String {
+        return code.replace("\\n", "\n").replace("\\\"", "\"")
+    }
+
+    private fun getName() = when (request.language) {
+        ProblemSubmitLanguage.PYTHON -> "python"
+        ProblemSubmitLanguage.JAVA -> "java"
+        else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
     private fun getFileExtension() = when (request.language) {
@@ -48,13 +70,26 @@ class DockerCodeExecutor(
         else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
+    private fun getExecutionTarget(): String {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> "${submit.id}/Main.java"
+            ProblemSubmitLanguage.PYTHON -> "${submit.id}.${getFileExtension()}"
+            ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
-        val scriptPath = "/app/cmd/execute.sh"
+
+        compile(sourceFile)?.let { return it }
+        println(sourceFile.name)
+
+        val scriptPath = "/app/cmd/${getName()}_execute.sh"
 
         val command = listOf(
-            "docker", "exec", "--privileged", pythonContainerName, "sh", "-c",
-            "$scriptPath '${input.replace("'", "'\\''")}' ${sourceFile.name}"
+            "docker", "exec", "--privileged", "${getName()}-judge", "sh", "-c",
+            "$scriptPath '${input.replace("'", "'\\''")}' ${getExecutionTarget()}"
         )
 
         println("Executing command: $command")
@@ -162,15 +197,6 @@ class DockerCodeExecutor(
         )
     }
 
-    private fun getDockerImage(language: ProblemSubmitLanguage): String {
-        return when (language) {
-            ProblemSubmitLanguage.PYTHON -> "python:3.11"
-            ProblemSubmitLanguage.JAVA -> "openjdk:17"
-            ProblemSubmitLanguage.C -> "gcc"
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }
-    }
-
     private fun processStream(stream: java.io.InputStream, buffer: StringBuilder) {
         try {
             stream.bufferedReader().use { reader ->
@@ -190,5 +216,52 @@ class DockerCodeExecutor(
 
         return normalizedActual == normalizedExpected && actual != expected
     }
+
+    private fun compile(sourceFile: File): ExecutionResult? {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
+            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
+            else -> null
+        }
+    }
+
+    private fun checkPythonSyntax(sourceFile: File): ExecutionResult? {
+        val process = ProcessBuilder("python3", "-m", "py_compile", sourceFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+
+        return if (exitCode != 0) {
+            ExecutionResult(
+                output = "",
+                error = output,
+                success = false,
+                state = ProblemSubmitState.COMPILE_ERROR,
+                compilationOutput = output
+            )
+        } else null
+    }
+
+    private fun compileJava(sourceFile: File): ExecutionResult? {
+        val process = ProcessBuilder("javac", sourceFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+
+        return if (exitCode != 0) {
+            ExecutionResult(
+                output = "",
+                error = output,
+                success = false,
+                state = ProblemSubmitState.COMPILE_ERROR,
+                compilationOutput = output
+            )
+        } else null
+    }
+
 
 }
