@@ -73,10 +73,10 @@ class DockerCodeExecutor(
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
 
-//        compile(sourceFile)?.let { return it }
+        compile(sourceFile)?.let { return it }
         println(sourceFile.name)
 
-        val scriptPath = "/app/cmd/${getFileExtension()}_execute.sh"
+        val scriptPath = "/app/cmd/${getName()}_execute.sh"
 
         val command = listOf(
             "docker", "exec", "--privileged", "${getName()}-judge", "sh", "-c",
@@ -208,13 +208,13 @@ class DockerCodeExecutor(
         return normalizedActual == normalizedExpected && actual != expected
     }
 
-//    private fun compile(sourceFile: File): ExecutionResult? {
-//        return when (request.language) {
-//            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
-//            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
-//            else -> null
-//        }
-//    }
+    private fun compile(sourceFile: File): ExecutionResult? {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
+            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
+            else -> null
+        }
+    }
 
     private fun checkPythonSyntax(sourceFile: File): ExecutionResult? {
         val process = ProcessBuilder("python3", "-m", "py_compile", sourceFile.absolutePath)
@@ -235,24 +235,24 @@ class DockerCodeExecutor(
         } else null
     }
 
-//    private fun compileJava(sourceFile: File): ExecutionResult? {
-//        val process = ProcessBuilder("javac", sourceFile.absolutePath)
-//            .redirectErrorStream(true)
-//            .start()
-//
-//        val output = process.inputStream.bufferedReader().use { it.readText() }
-//        val exitCode = process.waitFor()
-//
-//        return if (exitCode != 0) {
-//            ExecutionResult(
-//                output = "",
-//                error = output,
-//                success = false,
-//                state = ProblemSubmitState.COMPILE_ERROR,
-//                compilationOutput = output
-//            )
-//        } else null
-//    }
+    private fun compileJava(sourceFile: File): ExecutionResult? {
+        val process = ProcessBuilder("javac", sourceFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+
+        return if (exitCode != 0) {
+            ExecutionResult(
+                output = "",
+                error = output,
+                success = false,
+                state = ProblemSubmitState.COMPILE_ERROR,
+                compilationOutput = output
+            )
+        } else null
+    }
 
 
 }
