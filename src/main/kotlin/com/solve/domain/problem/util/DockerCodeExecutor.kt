@@ -5,6 +5,7 @@ import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
+import com.solve.domain.problem.util.CodeExecutor.ExecutionResult
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
@@ -28,6 +29,7 @@ class DockerCodeExecutor(
     )
 
     private val pythonContainerName = "python-judge"
+    private val javaContainerName = "java-judge"
 
     private fun createSourceFile(): File {
         val directory = File(fileProperties.path, "submits").apply {
@@ -35,10 +37,17 @@ class DockerCodeExecutor(
         }
         val restoredCode = request.code.replace("\\n", "\n").replace("\\\"", "\"")
 
-        return File(directory, "${submit.id}.${getFileExtension()}").apply {
+//        return File(directory, "${submit.id}.${getFileExtension()}").apply {
+        return File(directory, "Main.${getFileExtension()}").apply {
             createNewFile()
             writeText(restoredCode)
         }
+    }
+
+    private fun getName() = when (request.language) {
+        ProblemSubmitLanguage.PYTHON -> "python"
+        ProblemSubmitLanguage.JAVA -> "java"
+        else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
     private fun getFileExtension() = when (request.language) {
@@ -50,11 +59,14 @@ class DockerCodeExecutor(
 
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
-        val scriptPath = "/app/cmd/execute.sh"
+
+//        compile(sourceFile)?.let { return it }
+
+        val scriptPath = "/app/cmd/${getFileExtension()}_execute.sh"
 
         val command = listOf(
-            "docker", "exec", "--privileged", pythonContainerName, "sh", "-c",
-            "$scriptPath '${input.replace("'", "'\\''")}' ${sourceFile.name}"
+            "docker", "exec", "--privileged", "${getName()}-judge", "sh", "-c",
+            "$scriptPath '${input.replace("'", "'\\''")}' Main.java"
         )
 
         println("Executing command: $command")
@@ -190,5 +202,52 @@ class DockerCodeExecutor(
 
         return normalizedActual == normalizedExpected && actual != expected
     }
+
+//    private fun compile(sourceFile: File): ExecutionResult? {
+//        return when (request.language) {
+//            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
+//            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
+//            else -> null
+//        }
+//    }
+
+    private fun checkPythonSyntax(sourceFile: File): ExecutionResult? {
+        val process = ProcessBuilder("python3", "-m", "py_compile", sourceFile.absolutePath)
+            .redirectErrorStream(true)
+            .start()
+
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+
+        return if (exitCode != 0) {
+            ExecutionResult(
+                output = "",
+                error = output,
+                success = false,
+                state = ProblemSubmitState.COMPILE_ERROR,
+                compilationOutput = output
+            )
+        } else null
+    }
+
+//    private fun compileJava(sourceFile: File): ExecutionResult? {
+//        val process = ProcessBuilder("javac", sourceFile.absolutePath)
+//            .redirectErrorStream(true)
+//            .start()
+//
+//        val output = process.inputStream.bufferedReader().use { it.readText() }
+//        val exitCode = process.waitFor()
+//
+//        return if (exitCode != 0) {
+//            ExecutionResult(
+//                output = "",
+//                error = output,
+//                success = false,
+//                state = ProblemSubmitState.COMPILE_ERROR,
+//                compilationOutput = output
+//            )
+//        } else null
+//    }
+
 
 }

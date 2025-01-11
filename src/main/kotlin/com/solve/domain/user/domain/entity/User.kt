@@ -128,7 +128,6 @@ class User(
             }
         }
 
-
     val solvedToday: Boolean
         get() = solved.any { it.date == LocalDate.now() }
 
