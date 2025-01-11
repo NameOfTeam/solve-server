@@ -54,11 +54,7 @@ class DockerCodeExecutor(
     }
 
     private fun preprocessCode(language: ProblemSubmitLanguage, code: String): String {
-        return if (language == ProblemSubmitLanguage.JAVA) {
-            code.replace("\\n", "\n").replace("\\\"", "\"")
-        } else {
-            code.replace("\\n", "\n").replace("\\\"", "\"")
-        }
+        return code.replace("\\n", "\n").replace("\\\"", "\"")
     }
 
     private fun getName() = when (request.language) {
