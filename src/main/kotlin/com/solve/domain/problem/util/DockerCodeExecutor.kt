@@ -29,20 +29,33 @@ class DockerCodeExecutor(
     )
 
     private fun createSourceFile(): File {
-        val directory = File(fileProperties.path, "submits").apply {
-            if (!exists()) mkdirs()
-        }
-        val fileName = getExecutionTarget()
+        val directory = getSourceDirectory()
+        val fileName = getSourceFileName()
         return File(directory, fileName).apply {
             createNewFile()
             writeText(preprocessCode(request.language, request.code))
         }
     }
 
+    private fun getSourceDirectory(): File {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> File(fileProperties.path, "submits/${submit.id}").apply { if (!exists()) mkdirs() }
+            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> File(fileProperties.path, "submits").apply { if (!exists()) mkdirs() }
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
+    private fun getSourceFileName(): String {
+        return when (request.language) {
+            ProblemSubmitLanguage.JAVA -> "Main.${getFileExtension()}"
+            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
+            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+        }
+    }
+
     private fun preprocessCode(language: ProblemSubmitLanguage, code: String): String {
         return if (language == ProblemSubmitLanguage.JAVA) {
-            code.replace("public class Main", "public class Submit${submit.id}")
-            .replace("\\n", "\n").replace("\\\"", "\"")
+            code.replace("\\n", "\n").replace("\\\"", "\"")
         } else {
             code.replace("\\n", "\n").replace("\\\"", "\"")
         }
@@ -63,7 +76,7 @@ class DockerCodeExecutor(
 
     private fun getExecutionTarget(): String {
         return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> "Submit${submit.id}.${getFileExtension()}"
+            ProblemSubmitLanguage.JAVA -> "${submit.id}/Main.java"
             ProblemSubmitLanguage.PYTHON -> "${submit.id}.${getFileExtension()}"
             ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
             else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
