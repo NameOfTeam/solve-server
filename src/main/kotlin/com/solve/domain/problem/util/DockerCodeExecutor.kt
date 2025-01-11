@@ -76,7 +76,7 @@ class DockerCodeExecutor(
         compile(sourceFile)?.let { return it }
         println(sourceFile.name)
 
-        val scriptPath = "/app/cmd/${getFileExtension()}_execute.sh"
+        val scriptPath = "/app/cmd/${getName()}_execute.sh"
 
         val command = listOf(
             "docker", "exec", "--privileged", "${getName()}-judge", "sh", "-c",
