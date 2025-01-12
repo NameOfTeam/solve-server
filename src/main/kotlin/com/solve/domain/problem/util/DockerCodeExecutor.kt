@@ -48,7 +48,6 @@ class DockerCodeExecutor(
         val sourceFile = createSourceFile()
 
         compile(sourceFile)?.let { return it }
-//        println(sourceFile.name)
 
         val scriptPath = "/app/cmd/${languageConfig.name}_execute.sh"
 
