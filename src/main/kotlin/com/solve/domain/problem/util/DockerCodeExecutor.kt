@@ -175,34 +175,9 @@ class DockerCodeExecutor(
     }
 
     private fun compile(sourceFile: File): ExecutionResult? {
-        return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
-            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
-            else -> null
-        }
-    }
+        val compileCmd = languageConfig.compileCmd(sourceFile.absolutePath)
 
-    private fun checkPythonSyntax(sourceFile: File): ExecutionResult? {
-        val process = ProcessBuilder("python3", "-m", "py_compile", sourceFile.absolutePath)
-            .redirectErrorStream(true)
-            .start()
-
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        val exitCode = process.waitFor()
-
-        return if (exitCode != 0) {
-            ExecutionResult(
-                output = "",
-                error = output,
-                success = false,
-                state = ProblemSubmitState.COMPILE_ERROR,
-                compilationOutput = output
-            )
-        } else null
-    }
-
-    private fun compileJava(sourceFile: File): ExecutionResult? {
-        val process = ProcessBuilder("javac", sourceFile.absolutePath)
+        val process = ProcessBuilder(compileCmd)
             .redirectErrorStream(true)
             .start()
 
