@@ -48,14 +48,16 @@ class DockerCodeExecutor(
         val sourceFile = createSourceFile()
 
         compile(sourceFile)?.let { return it }
-        println(sourceFile.name)
+//        println(sourceFile.name)
 
         val scriptPath = "/app/cmd/${languageConfig.name}_execute.sh"
 
         val command = listOf(
             "docker", "exec", "--privileged", "${languageConfig.name}-judge", "sh", "-c",
-            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.executionTarget}"
+            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.executionTarget(submit.id!!)}"
         )
+
+//        println("Executing command: $command")
 
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.start()
@@ -67,7 +69,6 @@ class DockerCodeExecutor(
                 lines.forEach { output.append(it).append("\n") }
             }
         }
-
         val errorThread = thread {
             process.errorStream.bufferedReader().useLines { lines ->
                 lines.forEach { error.append(it).append("\n") }
@@ -95,7 +96,7 @@ class DockerCodeExecutor(
 
         // 실제 에러가 아닌 경우 perf 메타데이터로 간주
         if (!isPerfOutput && errorOutput.isNotEmpty()) {
-            println("Error Output: $errorOutput")
+//            println("Error Output: $errorOutput")
             return ExecutionResult(
                 output = "",
                 error = errorOutput,
@@ -110,6 +111,9 @@ class DockerCodeExecutor(
         // Perf 출력 이후의 내용 제거
         var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
         actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
+
+//        println(actualOutput)
+//        println(perfOutput)
 
         val timeUsage = Regex("(\\d+\\.\\d+) seconds time elapsed")
             .find(perfOutput)?.groups?.get(1)?.value?.toDoubleOrNull()?.let {

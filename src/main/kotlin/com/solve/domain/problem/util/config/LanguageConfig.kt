@@ -7,7 +7,7 @@ data class LanguageConfig (
     val name: String,
     val fileName: (submitId: Long) -> String,
     val sourceDirectory: (submitId: Long, basePath: String) -> File,
-    val executionTarget: (String) -> String
+    val executionTarget: (submitId: Long) -> String
 ) {
     companion object {
         val languageConfigs = mapOf(
