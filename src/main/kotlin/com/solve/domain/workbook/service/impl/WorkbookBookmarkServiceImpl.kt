@@ -25,7 +25,8 @@ class WorkbookBookmarkServiceImpl(
 
     @Transactional
     override fun removeWorkbookBookmark(workbookId: Long) {
-        val workbook = workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
+        val workbook =
+            workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
 
         workbook.removeBookmark(user)
