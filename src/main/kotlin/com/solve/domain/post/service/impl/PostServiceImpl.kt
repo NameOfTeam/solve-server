@@ -23,17 +23,21 @@ class PostServiceImpl(
     @Transactional
     override fun createPost(request: PostCreateRequest) {
         val author = security.user
-        val problem = problemRepository.findByIdOrNull(request.problemId) ?: throw CustomException(
-            ProblemError.PROBLEM_NOT_FOUND,
-            request.problemId
-        )
         val post = Post(
             title = request.title,
             content = request.content,
             category = request.category,
             author = author,
-            problem = problem
         )
+
+        request.problemId?.let {
+            val problem = problemRepository.findByIdOrNull(it) ?: throw CustomException(
+                ProblemError.PROBLEM_NOT_FOUND,
+                it
+            )
+
+            post.problem = problem
+        }
 
         postRepository.save(post)
     }

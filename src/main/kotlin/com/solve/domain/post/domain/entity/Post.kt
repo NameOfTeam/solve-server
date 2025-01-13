@@ -28,8 +28,8 @@ class Post(
     val category: PostCategory,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id", nullable = false)
-    val problem: Problem,
+    @JoinColumn(name = "problem_id")
+    var problem: Problem? = null,
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     val likes: MutableSet<PostLike> = mutableSetOf(),
