@@ -5,7 +5,7 @@ import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
-import com.solve.domain.problem.util.CodeExecutor.ExecutionResult
+import com.solve.domain.problem.util.config.LanguageConfig
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
@@ -28,71 +28,35 @@ class DockerCodeExecutor(
         val memoryUsage: Long = 0,
     )
 
+    private val languageConfig: LanguageConfig = LanguageConfig.LANGUAGE_CONFIGS[request.language]
+        ?: throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+
     private fun createSourceFile(): File {
-        val directory = getSourceDirectory()
-        val fileName = getSourceFileName()
+        val directory = languageConfig.getSourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
+        val fileName = languageConfig.fileName
         return File(directory, fileName).apply {
             createNewFile()
-            writeText(preprocessCode(request.language, request.code))
+            writeText(preprocessCode(request.code))
         }
     }
 
-    private fun getSourceDirectory(): File {
-        return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> File(fileProperties.path, "submits/${submit.id}").apply { if (!exists()) mkdirs() }
-            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> File(fileProperties.path, "submits").apply { if (!exists()) mkdirs() }
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }
-    }
-
-    private fun getSourceFileName(): String {
-        return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> "Main.${getFileExtension()}"
-            ProblemSubmitLanguage.PYTHON, ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }
-    }
-
-    private fun preprocessCode(language: ProblemSubmitLanguage, code: String): String {
+    private fun preprocessCode(code: String): String {
         return code.replace("\\n", "\n").replace("\\\"", "\"")
-    }
-
-    private fun getName() = when (request.language) {
-        ProblemSubmitLanguage.PYTHON -> "python"
-        ProblemSubmitLanguage.JAVA -> "java"
-        else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-    }
-
-    private fun getFileExtension() = when (request.language) {
-        ProblemSubmitLanguage.PYTHON -> "py"
-        ProblemSubmitLanguage.JAVA -> "java"
-        ProblemSubmitLanguage.C -> "c"
-        else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-    }
-
-    private fun getExecutionTarget(): String {
-        return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> "${submit.id}/Main.java"
-            ProblemSubmitLanguage.PYTHON -> "${submit.id}.${getFileExtension()}"
-            ProblemSubmitLanguage.C -> "${submit.id}.${getFileExtension()}"
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }
     }
 
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
         val sourceFile = createSourceFile()
 
         compile(sourceFile)?.let { return it }
-        println(sourceFile.name)
 
-        val scriptPath = "/app/cmd/${getName()}_execute.sh"
+        val scriptPath = "/app/cmd/${languageConfig.name}_execute.sh"
 
         val command = listOf(
-            "docker", "exec", "--privileged", "${getName()}-judge", "sh", "-c",
-            "$scriptPath '${input.replace("'", "'\\''")}' ${getExecutionTarget()}"
+            "docker", "exec", "--privileged", "${languageConfig.name}-judge", "sh", "-c",
+            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.getExecutionTarget(submit.id!!)}"
         )
 
-        println("Executing command: $command")
+//        println("Executing command: $command")
 
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.start()
@@ -131,7 +95,7 @@ class DockerCodeExecutor(
 
         // 실제 에러가 아닌 경우 perf 메타데이터로 간주
         if (!isPerfOutput && errorOutput.isNotEmpty()) {
-            println("Error Output: $errorOutput")
+//            println("Error Output: $errorOutput")
             return ExecutionResult(
                 output = "",
                 error = errorOutput,
@@ -147,24 +111,17 @@ class DockerCodeExecutor(
         var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
         actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
 
-        // 실행 시간 측정
-        val timeRegex = Regex("(\\d+\\.\\d+) seconds time elapsed")
-        val timeMatch = timeRegex.find(perfOutput)
+//        println(actualOutput)
+//        println(perfOutput)
 
-        val timeUsage = timeMatch?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
-            (it * 1000).toInt().toLong()
-        } ?: -1
+        val timeUsage = Regex("(\\d+\\.\\d+) seconds time elapsed")
+            .find(perfOutput)?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
+                (it * 1000).toInt().toLong()
+            } ?: -1
 
-        // 메모리 사용량 측정
-        val memoryRegex = Regex("Memory Usage: (\\d+) KB")
-        val memoryMatch = memoryRegex.find(entireOutput)
-        val memoryUsageKB = memoryMatch?.groups?.get(1)?.value?.toLongOrNull() ?: 0
+        val memoryUsage = Regex("Memory Usage: (\\d+) KB")
+            .find(entireOutput)?.groups?.get(1)?.value?.toLongOrNull() ?: 0
 
-        println("entireOutput: $entireOutput")
-        println("actualOutput: $actualOutput")
-        println("MemoryKB Usage: ${memoryUsageKB}KB")
-
-        // 출력 비교
         if (hasPresentationError(actualOutput, expectedOutput)) {
             return ExecutionResult(
                 output = actualOutput,
@@ -172,7 +129,7 @@ class DockerCodeExecutor(
                 success = false,
                 state = ProblemSubmitState.PRESENTATION_ERROR,
                 timeUsage = timeUsage,
-                memoryUsage = memoryUsageKB,
+                memoryUsage = memoryUsage,
             )
         }
 
@@ -183,7 +140,7 @@ class DockerCodeExecutor(
                 success = false,
                 state = ProblemSubmitState.WRONG_ANSWER,
                 timeUsage = timeUsage,
-                memoryUsage = memoryUsageKB,
+                memoryUsage = memoryUsage,
             )
         }
 
@@ -193,7 +150,7 @@ class DockerCodeExecutor(
             success = true,
             state = ProblemSubmitState.ACCEPTED,
             timeUsage = timeUsage,
-            memoryUsage = memoryUsageKB,
+            memoryUsage = memoryUsage,
         )
     }
 
@@ -262,6 +219,4 @@ class DockerCodeExecutor(
             )
         } else null
     }
-
-
 }
