@@ -28,6 +28,12 @@ data class LanguageConfig (
                 fileName = "main.c",
                 getSourceDirectory = { submitId, basePath -> File(basePath, "submits/$submitId") },
                 getExecutionTarget = { submitId -> "$submitId/main.c" }
+            ),
+            ProblemSubmitLanguage.NODE_JS to LanguageConfig(
+                name = "node",
+                fileName = "main.js",
+                getSourceDirectory = { submitId, basePath -> File(basePath, "submits/$submitId") },
+                getExecutionTarget = { submitId -> "$submitId/main.js" }
             )
         )
     }

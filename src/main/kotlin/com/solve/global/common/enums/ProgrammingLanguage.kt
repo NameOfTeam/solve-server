@@ -7,6 +7,6 @@ enum class ProgrammingLanguage {
     C,
     CPP,
     CSHARP,
-    JAVASCRIPT,
+    NODE_JS,
     SWIFT,
 }
