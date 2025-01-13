@@ -31,7 +31,7 @@ class PostSearchServiceImpl(
         content = content,
         category = category,
         author = PostAuthorResponse.of(author),
-        problem = PostProblemResponse.of(problem),
+        problem = problem?.let { PostProblemResponse.of(it) },
         language = language,
         likeCount = likes.size.toLong(),
         isLiked = securityHolder.isAuthenticated && likes.any { it.user == securityHolder.user },
