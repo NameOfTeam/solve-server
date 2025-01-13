@@ -28,12 +28,12 @@ class DockerCodeExecutor(
         val memoryUsage: Long = 0,
     )
 
-    private val languageConfig: LanguageConfig = LanguageConfig.languageConfigs[request.language]
+    private val languageConfig: LanguageConfig = LanguageConfig.LANGUAGE_CONFIGS[request.language]
         ?: throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
 
     private fun createSourceFile(): File {
-        val directory = languageConfig.sourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
-        val fileName = languageConfig.fileName(submit.id)
+        val directory = languageConfig.getSourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
+        val fileName = languageConfig.fileName
         return File(directory, fileName).apply {
             createNewFile()
             writeText(preprocessCode(request.code))
@@ -53,7 +53,7 @@ class DockerCodeExecutor(
 
         val command = listOf(
             "docker", "exec", "--privileged", "${languageConfig.name}-judge", "sh", "-c",
-            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.executionTarget(submit.id!!)}"
+            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.getExecutionTarget(submit.id!!)}"
         )
 
 //        println("Executing command: $command")
