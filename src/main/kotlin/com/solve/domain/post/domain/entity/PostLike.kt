@@ -2,14 +2,7 @@ package com.solve.domain.post.domain.entity
 
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.entity.BaseTimeEntity
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.Id
-import jakarta.persistence.IdClass
-import jakarta.persistence.Index
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.io.Serializable
 
 @Entity
@@ -31,7 +24,7 @@ class PostLike(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BINARY(16)")
     val user: User
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is PostLike) return false

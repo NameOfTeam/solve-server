@@ -46,7 +46,7 @@ class Post(
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     val comments: MutableSet<PostComment> = mutableSetOf()
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Post) return false

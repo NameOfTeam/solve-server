@@ -33,7 +33,8 @@ data class ProblemResponse(
             memoryLimit = problem.memoryLimit,
             timeLimit = problem.timeLimit,
             tier = problem.tier,
-            solvedCount = problem.submits.filter { it.state == ProblemSubmitState.ACCEPTED }.distinctBy { it.author }.count(),
+            solvedCount = problem.submits.filter { it.state == ProblemSubmitState.ACCEPTED }.distinctBy { it.author }
+                .count(),
             examples = problem.examples.map { ProblemExampleResponse.of(it) },
             author = ProblemAuthorResponse.of(problem.author),
             correctRate = (problem.submits.map { it.state }

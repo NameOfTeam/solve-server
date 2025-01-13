@@ -12,5 +12,6 @@ interface AdminProblemTestCaseService {
         testCaseId: Long,
         request: AdminProblemTestCaseUpdateRequest
     )
+
     fun removeProblemTestCase(problemId: Long, testCaseId: Long)
 }

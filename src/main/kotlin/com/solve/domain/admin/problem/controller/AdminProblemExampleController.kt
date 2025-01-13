@@ -1,8 +1,8 @@
 package com.solve.domain.admin.problem.controller
 
 import com.solve.domain.admin.problem.dto.request.AdminProblemExampleCreateRequest
-import com.solve.domain.admin.problem.service.AdminProblemExampleService
 import com.solve.domain.admin.problem.dto.request.AdminProblemExampleUpdateRequest
+import com.solve.domain.admin.problem.service.AdminProblemExampleService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -22,7 +22,10 @@ class AdminProblemExampleController(
 
     @Operation(summary = "문제 예시 입출력 추가", description = "문제에 예시 입출력를 추가합니다.")
     @PostMapping
-    fun addProblemExample(@PathVariable problemId: Long, @Valid @RequestBody request: AdminProblemExampleCreateRequest) =
+    fun addProblemExample(
+        @PathVariable problemId: Long,
+        @Valid @RequestBody request: AdminProblemExampleCreateRequest
+    ) =
         BaseResponse.of(adminProblemExampleService.addProblemExample(problemId, request))
 
     @Operation(summary = "문제 예시 입출력 수정", description = "문제의 예시 입출력를 수정합니다.")

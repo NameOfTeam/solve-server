@@ -43,7 +43,7 @@ class Workbook(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

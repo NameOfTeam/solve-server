@@ -1,9 +1,8 @@
 package com.solve.domain.problem.util.config
 
 import com.solve.global.common.enums.ProgrammingLanguage
-import java.io.File
 
-data class LanguageConfig (
+data class LanguageConfig(
     val name: String,
     val fileName: String,
 ) {

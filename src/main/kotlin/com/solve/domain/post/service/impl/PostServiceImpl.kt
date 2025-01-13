@@ -19,7 +19,7 @@ class PostServiceImpl(
     private val security: SecurityHolder,
     private val problemRepository: ProblemRepository,
     private val postRepository: PostRepository
-): PostService {
+) : PostService {
     @Transactional
     override fun createPost(request: PostCreateRequest) {
         val author = security.user

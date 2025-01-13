@@ -21,7 +21,7 @@ class EmailVerification(
 
     @Column(name = "is_verified", nullable = false)
     var isVerified: Boolean = false
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is EmailVerification) return false

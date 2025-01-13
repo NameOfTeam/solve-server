@@ -1,8 +1,8 @@
 package com.solve.domain.user.domain.entity
 
 import com.solve.domain.user.domain.enums.UserRole
-import com.solve.global.common.enums.Tier
 import com.solve.global.common.entity.BaseTimeEntity
+import com.solve.global.common.enums.Tier
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
 import java.time.LocalDate
