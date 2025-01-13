@@ -14,7 +14,7 @@ data class PostResponse(
     val category: PostCategory,
     val language: ProgrammingLanguage?,
     val author: PostAuthorResponse,
-    val problem: PostProblemResponse,
+    val problem: PostProblemResponse?,
     val likeCount: Long,
     val isLiked: Boolean,
     val createdAt: LocalDateTime,
