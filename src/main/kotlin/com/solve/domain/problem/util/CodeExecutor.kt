@@ -1,7 +1,7 @@
 package com.solve.domain.problem.util
 
 import com.solve.domain.problem.domain.entity.ProblemSubmit
-import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
+import com.solve.global.common.enums.ProgrammingLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
@@ -42,20 +42,20 @@ class CodeExecutor(
     }
 
     private fun getFileExtension() = when (request.language) {
-        ProblemSubmitLanguage.PYTHON -> "py"
-        ProblemSubmitLanguage.JAVA -> "java"
-        ProblemSubmitLanguage.KOTLIN -> "kt"
-        ProblemSubmitLanguage.C -> "c"
-        ProblemSubmitLanguage.CPP -> "cpp"
-        ProblemSubmitLanguage.CSHARP -> "cs"
-        ProblemSubmitLanguage.JAVASCRIPT -> "js"
+        ProgrammingLanguage.PYTHON -> "py"
+        ProgrammingLanguage.JAVA -> "java"
+        ProgrammingLanguage.KOTLIN -> "kt"
+        ProgrammingLanguage.C -> "c"
+        ProgrammingLanguage.CPP -> "cpp"
+        ProgrammingLanguage.CSHARP -> "cs"
+        ProgrammingLanguage.JAVASCRIPT -> "js"
         else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
     private fun compile(sourceFile: File): ExecutionResult? {
         return when (request.language) {
-            ProblemSubmitLanguage.JAVA -> compileJava(sourceFile)
-            ProblemSubmitLanguage.PYTHON -> checkPythonSyntax(sourceFile)
+            ProgrammingLanguage.JAVA -> compileJava(sourceFile)
+            ProgrammingLanguage.PYTHON -> checkPythonSyntax(sourceFile)
             else -> null
         }
     }
@@ -104,8 +104,8 @@ class CodeExecutor(
         compile(sourceFile)?.let { return it }
 
         val process = when (request.language) {
-            ProblemSubmitLanguage.PYTHON -> ProcessBuilder("python3", sourceFile.absolutePath)
-            ProblemSubmitLanguage.JAVA -> ProcessBuilder(
+            ProgrammingLanguage.PYTHON -> ProcessBuilder("python3", sourceFile.absolutePath)
+            ProgrammingLanguage.JAVA -> ProcessBuilder(
                 "java",
                 "-cp",
                 sourceFile.parent,

@@ -1,6 +1,6 @@
 package com.solve.domain.problem.domain.entity
 
-import com.solve.domain.problem.domain.enums.ProblemSubmitLanguage
+import com.solve.global.common.enums.ProgrammingLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.domain.enums.ProblemSubmitVisibility
 import com.solve.domain.user.domain.entity.User
@@ -31,7 +31,7 @@ class ProblemSubmit(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
-    val language: ProblemSubmitLanguage,
+    val language: ProgrammingLanguage,
 
     @Column(name = "memory_usage")
     var memoryUsage: Long? = null,
