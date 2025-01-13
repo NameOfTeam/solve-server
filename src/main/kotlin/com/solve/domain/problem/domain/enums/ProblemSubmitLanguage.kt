@@ -7,6 +7,6 @@ enum class ProblemSubmitLanguage {
     C,
     CPP,
     CSHARP,
-    JAVASCRIPT,
+    NODE_JS,
     SWIFT,
 }
