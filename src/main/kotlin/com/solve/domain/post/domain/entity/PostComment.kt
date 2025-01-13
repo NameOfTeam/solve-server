@@ -34,7 +34,7 @@ class PostComment(
         orphanRemoval = true
     )
     val likes: MutableSet<PostCommentLike> = mutableSetOf()
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is PostComment) return false
