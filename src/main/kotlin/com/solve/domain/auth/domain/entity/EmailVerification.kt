@@ -21,4 +21,15 @@ class EmailVerification(
 
     @Column(name = "is_verified", nullable = false)
     var isVerified: Boolean = false
-): BaseTimeEntity()
+): BaseTimeEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is EmailVerification) return false
+        if (id == null || other.id == null) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+}
