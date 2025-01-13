@@ -56,7 +56,7 @@ class DockerCodeExecutor(
             "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.getExecutionTarget(submit.id!!)}"
         )
 
-        println("Executing command: $command")
+//        println("Executing command: $command")
 
         val processBuilder = ProcessBuilder(command)
         val process = processBuilder.start()
@@ -95,7 +95,7 @@ class DockerCodeExecutor(
 
         // 실제 에러가 아닌 경우 perf 메타데이터로 간주
         if (!isPerfOutput && errorOutput.isNotEmpty()) {
-            println("Error Output: $errorOutput")
+//            println("Error Output: $errorOutput")
             return ExecutionResult(
                 output = "",
                 error = errorOutput,
@@ -111,8 +111,8 @@ class DockerCodeExecutor(
         var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
         actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
 
-        println(actualOutput)
-        println(perfOutput)
+//        println(actualOutput)
+//        println(perfOutput)
 
         val timeUsage = Regex("(\\d+\\.\\d+) seconds time elapsed")
             .find(perfOutput)?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
