@@ -32,7 +32,7 @@ class DockerCodeExecutor(
         ?: throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
 
     private fun createSourceFile(): File {
-        val directory = languageConfig.getSourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
+        val directory = getSourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
         val fileName = languageConfig.fileName
         return File(directory, fileName).apply {
             createNewFile()
@@ -214,5 +214,9 @@ class DockerCodeExecutor(
                 compilationOutput = output
             )
         } else null
+    }
+
+    private fun getSourceDirectory(submitId: Long, path: String): File {
+        return File(path, "submits/$submitId")
     }
 }
