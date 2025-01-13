@@ -29,7 +29,7 @@ class ProblemExample(
     @JoinColumn(name = "problem_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     val problem: Problem
-): BaseTimeEntity() {
+) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ProblemExample) return false
