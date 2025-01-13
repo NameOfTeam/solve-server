@@ -58,7 +58,7 @@ class AuthServiceImpl(
             request.email
         )
 
-        if (!user.verified) throw CustomException(UserError.USER_NOT_VERIFIED)
+        if (!user.isVerified) throw CustomException(UserError.USER_NOT_VERIFIED)
 
         if (!passwordEncoder.matches(
                 request.password,
@@ -132,7 +132,7 @@ class AuthServiceImpl(
         val emailVerification = emailVerificationRepository.findByVerificationToken(token)
             ?: throw CustomException(AuthError.INVALID_VERIFICATION_TOKEN)
 
-        if (emailVerification.verified) {
+        if (emailVerification.isVerified) {
             throw CustomException(AuthError.ALREADY_VERIFIED)
         }
 
@@ -143,10 +143,10 @@ class AuthServiceImpl(
         val user = userRepository.findByEmail(emailVerification.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
-        emailVerification.verified = true
+        emailVerification.isVerified = true
         emailVerificationRepository.save(emailVerification)
 
-        user.verified = true
+        user.isVerified = true
         userRepository.save(user)
 
         val directory = Paths.get(fileProperties.path, "avatars").toFile()
@@ -168,12 +168,12 @@ class AuthServiceImpl(
     @Transactional
     fun deleteExpiredVerificationTokens() {
         val expiredVerifications =
-            emailVerificationRepository.findAllByExpiredAtBeforeAndVerifiedFalse(LocalDateTime.now())
+            emailVerificationRepository.findAllByExpiredAtBeforeAndIsVerifiedFalse(LocalDateTime.now())
 
         for (verification in expiredVerifications) {
             val user = userRepository.findByEmail(verification.email) ?: continue
 
-            if (!user.verified) {
+            if (!user.isVerified) {
                 userRepository.delete(user)
             }
 

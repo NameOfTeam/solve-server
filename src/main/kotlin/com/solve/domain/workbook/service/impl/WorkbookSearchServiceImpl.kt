@@ -41,8 +41,8 @@ class WorkbookSearchServiceImpl(
             val user = securityHolder.user
 
             progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
-            liked = likes.any { it.user == user }
-            bookmarked = bookmarks.any { it.user == user }
+            isLiked = likes.any { it.user == user }
+            isBookmarked = bookmarks.any { it.user == user }
         }
     }
 }

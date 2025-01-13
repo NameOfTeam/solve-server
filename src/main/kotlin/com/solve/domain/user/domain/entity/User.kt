@@ -26,8 +26,8 @@ class User(
     @Column(name = "introduction")
     var introduction: String? = null,
 
-    @Column(name = "verified", nullable = false)
-    var verified: Boolean = false,
+    @Column(name = "is_verified", nullable = false)
+    var isVerified: Boolean = false,
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val solved: MutableSet<UserSolved> = mutableSetOf(),

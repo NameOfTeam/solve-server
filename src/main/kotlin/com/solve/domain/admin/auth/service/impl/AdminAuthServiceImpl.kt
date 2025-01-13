@@ -38,7 +38,7 @@ class AdminAuthServiceImpl(
                 email = request.email,
                 password = passwordEncoder.encode(request.password),
                 role = UserRole.ADMIN,
-                verified = true
+                isVerified = true
             )
         )
 

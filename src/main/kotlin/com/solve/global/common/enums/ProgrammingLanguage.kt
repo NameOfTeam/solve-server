@@ -1,6 +1,6 @@
-package com.solve.domain.problem.domain.enums
+package com.solve.global.common.enums
 
-enum class ProblemSubmitLanguage {
+enum class ProgrammingLanguage {
     JAVA,
     KOTLIN,
     PYTHON,

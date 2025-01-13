@@ -18,5 +18,10 @@ class SecurityHolderImpl(
         get() = userRepository.findByEmail(email) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL, email)
 
     override val isAuthenticated: Boolean
-        get() = email != "anonymousUser"
+        get() {
+            val authentication = SecurityContextHolder.getContext().authentication
+            return authentication != null &&
+                    authentication.isAuthenticated &&
+                    authentication.name != "anonymousUser"
+        }
 }
