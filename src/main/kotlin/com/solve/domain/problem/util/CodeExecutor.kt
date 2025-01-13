@@ -48,7 +48,7 @@ class CodeExecutor(
         ProgrammingLanguage.C -> "c"
         ProgrammingLanguage.CPP -> "cpp"
         ProgrammingLanguage.CSHARP -> "cs"
-        ProgrammingLanguage.JAVASCRIPT -> "js"
+        ProgrammingLanguage.NODE_JS -> "js"
         else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
     }
 
