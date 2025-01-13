@@ -15,7 +15,7 @@ data class UserMeResponse(
     val streak: Int,
     val maxStreak: Int,
     var grass: Map<LocalDate, Int>,
-    val solvedToday: Boolean = false,
+    val isSolvedToday: Boolean = false,
     val solvedCount: Int,
     val connections: List<UserMeConnectionResponse>,
     val createdAt: LocalDateTime,
@@ -32,7 +32,7 @@ data class UserMeResponse(
             maxStreak = me.maxStreak,
             grass = me.grass,
             solvedCount = me.solvedCount,
-            solvedToday = me.solvedToday,
+            isSolvedToday = me.solvedToday,
             connections = me.connections.map { UserMeConnectionResponse.of(it) },
             createdAt = me.createdAt,
             updatedAt = me.updatedAt
