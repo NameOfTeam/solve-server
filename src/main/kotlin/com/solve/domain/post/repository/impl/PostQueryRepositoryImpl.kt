@@ -8,7 +8,6 @@ import com.solve.domain.post.domain.enums.PostCategory
 import com.solve.domain.post.repository.PostQueryRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 class PostQueryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
-): PostQueryRepository {
+) : PostQueryRepository {
     private val post = QPost.post
 
     @Transactional(readOnly = true)
