@@ -28,8 +28,11 @@ data class LanguageConfig (
             ProgrammingLanguage.NODE_JS to LanguageConfig(
                 name = "node",
                 fileName = "main.js",
+            ),
+            ProgrammingLanguage.KOTLIN to LanguageConfig(
+                name = "kotlin",
+                fileName = "main.kt",
             )
         )
     }
-
 }

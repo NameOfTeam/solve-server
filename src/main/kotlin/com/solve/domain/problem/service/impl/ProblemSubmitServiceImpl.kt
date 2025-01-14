@@ -11,7 +11,6 @@ import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
 import com.solve.domain.problem.service.ProblemSubmitService
-import com.solve.domain.problem.util.CodeExecutor
 import com.solve.domain.problem.util.DockerCodeExecutor
 import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.repository.UserRepository
