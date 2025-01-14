@@ -45,7 +45,7 @@ class ProblemCodeServiceImpl(
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     override fun getCode(problemId: Long): ProblemCodeResponse {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
@@ -58,6 +58,7 @@ class ProblemCodeServiceImpl(
         return ProblemCodeResponse.of(code)
     }
 
+    @Transactional(readOnly = true)
     override fun deleteCode(problemId: Long) {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
