@@ -31,7 +31,7 @@ class ProblemServiceImpl(
     @Transactional(readOnly = true)
     override fun getProblem(problemId: Long): ProblemResponse {
         val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
 
         return ProblemResponse.ofMe(problem)
     }
