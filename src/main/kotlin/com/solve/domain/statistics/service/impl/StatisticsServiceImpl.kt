@@ -4,9 +4,9 @@ import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.statistics.dto.response.StatisticsResponse
 import com.solve.domain.statistics.service.StatisticsService
+import com.solve.global.common.enums.Tier
 import com.solve.domain.user.repository.UserRepository
 import com.solve.domain.workbook.repository.WorkbookRepository
-import com.solve.global.common.enums.Tier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

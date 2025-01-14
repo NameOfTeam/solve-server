@@ -12,6 +12,5 @@ interface AdminProblemExampleService {
         exampleId: Long,
         request: AdminProblemExampleUpdateRequest
     )
-
     fun removeProblemExample(problemId: Long, exampleId: Long)
 }

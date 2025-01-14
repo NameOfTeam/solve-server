@@ -17,13 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 class WorkbookSearchServiceImpl(
     private val workbookQueryRepository: WorkbookQueryRepository,
     private val securityHolder: SecurityHolder
-) : WorkbookSearchService {
+): WorkbookSearchService {
     @Transactional(readOnly = true)
-    override fun searchWorkbook(
-        query: String,
-        filter: WorkbookSearchFilter?,
-        pageable: Pageable
-    ): Page<WorkbookResponse> {
+    override fun searchWorkbook(query: String, filter: WorkbookSearchFilter?, pageable: Pageable): Page<WorkbookResponse> {
         val workbooks = workbookQueryRepository.searchWorkbook(query, filter, pageable)
 
         return workbooks.map { it.toResponse() }

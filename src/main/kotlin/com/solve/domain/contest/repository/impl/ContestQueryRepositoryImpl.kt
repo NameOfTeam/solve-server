@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 @Repository
 class ContestQueryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
-) : ContestQueryRepository {
+): ContestQueryRepository {
     private val contest = QContest.contest
 
     @Transactional(readOnly = true)

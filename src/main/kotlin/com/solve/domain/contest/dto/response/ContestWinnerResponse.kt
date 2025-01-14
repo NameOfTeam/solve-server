@@ -1,7 +1,7 @@
 package com.solve.domain.contest.dto.response
 
 import com.solve.domain.user.domain.entity.User
-import java.util.*
+import java.util.UUID
 
 data class ContestWinnerResponse(
     val id: UUID,

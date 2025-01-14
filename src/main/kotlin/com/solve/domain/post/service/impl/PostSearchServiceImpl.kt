@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class PostSearchServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postQueryRepository: PostQueryRepository
-) : PostSearchService {
+): PostSearchService {
     @Transactional(readOnly = true)
     override fun searchPost(query: String, category: PostCategory?, pageable: Pageable): Page<PostResponse> {
         val posts = postQueryRepository.searchPost(query, category, pageable)

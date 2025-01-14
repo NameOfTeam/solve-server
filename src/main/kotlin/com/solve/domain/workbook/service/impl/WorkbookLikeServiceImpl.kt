@@ -10,14 +10,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class WorkbookLikeServiceImpl(
-    private val workbookRepository: WorkbookRepository,
-    private val securityHolder: SecurityHolder
-) : WorkbookLikeService {
+class WorkbookLikeServiceImpl(private val workbookRepository: WorkbookRepository, private val securityHolder: SecurityHolder) : WorkbookLikeService {
     @Transactional
     override fun addWorkbookLike(workbookId: Long) {
-        val workbook =
-            workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
+        val workbook = workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
 
         workbook.addLike(user)
@@ -25,8 +21,7 @@ class WorkbookLikeServiceImpl(
 
     @Transactional
     override fun removeWorkbookLike(workbookId: Long) {
-        val workbook =
-            workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
+        val workbook = workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
 
         workbook.removeLike(user)

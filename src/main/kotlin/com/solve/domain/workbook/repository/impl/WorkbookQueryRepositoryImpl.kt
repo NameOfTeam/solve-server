@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class WorkbookQueryRepositoryImpl(
     private val securityHolder: SecurityHolder,
     private val queryFactory: JPAQueryFactory
-) : WorkbookQueryRepository {
+): WorkbookQueryRepository {
     private val workbook = QWorkbook.workbook
     private val bookmark = QWorkbookBookmark.workbookBookmark
     private val like = QWorkbookLike.workbookLike
@@ -54,9 +54,7 @@ class WorkbookQueryRepositoryImpl(
         return PageImpl(workbooks, pageable, totalCount)
     }
 
-    private fun containsSearchKeyword(query: String): BooleanExpression? =
-        if (query.isNotBlank()) workbook.title.containsIgnoreCase(query)
-            .or(workbook.description.containsIgnoreCase(query)) else null
+    private fun containsSearchKeyword(query: String): BooleanExpression? = if (query.isNotBlank()) workbook.title.containsIgnoreCase(query).or(workbook.description.containsIgnoreCase(query)) else null
 
     private fun filterByBookmark(filter: WorkbookSearchFilter?): BooleanExpression? =
         if (filter == WorkbookSearchFilter.BOOKMARKED && securityHolder.isAuthenticated) {
@@ -75,7 +73,6 @@ class WorkbookQueryRepositoryImpl(
                     .groupBy(workbook)
                     .orderBy(like.count().desc())
             }
-
             else -> {
                 query.orderBy(workbook._createdAt.desc())
             }

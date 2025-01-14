@@ -54,8 +54,7 @@ class AdminWorkbookServiceImpl(
 
     @Transactional
     override fun deleteWorkbook(workbookId: Long) {
-        val workbook =
-            workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
+        val workbook = workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
 
         workbookRepository.delete(workbook)
     }

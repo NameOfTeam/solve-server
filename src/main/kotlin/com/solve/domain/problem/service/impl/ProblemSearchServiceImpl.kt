@@ -1,7 +1,7 @@
 package com.solve.domain.problem.service.impl
 
-import com.solve.domain.problem.domain.enums.ProblemSearchOrder
 import com.solve.domain.problem.domain.enums.ProblemSearchState
+import com.solve.domain.problem.domain.enums.ProblemSearchOrder
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.repository.ProblemQueryRepository
 import com.solve.domain.problem.service.ProblemSearchService
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProblemSearchServiceImpl(
     private val problemQueryRepository: ProblemQueryRepository
-) : ProblemSearchService {
+): ProblemSearchService {
     @Transactional(readOnly = true)
     override fun searchProblem(
         query: String,
@@ -23,7 +23,6 @@ class ProblemSearchServiceImpl(
         order: ProblemSearchOrder,
         pageable: Pageable
     ): Page<ProblemResponse> {
-        return problemQueryRepository.searchProblem(query, states, tiers, order, pageable)
-            .map { ProblemResponse.of(it) }
+        return problemQueryRepository.searchProblem(query, states, tiers, order, pageable).map { ProblemResponse.of(it) }
     }
 }

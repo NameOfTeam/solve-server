@@ -8,13 +8,7 @@ import com.solve.global.common.enums.ProgrammingLanguage
 import jakarta.persistence.*
 
 @Entity
-@Table(
-    name = "posts",
-    indexes = [
-        Index(name = "idx_post_author", columnList = "author_id"),
-        Index(name = "idx_post_problem", columnList = "problem_id")
-    ]
-)
+@Table(name = "posts")
 class Post(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -45,16 +39,5 @@ class Post(
     val author: User,
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val comments: MutableSet<PostComment> = mutableSetOf()
-) : BaseTimeEntity() {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Post) return false
-        if (id == null || other.id == null) return false
-        return id == other.id
-    }
-
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
-}
+    val comments: MutableList<PostComment> = mutableListOf()
+): BaseTimeEntity()

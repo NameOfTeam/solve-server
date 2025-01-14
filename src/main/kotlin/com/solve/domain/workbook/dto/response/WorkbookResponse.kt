@@ -1,6 +1,7 @@
 package com.solve.domain.workbook.dto.response
 
 import com.solve.domain.user.domain.entity.User
+import com.solve.domain.workbook.domain.entity.Workbook
 import com.solve.domain.workbook.domain.entity.WorkbookProblem
 import java.time.LocalDateTime
 

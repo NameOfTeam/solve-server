@@ -16,11 +16,9 @@ class AdminUserConnectionController(
 ) {
     @Operation(summary = "사용자 연결 추가")
     @PostMapping
-    fun addUserConnection(@PathVariable userId: UUID, @RequestBody request: AdminUserConnectionAddRequest) =
-        BaseResponse.of(adminUserConnectionService.addUserConnection(userId, request), 201)
+    fun addUserConnection(@PathVariable userId: UUID, @RequestBody request: AdminUserConnectionAddRequest) = BaseResponse.of(adminUserConnectionService.addUserConnection(userId, request), 201)
 
     @Operation(summary = "사용자 연결 삭제")
     @DeleteMapping("/{connectionId}")
-    fun removeUserConnection(@PathVariable userId: UUID, @PathVariable connectionId: UUID) =
-        BaseResponse.of(adminUserConnectionService.removeUserConnection(userId, connectionId), 204)
+    fun removeUserConnection(@PathVariable userId: UUID, @PathVariable connectionId: UUID) = BaseResponse.of(adminUserConnectionService.removeUserConnection(userId, connectionId), 204)
 }

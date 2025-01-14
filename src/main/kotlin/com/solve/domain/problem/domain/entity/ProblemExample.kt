@@ -6,38 +6,22 @@ import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 
 @Entity
-@Table(
-    name = "problem_examples",
-    indexes = [
-        Index(name = "idx_problem_example_problem", columnList = "problem_id")
-    ]
-)
+@Table(name = "problem_examples")
 class ProblemExample(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "input", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "input", nullable = false)
     var input: String,
 
-    @Column(name = "output", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "output", nullable = false)
     var output: String,
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description")
     var description: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id", nullable = false)
+    @JoinColumn(name = "problem", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     val problem: Problem
-) : BaseTimeEntity() {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ProblemExample) return false
-        if (id == null || other.id == null) return false
-        return id == other.id
-    }
-
-    override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
-    }
-}
+): BaseTimeEntity()

@@ -1,8 +1,8 @@
 package com.solve.domain.admin.problem.controller
 
 import com.solve.domain.admin.problem.dto.request.AdminProblemTestCaseCreateRequest
-import com.solve.domain.admin.problem.dto.request.AdminProblemTestCaseUpdateRequest
 import com.solve.domain.admin.problem.service.AdminProblemTestCaseService
+import com.solve.domain.admin.problem.dto.request.AdminProblemTestCaseUpdateRequest
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -22,10 +22,7 @@ class AdminProblemTestCaseController(
 
     @Operation(summary = "문제 테스트 케이스 추가", description = "문제에 테스트 케이스를 추가합니다.")
     @PostMapping
-    fun addProblemTestCase(
-        @PathVariable problemId: Long,
-        @Valid @RequestBody request: AdminProblemTestCaseCreateRequest
-    ) =
+    fun addProblemTestCase(@PathVariable problemId: Long, @Valid @RequestBody request: AdminProblemTestCaseCreateRequest) =
         BaseResponse.of(adminProblemTestCaseService.addProblemTestCase(problemId, request))
 
     @Operation(summary = "문제 테스트 케이스 수정", description = "문제의 테스트 케이스를 수정합니다.")
