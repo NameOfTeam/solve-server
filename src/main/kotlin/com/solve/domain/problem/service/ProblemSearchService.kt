@@ -1,7 +1,7 @@
 package com.solve.domain.problem.service
 
-import com.solve.domain.problem.domain.enums.ProblemSearchState
 import com.solve.domain.problem.domain.enums.ProblemSearchOrder
+import com.solve.domain.problem.domain.enums.ProblemSearchState
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.global.common.enums.Tier
 import org.springframework.data.domain.Page

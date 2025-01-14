@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class PostCommentServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postRepository: PostRepository
-): PostCommentService {
+) : PostCommentService {
     @Transactional
     override fun createComment(postId: Long, request: PostCommentCreateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
@@ -34,7 +34,10 @@ class PostCommentServiceImpl(
     @Transactional
     override fun updateComment(postId: Long, commentId: Long, request: PostCommentUpdateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
+        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(
+            PostCommentError.POST_COMMENT_NOT_FOUND,
+            commentId
+        )
 
         if (comment.author != securityHolder.user)
             throw CustomException(PostCommentError.POST_COMMENT_NOT_AUTHORIZED)
@@ -45,7 +48,10 @@ class PostCommentServiceImpl(
     @Transactional
     override fun deleteComment(postId: Long, commentId: Long) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
+        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(
+            PostCommentError.POST_COMMENT_NOT_FOUND,
+            commentId
+        )
 
         if (comment.author != securityHolder.user)
             throw CustomException(PostCommentError.POST_COMMENT_NOT_AUTHORIZED)

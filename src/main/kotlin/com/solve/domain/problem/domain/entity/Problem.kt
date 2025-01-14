@@ -4,9 +4,16 @@ import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.entity.BaseTimeEntity
 import com.solve.global.common.enums.Tier
 import jakarta.persistence.*
+import org.hibernate.annotations.BatchSize
 
 @Entity
-@Table(name = "problems")
+@Table(
+    name = "problems",
+    indexes = [
+        Index(name = "idx_problem_author", columnList = "author_id"),
+        Index(name = "idx_problem_tier", columnList = "tier")
+    ]
+)
 class Problem(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,22 +41,34 @@ class Problem(
     @Column(name = "tier", nullable = false)
     val tier: Tier,
 
-    @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val examples: MutableSet<ProblemExample> = mutableSetOf(),
 
-    @OneToMany(mappedBy = "problem", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val testCases: MutableSet<ProblemTestCase> = mutableSetOf(),
 
-    @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val contributors: MutableSet<ProblemContributor> = mutableSetOf(),
 
-    @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val submits: MutableSet<ProblemSubmit> = mutableSetOf(),
-
-    @OneToMany(mappedBy = "problem", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val ideas: MutableSet<ProblemIdea> = mutableSetOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,
-) : BaseTimeEntity()
+) : BaseTimeEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Problem) return false
+        if (id == null || other.id == null) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+}

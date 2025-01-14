@@ -35,8 +35,9 @@ class UserMeServiceImpl(
     override fun updateMe(request: UserMeUpdateRequest): UserMeResponse {
         var user = securityHolder.user
 
-        if (request.username != null) user.username = request.username
-        if (request.introduction != null) user.introduction = request.introduction
+        request.username?.let { user.username = it }
+        request.introduction?.let { user.introduction = it }
+        request.gender?.let { user.gender = it }
 
         user = userRepository.save(user)
 

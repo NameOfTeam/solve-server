@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ContestSearchServiceImpl(
     private val contestQueryRepository: ContestQueryRepository
-): ContestSearchService {
+) : ContestSearchService {
     @Transactional(readOnly = true)
     override fun searchContest(query: String, state: ContestSearchState?, pageable: Pageable): Page<ContestResponse> {
         val contests = contestQueryRepository.searchContest(query, state, pageable)

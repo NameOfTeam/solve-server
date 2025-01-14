@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 class ProblemQueryRepositoryImpl(
     private val securityHolder: SecurityHolder,
     private val queryFactory: JPAQueryFactory
-): ProblemQueryRepository {
+) : ProblemQueryRepository {
     private val problem = QProblem.problem
     private val submit = QProblemSubmit.problemSubmit
 
@@ -61,9 +61,12 @@ class ProblemQueryRepositoryImpl(
         return PageImpl(problems, pageable, totalCount)
     }
 
-    private fun containsSearchKeyword(query: String): BooleanExpression? = if (query.isNotBlank()) problem.title.containsIgnoreCase(query).or(problem.content.containsIgnoreCase(query)) else null
+    private fun containsSearchKeyword(query: String): BooleanExpression? =
+        if (query.isNotBlank()) problem.title.containsIgnoreCase(query)
+            .or(problem.content.containsIgnoreCase(query)) else null
 
-    private fun filterByTiers(tiers: List<Tier>): BooleanExpression? = if (tiers.isNotEmpty()) problem.tier.`in`(tiers) else null
+    private fun filterByTiers(tiers: List<Tier>): BooleanExpression? =
+        if (tiers.isNotEmpty()) problem.tier.`in`(tiers) else null
 
     private fun filterByStates(state: List<ProblemSearchState>): BooleanExpression? {
         if (!securityHolder.isAuthenticated) return null

@@ -27,6 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.sksamuel.scrimage:scrimage-core:4.2.0")
     implementation("com.sksamuel.scrimage:scrimage-webp:4.2.0")
+    runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.116.Final")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")

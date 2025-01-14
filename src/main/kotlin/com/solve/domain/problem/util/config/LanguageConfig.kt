@@ -1,9 +1,8 @@
 package com.solve.domain.problem.util.config
 
 import com.solve.global.common.enums.ProgrammingLanguage
-import java.io.File
 
-data class LanguageConfig (
+data class LanguageConfig(
     val name: String,
     val fileName: String,
 ) {
@@ -28,11 +27,8 @@ data class LanguageConfig (
             ProgrammingLanguage.NODE_JS to LanguageConfig(
                 name = "node",
                 fileName = "main.js",
-            ),
-            ProgrammingLanguage.KOTLIN to LanguageConfig(
-                name = "kotlin",
-                fileName = "main.kt",
             )
         )
     }
+
 }

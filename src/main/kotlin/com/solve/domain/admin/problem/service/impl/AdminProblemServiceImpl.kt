@@ -62,12 +62,14 @@ class AdminProblemServiceImpl(
         }
 
         for (example in request.examples) {
-            problem.examples.add(ProblemExample(
-                input = example.input,
-                output = example.output,
-                description = example.description,
-                problem = problem
-            ))
+            problem.examples.add(
+                ProblemExample(
+                    input = example.input,
+                    output = example.output,
+                    description = example.description,
+                    problem = problem
+                )
+            )
         }
 
         problem = problemRepository.save(problem)
