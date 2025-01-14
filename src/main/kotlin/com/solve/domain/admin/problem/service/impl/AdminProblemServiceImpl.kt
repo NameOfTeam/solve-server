@@ -9,6 +9,7 @@ import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.global.common.enums.Tier
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.domain.Pageable
@@ -38,18 +39,16 @@ class AdminProblemServiceImpl(
     @Transactional
     override fun createProblem(request: AdminProblemCreateRequest): AdminProblemResponse {
         val author = securityHolder.user
-        var problem = problemRepository.save(
-            Problem(
+        var problem = Problem(
                 title = request.title,
                 content = request.content,
                 input = request.input,
                 output = request.output,
-                tier = request.tier,
+                tier = Tier.UNRATED,
                 memoryLimit = request.memoryLimit,
                 timeLimit = request.timeLimit,
                 author = author
             )
-        )
 
         for (testCase in request.testCases) {
             problem.testCases.add(
