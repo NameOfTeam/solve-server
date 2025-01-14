@@ -3,6 +3,7 @@ package com.solve.domain.post.service.impl
 import com.solve.domain.post.domain.entity.Post
 import com.solve.domain.post.dto.request.PostCreateRequest
 import com.solve.domain.post.dto.request.PostUpdateRequest
+import com.solve.domain.post.dto.response.PostCreateResponse
 import com.solve.domain.post.error.PostError
 import com.solve.domain.post.repository.PostRepository
 import com.solve.domain.post.service.PostService
@@ -19,11 +20,11 @@ class PostServiceImpl(
     private val security: SecurityHolder,
     private val problemRepository: ProblemRepository,
     private val postRepository: PostRepository
-): PostService {
+) : PostService {
     @Transactional
-    override fun createPost(request: PostCreateRequest) {
+    override fun createPost(request: PostCreateRequest): PostCreateResponse {
         val author = security.user
-        val post = Post(
+        var post = Post(
             title = request.title,
             content = request.content,
             category = request.category,
@@ -39,7 +40,9 @@ class PostServiceImpl(
             post.problem = problem
         }
 
-        postRepository.save(post)
+        post = postRepository.save(post)
+
+        return PostCreateResponse.of(post)
     }
 
     @Transactional

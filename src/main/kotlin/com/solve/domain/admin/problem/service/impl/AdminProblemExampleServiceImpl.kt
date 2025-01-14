@@ -1,10 +1,10 @@
 package com.solve.domain.admin.problem.service.impl
 
 import com.solve.domain.admin.problem.dto.request.AdminProblemExampleCreateRequest
-import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.admin.problem.dto.request.AdminProblemExampleUpdateRequest
 import com.solve.domain.admin.problem.dto.response.AdminProblemExampleResponse
 import com.solve.domain.admin.problem.service.AdminProblemExampleService
+import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.global.error.CustomException

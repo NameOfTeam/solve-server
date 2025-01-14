@@ -1,11 +1,11 @@
 package com.solve.domain.problem.util
 
 import com.solve.domain.problem.domain.entity.ProblemSubmit
-import com.solve.global.common.enums.ProgrammingLanguage
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.util.config.LanguageConfig
+import com.solve.global.common.enums.ProgrammingLanguage
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
@@ -91,7 +91,7 @@ class DockerCodeExecutor(
 
         // 실제 에러가 아닌 경우 perf 메타데이터로 간주
         if (!isPerfOutput && errorOutput.isNotEmpty()) {
-//            println("Error Output: $errorOutput")
+            println("Error Output: $errorOutput")
             return ExecutionResult(
                 output = "",
                 error = errorOutput,
@@ -107,9 +107,8 @@ class DockerCodeExecutor(
         var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
         actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
 
-        println("Actual Output: $actualOutput")
-        println("Expected Output: $expectedOutput")
-//        println(perfOutput)
+        println(actualOutput)
+        println(perfOutput)
 
         val timeUsage = Regex("(\\d+\\.\\d+) seconds time elapsed")
             .find(perfOutput)?.groups?.get(1)?.value?.toDoubleOrNull()?.let {

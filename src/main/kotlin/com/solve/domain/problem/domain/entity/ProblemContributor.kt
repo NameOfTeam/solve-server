@@ -2,9 +2,17 @@ package com.solve.domain.problem.domain.entity
 
 import com.solve.domain.user.domain.entity.User
 import jakarta.persistence.*
+import java.io.Serializable
 
 @Entity
-@Table(name = "problem_contributors")
+@Table(
+    name = "problem_contributors",
+    indexes = [
+        Index(name = "idx_problem_contributor_user", columnList = "user_id"),
+        Index(name = "idx_problem_contributor_problem", columnList = "problem_id")
+    ]
+)
+@IdClass(ProblemContributorId::class)
 class ProblemContributor(
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -13,6 +21,43 @@ class ProblemContributor(
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BINARY(16)")
     val user: User,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProblemContributor) return false
+
+        if (problem.id != other.problem.id) return false
+        if (user.id != other.user.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = problem.id?.hashCode() ?: 0
+        result = 31 * result + (user.id?.hashCode() ?: 0)
+        return result
+    }
+}
+
+class ProblemContributorId(
+    val problem: Long? = null,
+    val user: Long? = null
+) : Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProblemContributorId) return false
+
+        if (problem != other.problem) return false
+        if (user != other.user) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = problem?.hashCode() ?: 0
+        result = 31 * result + (user?.hashCode() ?: 0)
+        return result
+    }
+}
