@@ -36,7 +36,7 @@ class User(
     var introduction: String? = null,
 
     @Column(name = "gender", nullable = false)
-    var gender: String,
+    var gender: String = "",
 
     @Column(name = "is_verified", nullable = false)
     var isVerified: Boolean = false,
