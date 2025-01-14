@@ -7,5 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ProblemCodeRepository : JpaRepository<ProblemCode, Long> {
     fun findByProblemAndUser(problem: Problem, user: User): ProblemCode?
-    fun existsByProblemAndUser(problem: Problem, user: User): Boolean
 }

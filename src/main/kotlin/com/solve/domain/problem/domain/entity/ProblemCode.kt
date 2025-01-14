@@ -13,6 +13,7 @@ class ProblemCode(
     @Column(nullable = false)
     var code: String,
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var language: ProgrammingLanguage,
 

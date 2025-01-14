@@ -1,7 +1,6 @@
 package com.solve.domain.problem.controller
 
 import com.solve.domain.problem.dto.request.ProblemCodeCreateRequest
-import com.solve.domain.problem.dto.request.ProblemCodeUpdateRequest
 import com.solve.domain.problem.service.ProblemCodeService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -21,11 +20,6 @@ class ProblemCodeController(
     @Operation(summary = "코드 불러오기", description = "저장된 코드를 불러옵니다.")
     @GetMapping
     fun getCode(@PathVariable problemId : Long) = problemCodeService.getCode(problemId)
-
-    @Operation(summary = "코드 수정", description = "작성 중인 코드를 수정합니다.")
-    @PatchMapping
-    fun updateCode(@PathVariable problemId: Long, request: ProblemCodeUpdateRequest) =
-        problemCodeService.updateCode(problemId, request)
 
     @Operation(summary = "코드 초기화", description = "저장된 코드를 삭제합니다.")
     @DeleteMapping
