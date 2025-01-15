@@ -37,29 +37,45 @@ class ProblemSearchServiceImpl(
             .map { it.toResponse() }
     }
 
-    private fun Problem.toResponse() = ProblemResponse(
-        id = id!!,
-        title = title,
-        content = content,
-        input = input,
-        output = output,
-        memoryLimit = memoryLimit,
-        timeLimit = timeLimit,
-        tier = tier,
-        solvedCount = submits.filter { it.state == ProblemSubmitState.ACCEPTED }.distinctBy { it.author }
-            .count(),
-        examples = problemExampleRepository.findAllByProblem(this).map { ProblemExampleResponse.of(it) },
-        author = ProblemAuthorResponse.of(author),
-        correctRate = (submits.map { it.state }
-            .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size * 1000).toInt() / 10.0,
-    ).apply {
-        if (!securityHolder.isAuthenticated) return@apply
+    private fun Problem.toResponse(): ProblemResponse {
+        val submits = problemSubmitRepository.findAllByProblem(this)
+        val acceptedSubmits = submits.filter { it.state == ProblemSubmitState.ACCEPTED }
+        val distinctSolvedCount = acceptedSubmits.distinctBy { it.author }.size
+        val correctRate = if (submits.isNotEmpty()) {
+            (acceptedSubmits.size.toDouble() / submits.size * 1000).toInt() / 10.0
+        } else 0.0
 
-        val me = securityHolder.user
-        val submits = problemSubmitRepository.findAllByProblemAndAuthor(this@toResponse, me)
+        return ProblemResponse(
+            id = id!!,
+            title = title,
+            content = content,
+            input = input,
+            output = output,
+            memoryLimit = memoryLimit,
+            timeLimit = timeLimit,
+            tier = tier,
+            solvedCount = distinctSolvedCount,
+            examples = problemExampleRepository.findAllByProblem(this).map { ProblemExampleResponse.of(it) },
+            author = ProblemAuthorResponse.of(author),
+            correctRate = correctRate
+        ).apply {
+            if (!securityHolder.isAuthenticated) return@apply
 
-        if (submits.any { it.state == ProblemSubmitState.ACCEPTED }) state = ProblemSubmitState.ACCEPTED
-        else if (submits.any { it.state == ProblemSubmitState.WRONG_ANSWER || it.state == ProblemSubmitState.RUNTIME_ERROR || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.MEMORY_LIMIT_EXCEEDED || it.state == ProblemSubmitState.TIME_LIMIT_EXCEEDED || it.state == ProblemSubmitState.COMPILE_ERROR }) state =
-            ProblemSubmitState.WRONG_ANSWER
+            val mySubmits = problemSubmitRepository.findAllByProblemAndAuthor(this@toResponse, securityHolder.user)
+
+            if (mySubmits.any { it.state == ProblemSubmitState.ACCEPTED }) {
+                state = ProblemSubmitState.ACCEPTED
+            } else if (mySubmits.any {
+                    it.state in listOf(
+                        ProblemSubmitState.WRONG_ANSWER,
+                        ProblemSubmitState.RUNTIME_ERROR,
+                        ProblemSubmitState.TIME_LIMIT_EXCEEDED,
+                        ProblemSubmitState.MEMORY_LIMIT_EXCEEDED,
+                        ProblemSubmitState.COMPILE_ERROR
+                    )
+                }) {
+                state = ProblemSubmitState.WRONG_ANSWER
+            }
+        }
     }
 }

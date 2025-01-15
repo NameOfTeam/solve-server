@@ -41,10 +41,6 @@ class Problem(
     @Column(name = "tier", nullable = false)
     val tier: Tier,
 
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val submits: MutableSet<ProblemSubmit> = mutableSetOf(),
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,

@@ -69,16 +69,16 @@ class ProblemQueryRepositoryImpl(
         if (tiers.isNotEmpty()) problem.tier.`in`(tiers) else null
 
     private fun filterByStates(state: List<ProblemSearchState>): BooleanExpression? {
-        if (!securityHolder.isAuthenticated) return null
+        if (!securityHolder.isAuthenticated || state.isEmpty()) return null
 
-        val submits = queryFactory
+        val submittedProblems = queryFactory
             .selectFrom(submit)
             .where(submit.author.eq(securityHolder.user))
             .fetch()
 
         if (state.contains(ProblemSearchState.SOLVED)) {
             return problem.id.`in`(
-                submits
+                submittedProblems
                     .filter { it.state == ProblemSubmitState.ACCEPTED }
                     .map { it.problem.id }
             )
@@ -86,13 +86,13 @@ class ProblemQueryRepositoryImpl(
 
         if (state.contains(ProblemSearchState.UNSOLVED)) {
             return problem.id.notIn(
-                submits.map { it.problem.id }
+                submittedProblems.map { it.problem.id }
             )
         }
 
         if (state.contains(ProblemSearchState.SOLVING)) {
             return problem.id.`in`(
-                submits
+                submittedProblems
                     .filter { it.state != ProblemSubmitState.ACCEPTED }
                     .map { it.problem.id }
             )
@@ -108,7 +108,7 @@ class ProblemQueryRepositoryImpl(
             }
 
             ProblemSearchOrder.CORRECT_RATE_ASC -> {
-                query.leftJoin(problem.submits, submit)
+                query.leftJoin(submit).on(submit.problem.eq(problem))
                     .groupBy(problem)
                     .orderBy(
                         submit.state.`when`(ProblemSubmitState.ACCEPTED)
@@ -122,7 +122,7 @@ class ProblemQueryRepositoryImpl(
             }
 
             ProblemSearchOrder.CORRECT_RATE_DESC -> {
-                query.leftJoin(problem.submits, submit)
+                query.leftJoin(submit).on(submit.problem.eq(problem))
                     .groupBy(problem)
                     .orderBy(
                         submit.state.`when`(ProblemSubmitState.ACCEPTED)
