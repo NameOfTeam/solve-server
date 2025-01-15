@@ -34,7 +34,7 @@ class PostCommentReplyServiceImpl(
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
         val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
         val author = securityHolder.user
-        val reply = request.replyId.let { comment.replies.find { reply -> reply.id == it } }
+        val reply = request.replyId?.let { comment.replies.find { reply -> reply.id == it } }
 
         comment.replies.add(PostCommentReply(
             content = request.content,
