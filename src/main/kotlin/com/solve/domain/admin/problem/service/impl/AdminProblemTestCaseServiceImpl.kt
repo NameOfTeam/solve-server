@@ -7,6 +7,7 @@ import com.solve.domain.admin.problem.service.AdminProblemTestCaseService
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.domain.problem.repository.ProblemTestCaseRepository
 import com.solve.global.error.CustomException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -15,12 +16,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AdminProblemTestCaseServiceImpl(
     private val problemRepository: ProblemRepository,
+    private val problemTestCaseRepository: ProblemTestCaseRepository,
 ) : AdminProblemTestCaseService {
     @Transactional(readOnly = true)
     override fun getProblemTestCases(problemId: Long): List<AdminProblemTestCaseResponse> {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val testCases = problem.testCases
+        val testCases = problemTestCaseRepository.findAllByProblem(problem)
 
         return testCases.map { AdminProblemTestCaseResponse.of(it) }
     }
@@ -30,13 +32,13 @@ class AdminProblemTestCaseServiceImpl(
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
-        val testCase = ProblemTestCase(
-            input = request.input,
-            output = request.output,
-            problem = problem
+        problemTestCaseRepository.save(
+            ProblemTestCase(
+                input = request.input,
+                output = request.output,
+                problem = problem
+            )
         )
-
-        problem.testCases.add(testCase)
     }
 
     @Transactional
@@ -47,7 +49,7 @@ class AdminProblemTestCaseServiceImpl(
     ) {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val testCase = problem.testCases.find { it.id == testCaseId }
+        val testCase = problemTestCaseRepository.findByProblemAndId(problem, testCaseId)
             ?: throw CustomException(ProblemError.TEST_CASE_NOT_FOUND)
 
         if (request.input != null) testCase.input = request.input
@@ -58,9 +60,9 @@ class AdminProblemTestCaseServiceImpl(
     override fun removeProblemTestCase(problemId: Long, testCaseId: Long) {
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val testCase = problem.testCases.find { it.id == testCaseId }
+        val testCase = problemTestCaseRepository.findByProblemAndId(problem, testCaseId)
             ?: throw CustomException(ProblemError.TEST_CASE_NOT_FOUND)
 
-        problem.testCases.remove(testCase)
+        problemTestCaseRepository.delete(testCase)
     }
 }

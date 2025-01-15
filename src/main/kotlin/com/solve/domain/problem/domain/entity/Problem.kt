@@ -47,10 +47,6 @@ class Problem(
 
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val testCases: MutableSet<ProblemTestCase> = mutableSetOf(),
-
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "problem", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val contributors: MutableSet<ProblemContributor> = mutableSetOf(),
 
     @BatchSize(size = 20)
