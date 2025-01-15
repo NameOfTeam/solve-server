@@ -41,5 +41,5 @@ class PostCommentReply(
         cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    val likes: MutableSet<PostReplyLike> = mutableSetOf()
+    val likes: MutableSet<PostCommentReplyLike> = mutableSetOf()
 ): BaseTimeEntity()
