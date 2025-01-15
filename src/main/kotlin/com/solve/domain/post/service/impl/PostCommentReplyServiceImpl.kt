@@ -15,6 +15,8 @@ import com.solve.domain.post.repository.PostRepository
 import com.solve.domain.post.service.PostCommentReplyService
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,10 +30,10 @@ class PostCommentReplyServiceImpl(
     private val postCommentReplyLikeRepository: PostCommentReplyLikeRepository
 ) : PostCommentReplyService {
     @Transactional(readOnly = true)
-    override fun getReplies(postId: Long, commentId: Long): List<PostCommentReplyResponse> {
+    override fun getReplies(postId: Long, commentId: Long, pageable: Pageable): Page<PostCommentReplyResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
         val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
-        val replies = postCommentReplyRepository.findAllByPostAndComment(post, comment)
+        val replies = postCommentReplyRepository.findAllByPostAndCommentOrderByCreatedAt(post, comment, pageable)
 
         return replies.map { it.toResponse() }
     }
