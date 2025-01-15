@@ -97,12 +97,12 @@ class WorkbookServiceImpl(
         createdAt = createdAt,
         updatedAt = updatedAt
     ).apply {
-        if (securityHolder.isAuthenticated) {
-            val user = securityHolder.user
+        if (!securityHolder.isAuthenticated) return@apply
 
-            progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
-            isLiked = likes.any { it.user == user }
-            isBookmarked = bookmarks.any { it.user == user }
-        }
+        val user = securityHolder.user
+
+        progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
+        isLiked = likes.any { it.user == user }
+        isBookmarked = bookmarks.any { it.user == user }
     }
 }
