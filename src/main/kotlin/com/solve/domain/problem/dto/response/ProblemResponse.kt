@@ -22,26 +22,7 @@ data class ProblemResponse(
     val examples: List<ProblemExampleResponse>,
     val author: ProblemAuthorResponse,
     var state: ProblemSubmitState? = null
-) {
-    companion object {
-        fun of(problem: Problem) = ProblemResponse(
-            id = problem.id!!,
-            title = problem.title,
-            content = problem.content,
-            input = problem.input,
-            output = problem.output,
-            memoryLimit = problem.memoryLimit,
-            timeLimit = problem.timeLimit,
-            tier = problem.tier,
-            solvedCount = problem.submits.filter { it.state == ProblemSubmitState.ACCEPTED }.distinctBy { it.author }
-                .count(),
-            examples = problem.examples.map { ProblemExampleResponse.of(it) },
-            author = ProblemAuthorResponse.of(problem.author),
-            correctRate = (problem.submits.map { it.state }
-                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size * 1000).toInt() / 10.0,
-        )
-    }
-}
+)
 
 data class ProblemAuthorResponse(
     val username: String

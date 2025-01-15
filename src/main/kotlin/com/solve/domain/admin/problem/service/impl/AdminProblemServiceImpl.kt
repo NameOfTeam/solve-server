@@ -12,6 +12,7 @@ import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.error.ProblemError
+import com.solve.domain.problem.repository.ProblemExampleRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemTestCaseRepository
 import com.solve.global.common.enums.Tier
@@ -27,7 +28,8 @@ import org.springframework.transaction.annotation.Transactional
 class AdminProblemServiceImpl(
     private val securityHolder: SecurityHolder,
     private val problemRepository: ProblemRepository,
-    private val problemTestCaseRepository: ProblemTestCaseRepository
+    private val problemTestCaseRepository: ProblemTestCaseRepository,
+    private val problemExampleRepository: ProblemExampleRepository
 ) : AdminProblemService {
     @Transactional(readOnly = true)
     override fun getProblems(pageable: Pageable): Page<AdminProblemResponse> {
@@ -67,7 +69,7 @@ class AdminProblemServiceImpl(
         }
 
         for (example in request.examples) {
-            problem.examples.add(
+            problemExampleRepository.save(
                 ProblemExample(
                     input = example.input,
                     output = example.output,
