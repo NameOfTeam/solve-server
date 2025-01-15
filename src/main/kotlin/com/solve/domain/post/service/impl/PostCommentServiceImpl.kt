@@ -8,6 +8,7 @@ import com.solve.domain.post.dto.response.PostCommentResponse
 import com.solve.domain.post.error.PostCommentError
 import com.solve.domain.post.error.PostError
 import com.solve.domain.post.repository.PostCommentLikeRepository
+import com.solve.domain.post.repository.PostCommentReplyRepository
 import com.solve.domain.post.repository.PostCommentRepository
 import com.solve.domain.post.repository.PostRepository
 import com.solve.domain.post.service.PostCommentService
@@ -22,14 +23,17 @@ class PostCommentServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postRepository: PostRepository,
     private val postCommentRepository: PostCommentRepository,
-    private val postCommentLikeRepository: PostCommentLikeRepository
+    private val postCommentLikeRepository: PostCommentLikeRepository,
+    private val postCommentReplyRepository: PostCommentReplyRepository
 ) : PostCommentService {
+    @Transactional(readOnly = true)
     override fun getComments(postId: Long): List<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
         val comments = postCommentRepository.findAllByPost(post)
 
         return comments.map { it.toResponse() }
     }
+
     @Transactional
     override fun createComment(postId: Long, request: PostCommentCreateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
@@ -77,7 +81,8 @@ class PostCommentServiceImpl(
         content = content,
         author = PostCommentAuthorResponse.of(author),
         likeCount = postCommentLikeRepository.countByComment(this),
-        isLiked = postCommentLikeRepository.existsByCommentAndUser(this, securityHolder.user),
+        isLiked = securityHolder.isAuthenticated && postCommentLikeRepository.existsByCommentAndUser(this, securityHolder.user),
+        replyCount = postCommentReplyRepository.countByComment(this),
         createdAt = createdAt,
         updatedAt = updatedAt
     )
