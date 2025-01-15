@@ -63,6 +63,22 @@ class SecurityConfig(
 
                 .requestMatchers(HttpMethod.GET, "/statistics").permitAll()
 
+                .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/posts/{postId}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/posts").user()
+                .requestMatchers(HttpMethod.PATCH, "/posts/{postId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/posts/{postId}").user()
+
+                .requestMatchers(HttpMethod.GET, "/posts/{postId}/comments").permitAll()
+                .requestMatchers(HttpMethod.POST, "/posts/{postId}/comments").user()
+                .requestMatchers(HttpMethod.PATCH, "/posts/{postId}/comments/{commentId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/comments/{commentId}").user()
+
+                .requestMatchers(HttpMethod.GET, "/posts/{postId}/comments/{commentId}/replies").permitAll()
+                .requestMatchers(HttpMethod.POST, "/posts/{postId}/comments/{commentId}/replies").user()
+                .requestMatchers(HttpMethod.PATCH, "/posts/{postId}/comments/{commentId}/replies/{replyId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/comments/{commentId}/replies/{replyId}").user()
+
                 .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/problems/search").permitAll()
 
