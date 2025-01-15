@@ -18,6 +18,10 @@ class PostController(
     @PostMapping
     fun createPost(@RequestBody request: PostCreateRequest) = BaseResponse.of(postService.createPost(request))
 
+    @Operation(summary = "게시글 조회")
+    @GetMapping("/{postId}")
+    fun getPost(@PathVariable postId: Long) = BaseResponse.of(postService.getPost(postId))
+
     @Operation(summary = "게시글 수정")
     @PatchMapping("/{postId}")
     fun updatePost(@PathVariable postId: Long, @RequestBody request: PostUpdateRequest) =
