@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*
 class PostCommentController(
     private val postCommentService: PostCommentService
 ) {
+    @Operation(summary = "게시글 댓글 조회")
+    @GetMapping
+    fun getComments(@PathVariable postId: Long) = BaseResponse.of(postCommentService.getComments(postId))
+
     @Operation(summary = "게시글 댓글 생성")
     @PostMapping
     fun createComment(@PathVariable postId: Long, @RequestBody request: PostCommentCreateRequest) =
