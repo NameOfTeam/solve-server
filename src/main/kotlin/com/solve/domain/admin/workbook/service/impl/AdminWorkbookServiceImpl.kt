@@ -48,18 +48,14 @@ class AdminWorkbookServiceImpl(
             author = author,
         )
 
-        request.problemIds.forEach {
-            val problem = problemRepository.findByIdOrNull(it) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-
-            workbookProblemRepository.save(
-                WorkbookProblem(
-                    workbook = workbook,
-                    problem = problem
-                )
-            )
-        }
-
         workbookRepository.save(workbook)
+
+        workbookProblemRepository.saveAll(request.problemIds.map {
+            WorkbookProblem(
+                workbook = workbook,
+                problem = problemRepository.findByIdOrNull(it) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+            )
+        })
     }
 
     @Transactional

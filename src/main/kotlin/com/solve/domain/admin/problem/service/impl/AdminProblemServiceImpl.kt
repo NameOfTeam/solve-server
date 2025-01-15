@@ -58,6 +58,8 @@ class AdminProblemServiceImpl(
                 author = author
             )
 
+        problemRepository.save(problem)
+
         for (testCase in request.testCases) {
             problemTestCaseRepository.save(
                 ProblemTestCase(
@@ -78,8 +80,6 @@ class AdminProblemServiceImpl(
                 )
             )
         }
-
-        problemRepository.save(problem)
     }
 
     @Transactional
