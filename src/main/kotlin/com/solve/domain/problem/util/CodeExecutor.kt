@@ -4,11 +4,10 @@ import com.solve.domain.problem.domain.entity.ProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
-import com.solve.global.common.enums.ProgrammingLanguage
+import com.solve.domain.problem.util.config.LanguageConfig
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
@@ -17,85 +16,26 @@ class CodeExecutor(
     private val request: ProblemSubmitRequest,
     private val fileProperties: FileProperties
 ) {
-    private var memoryUsage = 0L  // MB 단위
-    private var isMemoryLimitExceeded = false
-    private var isTimeLimitExceeded = false
-    private var shouldStopMonitoring = false
-
     data class ExecutionResult(
         val output: String,
         val error: String,
         val success: Boolean,
         val state: ProblemSubmitState? = null,
         val timeUsage: Long = 0,
-        val compilationOutput: String? = null
+        val compilationOutput: String? = null,
+        val memoryUsage: Long = 0,
     )
 
+    private val languageConfig: LanguageConfig = LanguageConfig.LANGUAGE_CONFIGS[request.language]
+        ?: throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
+
     private fun createSourceFile(): File {
-        val directory = File(fileProperties.path, "submits").apply {
-            if (!exists()) mkdirs()
-        }
-        return File(directory, "${submit.id}.${getFileExtension()}").apply {
+        val directory = getSourceDirectory(submit.id!!, fileProperties.path).apply { if (!exists()) mkdirs() }
+        val fileName = languageConfig.fileName
+        return File(directory, fileName).apply {
             createNewFile()
             writeText(request.code)
         }
-    }
-
-    private fun getFileExtension() = when (request.language) {
-        ProgrammingLanguage.PYTHON -> "py"
-        ProgrammingLanguage.JAVA -> "java"
-        ProgrammingLanguage.KOTLIN -> "kt"
-        ProgrammingLanguage.C -> "c"
-        ProgrammingLanguage.CPP -> "cpp"
-        ProgrammingLanguage.CSHARP -> "cs"
-        ProgrammingLanguage.NODE_JS -> "js"
-        else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-    }
-
-    private fun compile(sourceFile: File): ExecutionResult? {
-        return when (request.language) {
-            ProgrammingLanguage.JAVA -> compileJava(sourceFile)
-            ProgrammingLanguage.PYTHON -> checkPythonSyntax(sourceFile)
-            else -> null
-        }
-    }
-
-    private fun checkPythonSyntax(sourceFile: File): ExecutionResult? {
-        val process = ProcessBuilder("python3", "-m", "py_compile", sourceFile.absolutePath)
-            .redirectErrorStream(true)
-            .start()
-
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        val exitCode = process.waitFor()
-
-        return if (exitCode != 0) {
-            ExecutionResult(
-                output = "",
-                error = output,
-                success = false,
-                state = ProblemSubmitState.COMPILE_ERROR,
-                compilationOutput = output
-            )
-        } else null
-    }
-
-    private fun compileJava(sourceFile: File): ExecutionResult? {
-        val process = ProcessBuilder("javac", sourceFile.absolutePath)
-            .redirectErrorStream(true)
-            .start()
-
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        val exitCode = process.waitFor()
-
-        return if (exitCode != 0) {
-            ExecutionResult(
-                output = "",
-                error = output,
-                success = false,
-                state = ProblemSubmitState.COMPILE_ERROR,
-                compilationOutput = output
-            )
-        } else null
     }
 
     fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
@@ -103,90 +43,78 @@ class CodeExecutor(
 
         compile(sourceFile)?.let { return it }
 
-        val process = when (request.language) {
-            ProgrammingLanguage.PYTHON -> ProcessBuilder("python3", sourceFile.absolutePath)
-            ProgrammingLanguage.JAVA -> ProcessBuilder(
-                "java",
-                "-cp",
-                sourceFile.parent,
-                sourceFile.nameWithoutExtension
-            )
+        val scriptPath = "/app/cmd/${languageConfig.name}_execute.sh"
 
-            else -> throw CustomException(ProblemError.LANGUAGE_NOT_SUPPORTED)
-        }.start()
+        val command = listOf(
+            "docker", "exec", "--privileged", "${languageConfig.name}-judge", "sh", "-c",
+            "$scriptPath '${input.replace("'", "'\\''")}' ${languageConfig.getExecutionTarget(submit.id!!)}"
+        )
 
-        val pid = process.pid()
+        println("Executing command: $command")
+
+        val processBuilder = ProcessBuilder(command)
+        val process = processBuilder.start()
         val output = StringBuilder()
         val error = StringBuilder()
-        val startTime = System.nanoTime()
 
-        val memoryThread = thread { monitorMemory(pid, submit.problem.memoryLimit) }
-
-        val outputThread = thread { processStream(process.inputStream, output) }
-        val errorThread = thread { processStream(process.errorStream, error) }
-
-        // 입력 처리 스레드
-        thread {
-            try {
-                process.outputStream.use {
-                    it.write(input.toByteArray())
-                    it.flush()
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
+        val outputThread = thread {
+            process.inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { output.append(it).append("\n") }
+            }
+        }
+        val errorThread = thread {
+            process.errorStream.bufferedReader().useLines { lines ->
+                lines.forEach { error.append(it).append("\n") }
             }
         }
 
         val timeLimitMillis = (timeLimit * 1000).toLong()
         val finishedInTime = process.waitFor(timeLimitMillis, TimeUnit.MILLISECONDS)
-        val timeUsage = ((System.nanoTime() - startTime) / 1_000_000)
 
-        if (!finishedInTime) {
-            isTimeLimitExceeded = true
-            shouldStopMonitoring = true
-            process.destroyForcibly()
-            process.waitFor(1, TimeUnit.SECONDS)
-
-            memoryThread.interrupt()
-            outputThread.interrupt()
-            errorThread.interrupt()
-
-            return ExecutionResult(
-                output = "",
-                error = "",
-                success = false,
-                state = ProblemSubmitState.TIME_LIMIT_EXCEEDED,
-                timeUsage = timeUsage
-            )
-        }
-
-        shouldStopMonitoring = true
-        memoryThread.join(1000)
         outputThread.join(1000)
         errorThread.join(1000)
 
-        if (isMemoryLimitExceeded) {
+        if (!finishedInTime) {
+            process.destroyForcibly()
             return ExecutionResult(
                 output = "",
-                error = "",
+                error = "Time Limit Exceeded",
                 success = false,
-                state = ProblemSubmitState.MEMORY_LIMIT_EXCEEDED,
-                timeUsage = timeUsage
+                state = ProblemSubmitState.TIME_LIMIT_EXCEEDED
             )
         }
 
         val errorOutput = error.toString().trim()
-        if (errorOutput.isNotEmpty()) {
+        val isPerfOutput = errorOutput.startsWith("Performance counter stats for")
+
+        // 실제 에러가 아닌 경우 perf 메타데이터로 간주
+        if (!isPerfOutput && errorOutput.isNotEmpty()) {
+            println("Error Output: $errorOutput")
             return ExecutionResult(
                 output = "",
                 error = errorOutput,
                 success = false,
-                state = ProblemSubmitState.RUNTIME_ERROR,
-                timeUsage = timeUsage
+                state = ProblemSubmitState.RUNTIME_ERROR
             )
         }
 
-        val actualOutput = output.toString().trim()
+        val perfOutput = if (isPerfOutput) errorOutput else ""
+        val entireOutput = output.toString().trim()
+
+        // Perf 출력 이후의 내용 제거
+        var actualOutput = entireOutput.substringBefore("Performance counter stats for").trim()
+        actualOutput = actualOutput.replace(Regex("Memory Usage: .*"), "").trim()
+
+        println(actualOutput)
+        println(perfOutput)
+
+        val timeUsage = Regex("(\\d+\\.\\d+) seconds time elapsed")
+            .find(perfOutput)?.groups?.get(1)?.value?.toDoubleOrNull()?.let {
+                (it * 1000).toInt().toLong()
+            } ?: -1
+
+        val memoryUsage = Regex("Memory Usage: (\\d+) KB")
+            .find(entireOutput)?.groups?.get(1)?.value?.toLongOrNull() ?: 0
 
         if (hasPresentationError(actualOutput, expectedOutput)) {
             return ExecutionResult(
@@ -194,7 +122,8 @@ class CodeExecutor(
                 error = "",
                 success = false,
                 state = ProblemSubmitState.PRESENTATION_ERROR,
-                timeUsage = timeUsage
+                timeUsage = timeUsage,
+                memoryUsage = memoryUsage,
             )
         }
 
@@ -204,7 +133,8 @@ class CodeExecutor(
                 error = "",
                 success = false,
                 state = ProblemSubmitState.WRONG_ANSWER,
-                timeUsage = timeUsage
+                timeUsage = timeUsage,
+                memoryUsage = memoryUsage,
             )
         }
 
@@ -213,60 +143,9 @@ class CodeExecutor(
             error = "",
             success = true,
             state = ProblemSubmitState.ACCEPTED,
-            timeUsage = timeUsage
+            timeUsage = timeUsage,
+            memoryUsage = memoryUsage,
         )
-    }
-
-    private fun processStream(stream: java.io.InputStream, buffer: StringBuilder) {
-        try {
-            stream.bufferedReader().use { reader ->
-                while (!Thread.currentThread().isInterrupted) {
-                    val line = reader.readLine() ?: break
-                    buffer.append(line).append("\n")
-                }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun monitorMemory(pid: Long, memoryLimit: Long) {
-        while (!Thread.currentThread().isInterrupted && !shouldStopMonitoring) {
-            try {
-                val memoryMB = getMemoryUsage(pid)
-                if (memoryMB > memoryUsage) {
-                    memoryUsage = memoryMB
-                    submit.memoryUsage = memoryMB
-                }
-                if (memoryMB > memoryLimit) {
-                    isMemoryLimitExceeded = true
-                    break
-                }
-                Thread.sleep(50)
-            } catch (e: Exception) {
-                break
-            }
-        }
-    }
-
-    private fun getMemoryUsage(pid: Long): Long {
-        return try {
-            val process = ProcessBuilder("sh", "-c", "ps -o rss= -p $pid")
-                .redirectErrorStream(true)
-                .start()
-
-            process.inputStream.bufferedReader().useLines { lines ->
-                lines.firstOrNull { it.isNotBlank() }?.trim()?.toLong()?.let { rssKB ->
-                    rssKB / 1024
-                } ?: -1
-            }.also {
-                process.waitFor(100, TimeUnit.MILLISECONDS)
-                process.destroyForcibly()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            -1
-        }
     }
 
     private fun hasPresentationError(actual: String, expected: String): Boolean {
@@ -274,5 +153,27 @@ class CodeExecutor(
         val normalizedExpected = expected.replace("\\s+".toRegex(), "")
 
         return normalizedActual == normalizedExpected && actual != expected
+    }
+
+    private fun compile(sourceFile: File): ExecutionResult? {
+        val compileCmd = languageConfig.compileCmd(sourceFile.absolutePath)
+        val process = ProcessBuilder(compileCmd)
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        val exitCode = process.waitFor()
+        return if (exitCode != 0) {
+            ExecutionResult(
+                output = "",
+                error = output,
+                success = false,
+                state = ProblemSubmitState.COMPILE_ERROR,
+                compilationOutput = output
+            )
+        } else null
+    }
+
+    private fun getSourceDirectory(submitId: Long, path: String): File {
+        return File(path, "submits/$submitId")
     }
 }
