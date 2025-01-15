@@ -33,7 +33,15 @@ class PostComment(
         cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    val likes: MutableSet<PostCommentLike> = mutableSetOf()
+    val likes: MutableSet<PostCommentLike> = mutableSetOf(),
+
+    @OneToMany(
+        mappedBy = "comment",
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val replies: MutableSet<PostCommentReply> = mutableSetOf()
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
