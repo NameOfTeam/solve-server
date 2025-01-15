@@ -42,10 +42,7 @@ class Post(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    val author: User,
-
-    @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val comments: MutableSet<PostComment> = mutableSetOf()
+    val author: User
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
