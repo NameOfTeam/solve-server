@@ -6,6 +6,7 @@ import com.solve.domain.post.service.PostCommentService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "게시글 댓글", description = "Post Comment")
@@ -16,7 +17,11 @@ class PostCommentController(
 ) {
     @Operation(summary = "게시글 댓글 조회")
     @GetMapping
-    fun getComments(@PathVariable postId: Long) = BaseResponse.of(postCommentService.getComments(postId))
+    fun getComments(
+        @PathVariable postId: Long,
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int
+    ) = BaseResponse.of(postCommentService.getComments(postId, PageRequest.of(page, size)))
 
     @Operation(summary = "게시글 댓글 생성")
     @PostMapping
