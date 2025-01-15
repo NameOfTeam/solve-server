@@ -25,23 +25,7 @@ class PostComment(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    val author: User,
-
-    @OneToMany(
-        mappedBy = "comment",
-        fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    val likes: MutableSet<PostCommentLike> = mutableSetOf(),
-
-    @OneToMany(
-        mappedBy = "comment",
-        fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    val replies: MutableSet<PostCommentReply> = mutableSetOf()
+    val author: User
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
