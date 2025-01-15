@@ -20,29 +20,4 @@ data class ContestResponse(
     val visibility: ContestVisibility,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-) {
-    companion object {
-        fun of(contest: Contest) = ContestResponse(
-            id = contest.id!!,
-            title = contest.title,
-            description = contest.description,
-            startAt = contest.startAt,
-            endAt = contest.endAt,
-            owner = ContestOwnerResponse.of(contest.owner),
-            visibility = contest.visibility,
-            state = if (contest.startAt.isAfter(LocalDateTime.now())) {
-                ContestState.UPCOMING
-            } else if (contest.endAt.isBefore(LocalDateTime.now())) {
-                ContestState.ENDED
-            } else {
-                ContestState.ONGOING
-            },
-            winner = contest.winner?.let { ContestWinnerResponse.of(it) },
-            operators = contest.operators.map { ContestOperatorResponse.of(it) },
-            participants = contest.participants.map { ContestParticipantResponse.of(it) },
-            problems = contest.problems.map { ContestProblemResponse.of(it) },
-            createdAt = contest.createdAt,
-            updatedAt = contest.updatedAt
-        )
-    }
-}
+)

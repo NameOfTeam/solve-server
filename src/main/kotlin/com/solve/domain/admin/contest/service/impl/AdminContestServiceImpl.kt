@@ -2,13 +2,14 @@ package com.solve.domain.admin.contest.service.impl
 
 import com.solve.domain.admin.contest.dto.request.AdminContestCreateRequest
 import com.solve.domain.admin.contest.dto.request.AdminContestUpdateRequest
-import com.solve.domain.admin.contest.dto.response.AdminContestResponse
+import com.solve.domain.admin.contest.dto.response.*
 import com.solve.domain.admin.contest.service.AdminContestService
 import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.ContestOperator
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.error.ContestError
+import com.solve.domain.contest.repository.ContestOperatorRepository
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.user.repository.UserRepository
@@ -25,11 +26,12 @@ class AdminContestServiceImpl(
     private val securityHolder: SecurityHolder,
     private val userRepository: UserRepository,
     private val problemRepository: ProblemRepository,
-    private val contestRepository: ContestRepository
+    private val contestRepository: ContestRepository,
+    private val contestOperatorRepository: ContestOperatorRepository
 ) : AdminContestService {
     @Transactional(readOnly = true)
     override fun getContests(pageable: Pageable): Page<AdminContestResponse> {
-        return contestRepository.findAll(pageable).map { AdminContestResponse.of(it) }
+        return contestRepository.findAll(pageable).map { it.toResponse() }
     }
 
     @Transactional(readOnly = true)
@@ -37,17 +39,17 @@ class AdminContestServiceImpl(
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
-        return AdminContestResponse.of(contest)
+        return contest.toResponse()
     }
 
     @Transactional
-    override fun createContest(request: AdminContestCreateRequest): AdminContestResponse {
+    override fun createContest(request: AdminContestCreateRequest) {
         val operators = userRepository.findAllById(request.operatorIds)
         val participants = userRepository.findAllById(request.participantIds)
         val problems = problemRepository.findAllById(request.problemIds)
         val owner = securityHolder.user
 
-        var contest = Contest(
+        val contest = Contest(
             title = request.title,
             description = request.description,
             startAt = request.startAt,
@@ -56,7 +58,7 @@ class AdminContestServiceImpl(
             visibility = request.visibility
         )
 
-        contest.operators.addAll(operators.map {
+        contestOperatorRepository.saveAll(operators.map {
             ContestOperator(
                 contest = contest,
                 user = it
@@ -75,13 +77,11 @@ class AdminContestServiceImpl(
             )
         })
 
-        contest = contestRepository.save(contest)
-
-        return AdminContestResponse.of(contest)
+        contestRepository.save(contest)
     }
 
     @Transactional
-    override fun updateContest(contestId: Long, request: AdminContestUpdateRequest): AdminContestResponse {
+    override fun updateContest(contestId: Long, request: AdminContestUpdateRequest) {
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
@@ -90,17 +90,28 @@ class AdminContestServiceImpl(
         request.startAt?.let { contest.startAt = it }
         request.endAt?.let { contest.endAt = it }
         request.visibility?.let { contest.visibility = it }
-
-        return AdminContestResponse.of(contest)
     }
 
     @Transactional
-    override fun deleteContest(contestId: Long): AdminContestResponse {
+    override fun deleteContest(contestId: Long) {
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
         contestRepository.delete(contest)
-
-        return AdminContestResponse.of(contest)
     }
+
+    private fun Contest.toResponse() =  AdminContestResponse(
+        id = id!!,
+        title = title,
+        description = description,
+        startAt = startAt,
+        endAt = endAt,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        participants = participants.map { AdminContestParticipantResponse.of(it) },
+        operators = contestOperatorRepository.findAllByContest(this).map { AdminContestOperatorResponse.of(it) },
+        problems = problems.map { AdminContestProblemResponse.of(it) },
+        visibility = visibility,
+        owner = AdminContestOwnerResponse.of(owner)
+    )
 }

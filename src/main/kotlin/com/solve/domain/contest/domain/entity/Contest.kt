@@ -38,15 +38,11 @@ class Contest(
     var visibility: ContestVisibility = ContestVisibility.PUBLIC,
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val operators: MutableSet<ContestOperator> = mutableSetOf(),
-
-    @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val participants: MutableSet<ContestParticipant> = mutableSetOf(),
 
     @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val problems: MutableSet<ContestProblem> = mutableSetOf(),
 ) : BaseTimeEntity() {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Contest) return false
@@ -56,17 +52,5 @@ class Contest(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    fun addOperator(operator: ContestOperator) {
-        operators.add(operator)
-    }
-
-    fun addParticipant(participant: ContestParticipant) {
-        participants.add(participant)
-    }
-
-    fun addProblem(problem: ContestProblem) {
-        problems.add(problem)
     }
 }

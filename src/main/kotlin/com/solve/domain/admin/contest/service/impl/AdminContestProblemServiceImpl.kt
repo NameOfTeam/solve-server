@@ -1,11 +1,13 @@
 package com.solve.domain.admin.contest.service.impl
 
 import com.solve.domain.admin.contest.dto.request.AdminContestProblemAddRequest
-import com.solve.domain.admin.contest.dto.response.AdminContestResponse
+import com.solve.domain.admin.contest.dto.response.*
 import com.solve.domain.admin.contest.service.AdminContestProblemService
+import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.error.ContestError
 import com.solve.domain.contest.error.ContestProblemError
+import com.solve.domain.contest.repository.ContestOperatorRepository
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
@@ -20,7 +22,7 @@ class AdminContestProblemServiceImpl(
     private val problemRepository: ProblemRepository
 ) : AdminContestProblemService {
     @Transactional
-    override fun addContestProblem(contestId: Long, request: AdminContestProblemAddRequest): AdminContestResponse {
+    override fun addContestProblem(contestId: Long, request: AdminContestProblemAddRequest) {
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
         val problem =
@@ -31,19 +33,15 @@ class AdminContestProblemServiceImpl(
         }
 
         contest.problems.add(ContestProblem(contest = contest, problem = problem))
-
-        return AdminContestResponse.of(contest)
     }
 
     @Transactional
-    override fun removeContestProblem(contestId: Long, problemId: Long): AdminContestResponse {
+    override fun removeContestProblem(contestId: Long, problemId: Long) {
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
         val problem = contest.problems.find { it.problem.id == problemId }
             ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
         contest.problems.remove(problem)
-
-        return AdminContestResponse.of(contest)
     }
 }

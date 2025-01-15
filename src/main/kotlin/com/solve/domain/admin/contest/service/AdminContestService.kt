@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable
 interface AdminContestService {
     fun getContests(pageable: Pageable): Page<AdminContestResponse>
     fun getContest(contestId: Long): AdminContestResponse
-    fun createContest(request: AdminContestCreateRequest): AdminContestResponse
-    fun updateContest(contestId: Long, request: AdminContestUpdateRequest): AdminContestResponse
-    fun deleteContest(contestId: Long): AdminContestResponse
+    fun createContest(request: AdminContestCreateRequest)
+    fun updateContest(contestId: Long, request: AdminContestUpdateRequest)
+    fun deleteContest(contestId: Long)
 }
