@@ -71,7 +71,7 @@ class WorkbookQueryRepositoryImpl(
     private fun applyOrdering(query: JPAQuery<Workbook>, filter: WorkbookSearchFilter?) {
         when (filter) {
             WorkbookSearchFilter.POPULAR -> {
-                query.leftJoin(workbook.likes, like)
+                query.leftJoin(like).on(like.workbook.eq(workbook))
                     .groupBy(workbook)
                     .orderBy(like.count().desc())
             }

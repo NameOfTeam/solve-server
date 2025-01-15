@@ -27,10 +27,6 @@ class Workbook(
 
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val likes: MutableSet<WorkbookLike> = mutableSetOf(),
-
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val bookmarks: MutableSet<WorkbookBookmark> = mutableSetOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,19 +45,6 @@ class Workbook(
         return id?.hashCode() ?: 0
     }
 
-    fun addLike(user: User) {
-        if (hasLikedBy(user)) {
-            throw CustomException(WorkbookLikeError.WORKBOOK_LIKE_ALREADY_EXISTS)
-        }
-        likes.add(WorkbookLike(this, user))
-    }
-
-    fun removeLike(user: User) {
-        val like = likes.find { it.user == user }
-            ?: throw CustomException(WorkbookLikeError.WORKBOOK_LIKE_NOT_FOUND)
-        likes.remove(like)
-    }
-
     fun addBookmark(user: User) {
         if (hasBookmarkedBy(user)) {
             throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_ALREADY_EXISTS)
@@ -73,10 +56,6 @@ class Workbook(
         val bookmark = bookmarks.find { it.user == user }
             ?: throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_NOT_FOUND)
         bookmarks.remove(bookmark)
-    }
-
-    private fun hasLikedBy(user: User): Boolean {
-        return likes.any { it.user == user }
     }
 
     private fun hasBookmarkedBy(user: User): Boolean {

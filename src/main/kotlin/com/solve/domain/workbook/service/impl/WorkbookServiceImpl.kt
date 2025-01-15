@@ -10,6 +10,7 @@ import com.solve.domain.workbook.dto.response.WorkbookAuthorResponse
 import com.solve.domain.workbook.dto.response.WorkbookProblemResponse
 import com.solve.domain.workbook.dto.response.WorkbookResponse
 import com.solve.domain.workbook.error.WorkbookError
+import com.solve.domain.workbook.repository.WorkbookLikeRepository
 import com.solve.domain.workbook.repository.WorkbookProblemRepository
 import com.solve.domain.workbook.repository.WorkbookRepository
 import com.solve.domain.workbook.service.WorkbookService
@@ -26,7 +27,8 @@ class WorkbookServiceImpl(
     private val securityHolder: SecurityHolder,
     private val workbookRepository: WorkbookRepository,
     private val problemRepository: ProblemRepository,
-    private val workbookProblemRepository: WorkbookProblemRepository
+    private val workbookProblemRepository: WorkbookProblemRepository,
+    private val workbookLikeRepository: WorkbookLikeRepository
 ) : WorkbookService {
     @Transactional(readOnly = true)
     override fun getWorkbooks(pageable: Pageable): Page<WorkbookResponse> {
@@ -92,7 +94,7 @@ class WorkbookServiceImpl(
         description = description,
         problems = workbookProblemRepository.findAllByWorkbook(this).map { WorkbookProblemResponse.of(it) },
         author = WorkbookAuthorResponse.of(author),
-        likeCount = likes.size.toLong(),
+        likeCount = workbookLikeRepository.countByWorkbook(this),
         bookmarkCount = bookmarks.size.toLong(),
         createdAt = createdAt,
         updatedAt = updatedAt
@@ -102,7 +104,7 @@ class WorkbookServiceImpl(
         val user = securityHolder.user
 
         progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
-        isLiked = likes.any { it.user == user }
+        isLiked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
         isBookmarked = bookmarks.any { it.user == user }
     }
 }
