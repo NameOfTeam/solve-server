@@ -12,8 +12,8 @@ import java.io.Serializable
         Index(name = "idx_post_comment_reply_like_comment", columnList = "post_comment_id")
     ]
 )
-@IdClass(PostReplyLikeId::class)
-class PostReplyLike(
+@IdClass(PostCommentReplyLikeId::class)
+class PostCommentReplyLike(
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_comment_reply_id", nullable = false)
@@ -41,7 +41,7 @@ class PostReplyLike(
     }
 }
 
-class PostReplyLikeId(
+class PostCommentReplyLikeId(
     val reply: Long? = null,
     val user: Long? = null
 ) : Serializable {
