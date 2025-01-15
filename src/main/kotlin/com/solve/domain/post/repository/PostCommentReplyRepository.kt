@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface PostCommentReplyRepository: JpaRepository<PostCommentReply, Long> {
     fun findAllByPostAndComment(post: Post, comment: PostComment): List<PostCommentReply>
     fun findByPostAndCommentAndId(post: Post, comment: PostComment, id: Long): PostCommentReply?
+
+    fun countByComment(comment: PostComment): Long
 }

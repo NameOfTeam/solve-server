@@ -39,7 +39,7 @@ class PostCommentReplyServiceImpl(
     @Transactional
     override fun createReply(postId: Long, commentId: Long, request: PostCommentReplyCreateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
-        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
+        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
         val author = securityHolder.user
         val reply = request.replyId?.let { postCommentReplyRepository.findByPostAndCommentAndId(post, comment, it) }
 
@@ -79,7 +79,7 @@ class PostCommentReplyServiceImpl(
         content = content,
         author = PostCommentReplyAuthorResponse.of(author),
         likeCount = postCommentReplyLikeRepository.countByReply(this),
-        isLiked = postCommentReplyLikeRepository.existsByReplyAndUser(this, securityHolder.user),
+        isLiked = securityHolder.isAuthenticated && postCommentReplyLikeRepository.existsByReplyAndUser(this, securityHolder.user),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

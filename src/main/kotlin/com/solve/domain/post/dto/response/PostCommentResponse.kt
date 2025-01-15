@@ -10,6 +10,7 @@ data class PostCommentResponse(
     val author: PostCommentAuthorResponse,
     val likeCount: Long,
     val isLiked: Boolean,
+    val replyCount: Long,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )
