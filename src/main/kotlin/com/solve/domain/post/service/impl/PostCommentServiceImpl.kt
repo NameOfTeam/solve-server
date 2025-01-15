@@ -77,7 +77,7 @@ class PostCommentServiceImpl(
         content = content,
         author = PostCommentAuthorResponse.of(author),
         likeCount = postCommentLikeRepository.countByComment(this),
-        liked = postCommentLikeRepository.existsByCommentAndUser(this, securityHolder.user),
+        isLiked = postCommentLikeRepository.existsByCommentAndUser(this, securityHolder.user),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

@@ -13,18 +13,7 @@ data class AdminWorkbookResponse(
     val author: AdminWorkbookAuthorResponse,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
-) {
-    companion object {
-        fun of(workbook: Workbook) = AdminWorkbookResponse(
-            id = workbook.id!!,
-            title = workbook.title,
-            problems = workbook.problems.map { AdminWorkbookProblemResponse.of(it) },
-            author = AdminWorkbookAuthorResponse.of(workbook.author),
-            createdAt = workbook.createdAt,
-            updatedAt = workbook.updatedAt
-        )
-    }
-}
+)
 
 data class AdminWorkbookProblemResponse(
     val id: Long,

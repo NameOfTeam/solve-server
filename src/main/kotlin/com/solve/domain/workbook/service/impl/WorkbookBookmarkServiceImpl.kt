@@ -1,6 +1,9 @@
 package com.solve.domain.workbook.service.impl
 
+import com.solve.domain.workbook.domain.entity.WorkbookBookmark
+import com.solve.domain.workbook.error.WorkbookBookmarkError
 import com.solve.domain.workbook.error.WorkbookError
+import com.solve.domain.workbook.repository.WorkbookBookmarkRepository
 import com.solve.domain.workbook.repository.WorkbookRepository
 import com.solve.domain.workbook.service.WorkbookBookmarkService
 import com.solve.global.error.CustomException
@@ -12,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class WorkbookBookmarkServiceImpl(
     private val workbookRepository: WorkbookRepository,
-    private val securityHolder: SecurityHolder
+    private val securityHolder: SecurityHolder,
+    private val workbookBookmarkRepository: WorkbookBookmarkRepository
 ) : WorkbookBookmarkService {
     @Transactional
     override fun addWorkbookBookmark(workbookId: Long) {
@@ -20,7 +24,10 @@ class WorkbookBookmarkServiceImpl(
             .findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
 
-        workbook.addBookmark(user)
+        if (workbookBookmarkRepository.existsByWorkbookAndUser(workbook, user))
+            throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_ALREADY_EXISTS)
+
+        workbookBookmarkRepository.save(WorkbookBookmark(workbook = workbook, user = user))
     }
 
     @Transactional
@@ -28,7 +35,9 @@ class WorkbookBookmarkServiceImpl(
         val workbook =
             workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
+        val workbookBookmark = workbookBookmarkRepository.findByWorkbookAndUser(workbook, user)
+            ?: throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_NOT_FOUND)
 
-        workbook.removeBookmark(user)
+        workbookBookmarkRepository.delete(workbookBookmark)
     }
 }

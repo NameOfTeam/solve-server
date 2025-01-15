@@ -22,24 +22,7 @@ data class AdminContestResponse(
     val visibility: ContestVisibility,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
-) {
-    companion object {
-        fun of(contest: Contest) = AdminContestResponse(
-            id = contest.id!!,
-            title = contest.title,
-            description = contest.description,
-            startAt = contest.startAt,
-            endAt = contest.endAt,
-            createdAt = contest.createdAt,
-            updatedAt = contest.updatedAt,
-            participants = contest.participants.map { AdminContestParticipantResponse.of(it) },
-            operators = contest.operators.map { AdminContestOperatorResponse.of(it) },
-            problems = contest.problems.map { AdminContestProblemResponse.of(it) },
-            visibility = contest.visibility,
-            owner = AdminContestOwnerResponse.of(contest.owner)
-        )
-    }
-}
+)
 
 data class AdminContestProblemResponse(
     val title: String,

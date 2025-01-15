@@ -3,12 +3,15 @@ package com.solve.domain.workbook.service.impl
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.workbook.domain.entity.Workbook
+import com.solve.domain.workbook.domain.entity.WorkbookProblem
 import com.solve.domain.workbook.dto.request.CreateWorkbookRequest
 import com.solve.domain.workbook.dto.request.UpdateWorkbookRequest
 import com.solve.domain.workbook.dto.response.WorkbookAuthorResponse
 import com.solve.domain.workbook.dto.response.WorkbookProblemResponse
 import com.solve.domain.workbook.dto.response.WorkbookResponse
 import com.solve.domain.workbook.error.WorkbookError
+import com.solve.domain.workbook.repository.WorkbookLikeRepository
+import com.solve.domain.workbook.repository.WorkbookProblemRepository
 import com.solve.domain.workbook.repository.WorkbookRepository
 import com.solve.domain.workbook.service.WorkbookService
 import com.solve.global.error.CustomException
@@ -23,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional
 class WorkbookServiceImpl(
     private val securityHolder: SecurityHolder,
     private val workbookRepository: WorkbookRepository,
-    private val problemRepository: ProblemRepository
+    private val problemRepository: ProblemRepository,
+    private val workbookProblemRepository: WorkbookProblemRepository,
+    private val workbookLikeRepository: WorkbookLikeRepository
 ) : WorkbookService {
     @Transactional(readOnly = true)
     override fun getWorkbooks(pageable: Pageable): Page<WorkbookResponse> {
@@ -52,7 +57,12 @@ class WorkbookServiceImpl(
         request.problemIds.forEach {
             val problem = problemRepository.findByIdOrNull(it) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
-            workbook.addProblem(problem)
+            workbookProblemRepository.save(
+                WorkbookProblem(
+                    workbook = workbook,
+                    problem = problem
+                )
+            )
         }
 
         return workbook.toResponse()
@@ -82,19 +92,19 @@ class WorkbookServiceImpl(
         id = id!!,
         title = title,
         description = description,
-        problems = problems.map { WorkbookProblemResponse.of(it) },
+        problems = workbookProblemRepository.findAllByWorkbook(this).map { WorkbookProblemResponse.of(it) },
         author = WorkbookAuthorResponse.of(author),
-        likeCount = likes.size.toLong(),
-        bookmarkCount = bookmarks.size.toLong(),
+        likeCount = workbookLikeRepository.countByWorkbook(this),
+        bookmarkCount = workbookLikeRepository.countByWorkbook(this),
         createdAt = createdAt,
         updatedAt = updatedAt
     ).apply {
-        if (securityHolder.isAuthenticated) {
-            val user = securityHolder.user
+        if (!securityHolder.isAuthenticated) return@apply
 
-            progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
-            isLiked = likes.any { it.user == user }
-            isBookmarked = bookmarks.any { it.user == user }
-        }
+        val user = securityHolder.user
+
+        progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
+        isLiked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
+        isBookmarked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
     }
 }

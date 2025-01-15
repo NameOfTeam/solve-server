@@ -79,7 +79,7 @@ class PostCommentReplyServiceImpl(
         content = content,
         author = PostCommentReplyAuthorResponse.of(author),
         likeCount = postCommentReplyLikeRepository.countByReply(this),
-        liked = postCommentReplyLikeRepository.existsByReplyAndUser(this, securityHolder.user),
+        isLiked = postCommentReplyLikeRepository.existsByReplyAndUser(this, securityHolder.user),
         createdAt = createdAt,
         updatedAt = updatedAt
     )
