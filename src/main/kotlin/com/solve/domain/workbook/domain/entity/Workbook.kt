@@ -1,10 +1,8 @@
 package com.solve.domain.workbook.domain.entity
 
-import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.user.domain.entity.User
 import com.solve.domain.workbook.error.WorkbookBookmarkError
 import com.solve.domain.workbook.error.WorkbookLikeError
-import com.solve.domain.workbook.error.WorkbookProblemError
 import com.solve.global.common.entity.BaseTimeEntity
 import com.solve.global.error.CustomException
 import jakarta.persistence.*
@@ -18,8 +16,7 @@ import org.hibernate.annotations.BatchSize
     ]
 )
 class Workbook(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     @Column(name = "title", nullable = false)
@@ -27,10 +24,6 @@ class Workbook(
 
     @Column(name = "description", columnDefinition = "TEXT")
     var description: String?,
-
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val problems: MutableSet<WorkbookProblem> = mutableSetOf(),
 
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -82,23 +75,11 @@ class Workbook(
         bookmarks.remove(bookmark)
     }
 
-    fun addProblem(problem: Problem) {
-        if (hasProblem(problem)) {
-            throw CustomException(WorkbookProblemError.WORKBOOK_PROBLEM_ALREADY_EXISTS)
-        }
-
-        problems.add(WorkbookProblem(this, problem))
-    }
-
     private fun hasLikedBy(user: User): Boolean {
         return likes.any { it.user == user }
     }
 
     private fun hasBookmarkedBy(user: User): Boolean {
         return bookmarks.any { it.user == user }
-    }
-
-    private fun hasProblem(problem: Problem): Boolean {
-        return problems.any { it.problem == problem }
     }
 }
