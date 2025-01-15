@@ -8,6 +8,9 @@ import com.solve.domain.post.dto.response.PostCommentReplyResponse
 import com.solve.domain.post.error.PostCommentError
 import com.solve.domain.post.error.PostCommentReplyError
 import com.solve.domain.post.error.PostError
+import com.solve.domain.post.repository.PostCommentReplyLikeRepository
+import com.solve.domain.post.repository.PostCommentReplyRepository
+import com.solve.domain.post.repository.PostCommentRepository
 import com.solve.domain.post.repository.PostRepository
 import com.solve.domain.post.service.PostCommentReplyService
 import com.solve.global.error.CustomException
@@ -19,24 +22,28 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class PostCommentReplyServiceImpl(
     private val postRepository: PostRepository,
-    private val securityHolder: SecurityHolder
+    private val securityHolder: SecurityHolder,
+    private val postCommentRepository: PostCommentRepository,
+    private val postCommentReplyRepository: PostCommentReplyRepository,
+    private val postCommentReplyLikeRepository: PostCommentReplyLikeRepository
 ) : PostCommentReplyService {
     @Transactional(readOnly = true)
     override fun getReplies(postId: Long, commentId: Long): List<PostCommentReplyResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
+        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
+        val replies = postCommentReplyRepository.findAllByPostAndComment(post, comment)
 
-        return comment.replies.map { it.toResponse() }
+        return replies.map { it.toResponse() }
     }
 
     @Transactional
     override fun createReply(postId: Long, commentId: Long, request: PostCommentReplyCreateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
+        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
         val author = securityHolder.user
-        val reply = request.replyId?.let { comment.replies.find { reply -> reply.id == it } }
+        val reply = request.replyId?.let { postCommentReplyRepository.findByPostAndCommentAndId(post, comment, it) }
 
-        comment.replies.add(PostCommentReply(
+        postCommentReplyRepository.save(PostCommentReply(
             content = request.content,
             author = author,
             post = post,
@@ -48,8 +55,8 @@ class PostCommentReplyServiceImpl(
     @Transactional
     override fun updateReply(postId: Long, commentId: Long, replyId: Long, request: PostCommentReplyUpdateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
-        val reply = comment.replies.find { it.id == replyId } ?: throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_FOUND)
+        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
+        val reply = postCommentReplyRepository.findByPostAndCommentAndId(post, comment, replyId) ?: throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_FOUND)
 
         if (reply.author != securityHolder.user) throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_AUTHORIZED)
 
@@ -59,20 +66,20 @@ class PostCommentReplyServiceImpl(
     @Transactional
     override fun deleteReply(postId: Long, commentId: Long, replyId: Long) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comment = post.comments.find { it.id == commentId } ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
-        val reply = comment.replies.find { it.id == replyId } ?: throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_FOUND, replyId)
+        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
+        val reply = postCommentReplyRepository.findByPostAndCommentAndId(post, comment, replyId) ?: throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_FOUND, replyId)
 
         if (reply.author != securityHolder.user) throw CustomException(PostCommentReplyError.POST_COMMENT_REPLY_NOT_AUTHORIZED)
 
-        comment.replies.remove(reply)
+        postCommentReplyRepository.delete(reply)
     }
 
     private fun PostCommentReply.toResponse() = PostCommentReplyResponse(
         id = id!!,
         content = content,
         author = PostCommentReplyAuthorResponse.of(author),
-        likeCount = likes.size,
-        liked = likes.any { it.user == securityHolder.user },
+        likeCount = postCommentReplyLikeRepository.countByReply(this),
+        liked = postCommentReplyLikeRepository.existsByReplyAndUser(this, securityHolder.user),
         createdAt = createdAt,
         updatedAt = updatedAt
     )

@@ -8,7 +8,7 @@ data class PostCommentReplyResponse(
     val id: Long,
     val content: String,
     val author: PostCommentReplyAuthorResponse,
-    val likeCount: Int,
+    val likeCount: Long,
     val liked: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime

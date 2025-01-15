@@ -9,7 +9,7 @@ import java.io.Serializable
     name = "post_comment_reply_likes",
     indexes = [
         Index(name = "idx_post_comment_reply_like_user", columnList = "user_id"),
-        Index(name = "idx_post_comment_reply_like_comment", columnList = "post_comment_id")
+        Index(name = "idx_post_comment_reply_like_comment", columnList = "post_comment_reply_id")
     ]
 )
 @IdClass(PostCommentReplyLikeId::class)

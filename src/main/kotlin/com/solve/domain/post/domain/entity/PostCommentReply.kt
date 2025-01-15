@@ -33,13 +33,5 @@ class PostCommentReply(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_id")
-    val reply: PostCommentReply? = null,
-
-    @OneToMany(
-        mappedBy = "reply",
-        fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    val likes: MutableSet<PostCommentReplyLike> = mutableSetOf()
+    val reply: PostCommentReply? = null
 ): BaseTimeEntity()
