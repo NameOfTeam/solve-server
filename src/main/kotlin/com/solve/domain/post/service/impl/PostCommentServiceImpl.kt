@@ -29,7 +29,7 @@ class PostCommentServiceImpl(
     @Transactional(readOnly = true)
     override fun getComments(postId: Long): List<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comments = postCommentRepository.findAllByPost(post)
+        val comments = postCommentRepository.findAllByPostOrderByCreatedAtDesc(post)
 
         return comments.map { it.toResponse() }
     }

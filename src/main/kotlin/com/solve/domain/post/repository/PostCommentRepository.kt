@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface PostCommentRepository: JpaRepository<PostComment, Long> {
     fun findAllByPost(post: Post): List<PostComment>
+    fun findAllByPostOrderByCreatedAtDesc(post: Post): List<PostComment>
     fun findByPostAndId(post: Post, id: Long): PostComment?
 }
