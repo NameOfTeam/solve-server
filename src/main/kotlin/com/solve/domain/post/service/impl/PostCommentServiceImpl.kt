@@ -3,6 +3,8 @@ package com.solve.domain.post.service.impl
 import com.solve.domain.post.domain.entity.PostComment
 import com.solve.domain.post.dto.request.PostCommentCreateRequest
 import com.solve.domain.post.dto.request.PostCommentUpdateRequest
+import com.solve.domain.post.dto.response.PostCommentAuthorResponse
+import com.solve.domain.post.dto.response.PostCommentResponse
 import com.solve.domain.post.error.PostCommentError
 import com.solve.domain.post.error.PostError
 import com.solve.domain.post.repository.PostRepository
@@ -18,17 +20,21 @@ class PostCommentServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postRepository: PostRepository
 ) : PostCommentService {
+    override fun getComments(postId: Long): List<PostCommentResponse> {
+        val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
+
+        return post.comments.map { it.toResponse() }
+    }
     @Transactional
     override fun createComment(postId: Long, request: PostCommentCreateRequest) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
         val author = securityHolder.user
-        val comment = PostComment(
+
+        post.comments.add(PostComment(
             post = post,
             content = request.content,
             author = author
-        )
-
-        post.comments.add(comment)
+        ))
     }
 
     @Transactional
@@ -58,4 +64,14 @@ class PostCommentServiceImpl(
 
         post.comments.remove(comment)
     }
+
+    private fun PostComment.toResponse() = PostCommentResponse(
+        id = id!!,
+        content = content,
+        author = PostCommentAuthorResponse.of(author),
+        likeCount = likes.size,
+        liked = likes.any { it.user == securityHolder.user },
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
 }
