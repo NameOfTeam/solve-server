@@ -12,6 +12,7 @@ import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.entity.ProblemTestCase
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.error.ProblemError
+import com.solve.domain.problem.repository.ProblemContributorRepository
 import com.solve.domain.problem.repository.ProblemExampleRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemTestCaseRepository
@@ -29,7 +30,8 @@ class AdminProblemServiceImpl(
     private val securityHolder: SecurityHolder,
     private val problemRepository: ProblemRepository,
     private val problemTestCaseRepository: ProblemTestCaseRepository,
-    private val problemExampleRepository: ProblemExampleRepository
+    private val problemExampleRepository: ProblemExampleRepository,
+    private val problemContributorRepository: ProblemContributorRepository
 ) : AdminProblemService {
     @Transactional(readOnly = true)
     override fun getProblems(pageable: Pageable): Page<AdminProblemResponse> {
@@ -115,7 +117,7 @@ class AdminProblemServiceImpl(
         timeLimit = timeLimit,
         testCases = problemTestCaseRepository.findAllByProblem(this).map { it.toResponse() },
         author = AdminProblemAuthorResponse.of(author),
-        contributors = contributors.map { AdminProblemContributorResponse.of(it.user) },
+        contributors = problemContributorRepository.findAllByProblem(this).map { AdminProblemContributorResponse.of(it.user) },
         correctRate = (submits.map { it.state }
             .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size * 1000).toInt() / 10.0,
     )
