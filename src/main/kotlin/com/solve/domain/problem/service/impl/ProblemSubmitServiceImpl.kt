@@ -10,6 +10,7 @@ import com.solve.domain.problem.error.ProblemSubmitError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import com.solve.domain.problem.repository.ProblemSubmitRepository
+import com.solve.domain.problem.repository.ProblemTestCaseRepository
 import com.solve.domain.problem.service.ProblemSubmitService
 import com.solve.domain.problem.util.DockerCodeExecutor
 import com.solve.domain.user.domain.entity.UserSolved
@@ -35,6 +36,7 @@ class ProblemSubmitServiceImpl(
     private val problemSubmitQueueRepository: ProblemSubmitQueueRepository,
     private val simpMessageSendingOperations: SimpMessageSendingOperations,
     private val userRepository: UserRepository,
+    private val problemTestCaseRepository: ProblemTestCaseRepository,
 ) : ProblemSubmitService {
     @Transactional
     override fun submitProblem(problemId: Long, request: ProblemSubmitRequest): ProblemSubmitResponse {
@@ -80,7 +82,7 @@ class ProblemSubmitServiceImpl(
     fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val executor = DockerCodeExecutor(submit, request, fileProperties)
         val problem = submit.problem
-        val testCases = problem.testCases.shuffled()
+        val testCases = problemTestCaseRepository.findAllByProblem(problem)
         var progress = 0.0
         val totalTestCases = testCases.size.toDouble()
         var maxTimeUsage = 0L  // Long으로 변경

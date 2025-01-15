@@ -17,24 +17,7 @@ data class AdminProblemResponse(
     val author: AdminProblemAuthorResponse,
     val contributors: List<AdminProblemContributorResponse>,
     val testCases: List<AdminProblemTestCaseResponse>
-) {
-    companion object {
-        fun of(problem: Problem) = AdminProblemResponse(
-            id = problem.id!!,
-            title = problem.title,
-            content = problem.content,
-            input = problem.input,
-            output = problem.output,
-            memoryLimit = problem.memoryLimit,
-            timeLimit = problem.timeLimit,
-            testCases = problem.testCases.map { AdminProblemTestCaseResponse.of(it) },
-            author = AdminProblemAuthorResponse.of(problem.author),
-            contributors = problem.contributors.map { AdminProblemContributorResponse.of(it.user) },
-            correctRate = (problem.submits.map { it.state }
-                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / problem.submits.size * 1000).toInt() / 10.0,
-        )
-    }
-}
+)
 
 data class AdminProblemAuthorResponse(
     val username: String

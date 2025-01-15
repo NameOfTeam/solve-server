@@ -9,7 +9,7 @@ import org.springframework.data.domain.Slice
 interface AdminProblemService {
     fun getProblems(pageable: Pageable): Slice<AdminProblemResponse>
     fun getProblem(problemId: Long): AdminProblemResponse
-    fun createProblem(request: AdminProblemCreateRequest): AdminProblemResponse
-    fun updateProblem(problemId: Long, request: AdminProblemUpdateRequest): AdminProblemResponse
+    fun createProblem(request: AdminProblemCreateRequest)
+    fun updateProblem(problemId: Long, request: AdminProblemUpdateRequest)
     fun deleteProblem(problemId: Long)
 }
