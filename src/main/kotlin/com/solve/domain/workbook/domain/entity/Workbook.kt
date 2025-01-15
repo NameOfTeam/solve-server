@@ -25,15 +25,10 @@ class Workbook(
     @Column(name = "description", columnDefinition = "TEXT")
     var description: String?,
 
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "workbook", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val bookmarks: MutableSet<WorkbookBookmark> = mutableSetOf(),
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User
 ) : BaseTimeEntity() {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Workbook) return false
@@ -43,22 +38,5 @@ class Workbook(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    fun addBookmark(user: User) {
-        if (hasBookmarkedBy(user)) {
-            throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_ALREADY_EXISTS)
-        }
-        bookmarks.add(WorkbookBookmark(this, user))
-    }
-
-    fun removeBookmark(user: User) {
-        val bookmark = bookmarks.find { it.user == user }
-            ?: throw CustomException(WorkbookBookmarkError.WORKBOOK_BOOKMARK_NOT_FOUND)
-        bookmarks.remove(bookmark)
-    }
-
-    private fun hasBookmarkedBy(user: User): Boolean {
-        return bookmarks.any { it.user == user }
     }
 }

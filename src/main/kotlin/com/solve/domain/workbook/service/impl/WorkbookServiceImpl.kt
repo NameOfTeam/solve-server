@@ -95,7 +95,7 @@ class WorkbookServiceImpl(
         problems = workbookProblemRepository.findAllByWorkbook(this).map { WorkbookProblemResponse.of(it) },
         author = WorkbookAuthorResponse.of(author),
         likeCount = workbookLikeRepository.countByWorkbook(this),
-        bookmarkCount = bookmarks.size.toLong(),
+        bookmarkCount = workbookLikeRepository.countByWorkbook(this),
         createdAt = createdAt,
         updatedAt = updatedAt
     ).apply {
@@ -105,6 +105,6 @@ class WorkbookServiceImpl(
 
         progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
         isLiked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
-        isBookmarked = bookmarks.any { it.user == user }
+        isBookmarked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
     }
 }

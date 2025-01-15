@@ -5,6 +5,7 @@ import com.solve.domain.workbook.domain.enums.WorkbookSearchFilter
 import com.solve.domain.workbook.dto.response.WorkbookAuthorResponse
 import com.solve.domain.workbook.dto.response.WorkbookProblemResponse
 import com.solve.domain.workbook.dto.response.WorkbookResponse
+import com.solve.domain.workbook.repository.WorkbookBookmarkRepository
 import com.solve.domain.workbook.repository.WorkbookLikeRepository
 import com.solve.domain.workbook.repository.WorkbookProblemRepository
 import com.solve.domain.workbook.repository.WorkbookQueryRepository
@@ -20,7 +21,8 @@ class WorkbookSearchServiceImpl(
     private val workbookQueryRepository: WorkbookQueryRepository,
     private val securityHolder: SecurityHolder,
     private val workbookProblemRepository: WorkbookProblemRepository,
-    private val workbookLikeRepository: WorkbookLikeRepository
+    private val workbookLikeRepository: WorkbookLikeRepository,
+    private val workbookBookmarkRepository: WorkbookBookmarkRepository
 ) : WorkbookSearchService {
     @Transactional(readOnly = true)
     override fun searchWorkbook(
@@ -40,7 +42,7 @@ class WorkbookSearchServiceImpl(
         problems = workbookProblemRepository.findAllByWorkbook(this).map { WorkbookProblemResponse.of(it) },
         author = WorkbookAuthorResponse.of(author),
         likeCount = workbookLikeRepository.countByWorkbook(this),
-        bookmarkCount = bookmarks.size.toLong(),
+        bookmarkCount = workbookBookmarkRepository.countByWorkbook(this),
         createdAt = createdAt,
         updatedAt = updatedAt
     ).apply {
@@ -50,6 +52,6 @@ class WorkbookSearchServiceImpl(
 
         progress = this.problems.intersect(user.solved.map { it.problem }.toSet()).size
         isLiked = workbookLikeRepository.existsByWorkbookAndUser(this@toResponse, user)
-        isBookmarked = bookmarks.any { it.user == user }
+        isBookmarked = workbookBookmarkRepository.existsByWorkbookAndUser(this@toResponse, user)
     }
 }
