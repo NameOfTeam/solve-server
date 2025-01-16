@@ -3,7 +3,6 @@ package com.solve.domain.problem.util.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.problem.service.impl.ProblemRunService
-import com.solve.global.security.jwt.provider.JwtProvider
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
@@ -12,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 class CodeExecutionWebSocketHandler(
     private val problemRunService: ProblemRunService,
-    private val jwtProvider: JwtProvider,
 ) : TextWebSocketHandler() {
     private val sessions = ConcurrentHashMap<String, WebSocketSession>()
 
@@ -23,18 +21,8 @@ class CodeExecutionWebSocketHandler(
             return
         }
 
-        val headers = session.handshakeHeaders
-        val authToken = headers["Authorization"]?.firstOrNull()?.removePrefix("Bearer ")
-
-        if (authToken.isNullOrBlank()) {
-            session.close(CloseStatus.BAD_DATA)
-            return
-        }
-
         try {
-            val userEmail = jwtProvider.getEmail(authToken)
             sessions[session.id] = session
-            session.attributes["user"] = userEmail
             session.attributes["runId"] = runId
             problemRunService.startExecution(runId, session)
         } catch (e: Exception) {
@@ -64,11 +52,14 @@ class CodeExecutionWebSocketHandler(
             return
         }
 
-        when (messageData.type.lowercase()) {
+        when (messageData.type) {
             "input" -> messageData.input?.let { input ->
                 problemRunService.handleInput(runId, input)
             }
-            "stop" -> problemRunService.stopCode(runId)
+            "stop" -> {
+                problemRunService.stopCode(runId)
+                session.close()
+            }
             else -> session.sendMessage(TextMessage("""{"type":"error","content":"Unknown message type"}"""))
         }
     }

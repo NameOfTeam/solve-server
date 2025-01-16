@@ -85,8 +85,10 @@ class ProblemRunService(
                     }
                 }
                 session.sendMessage(TextMessage("""{"type":"status","content":"Execution completed"}"""))
+                session.close()
             } catch (e: Exception) {
                 session.sendMessage(TextMessage("""{"type":"error","content":"Execution failed: ${e.message}"}"""))
+                session.close()
             } finally {
                 runningProcesses.remove(runId)
             }
