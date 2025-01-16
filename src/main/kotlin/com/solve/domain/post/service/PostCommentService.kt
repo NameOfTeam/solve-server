@@ -3,8 +3,6 @@ package com.solve.domain.post.service
 import com.solve.domain.post.dto.request.PostCommentCreateRequest
 import com.solve.domain.post.dto.request.PostCommentUpdateRequest
 import com.solve.domain.post.dto.response.PostCommentResponse
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 interface PostCommentService {
     fun getComments(postId: Long, cursorId: Long?, size: Int): List<PostCommentResponse>

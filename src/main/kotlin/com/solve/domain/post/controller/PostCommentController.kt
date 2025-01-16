@@ -6,7 +6,6 @@ import com.solve.domain.post.service.PostCommentService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "게시글 댓글", description = "Post Comment")

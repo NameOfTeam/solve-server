@@ -1,6 +1,5 @@
 package com.solve.domain.contest.dto.response
 
-import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.enums.ContestState
 import com.solve.domain.contest.domain.enums.ContestVisibility
 import java.time.LocalDateTime
