@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface PostCommentService {
-    fun getComments(postId: Long, pageable: Pageable): Page<PostCommentResponse>
+    fun getComments(postId: Long, cursorId: Long?, size: Int): List<PostCommentResponse>
     fun createComment(postId: Long, request: PostCommentCreateRequest)
     fun updateComment(postId: Long, commentId: Long, request: PostCommentUpdateRequest)
     fun deleteComment(postId: Long, commentId: Long)

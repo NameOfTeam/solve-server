@@ -19,9 +19,9 @@ class PostCommentController(
     @GetMapping
     fun getComments(
         @PathVariable postId: Long,
-        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false) cursorId: Long?,
         @RequestParam(required = false, defaultValue = "10") size: Int
-    ) = BaseResponse.of(postCommentService.getComments(postId, PageRequest.of(page, size)))
+    ) = BaseResponse.of(postCommentService.getComments(postId, cursorId, size))
 
     @Operation(summary = "게시글 댓글 생성")
     @PostMapping

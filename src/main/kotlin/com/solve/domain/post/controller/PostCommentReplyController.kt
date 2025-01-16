@@ -6,7 +6,6 @@ import com.solve.domain.post.service.PostCommentReplyService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -28,9 +27,9 @@ class PostCommentReplyController(
     fun getReplies(
         @PathVariable postId: Long,
         @PathVariable commentId: Long,
-        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false) cursorId: Long?,
         @RequestParam(required = false, defaultValue = "10") size: Int
-    ) = BaseResponse.of(postCommentReplyService.getReplies(postId, commentId, PageRequest.of(page, size)))
+    ) = BaseResponse.of(postCommentReplyService.getReplies(postId, commentId, cursorId, size))
 
     @Operation(summary = "게시글 댓글 답글 생성")
     @PostMapping

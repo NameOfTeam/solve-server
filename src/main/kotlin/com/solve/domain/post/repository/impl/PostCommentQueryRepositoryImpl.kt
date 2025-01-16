@@ -1,13 +1,11 @@
 package com.solve.domain.post.repository.impl
 
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.solve.domain.post.domain.entity.Post
 import com.solve.domain.post.domain.entity.PostComment
 import com.solve.domain.post.domain.entity.QPostComment
 import com.solve.domain.post.repository.PostCommentQueryRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,21 +16,27 @@ class PostCommentQueryRepositoryImpl(
     private val postComment = QPostComment.postComment
 
     @Transactional(readOnly = true)
-    override fun getComments(post: Post, pageable: Pageable): Page<PostComment> {
-        val baseQuery = queryFactory
+    override fun getComments(
+        post: Post,
+        cursor: PostComment?,
+        size: Int
+    ): List<PostComment> {
+        return queryFactory
             .selectFrom(postComment)
-            .where(postComment.post.eq(post))
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .orderBy(postComment._createdAt.desc())
+            .where(
+                postComment.post.eq(post),
+                cursorIdCondition(cursor)
+            )
+            .orderBy(postComment._createdAt.desc(), postComment.id.desc())
+            .limit(size.toLong())
+            .fetch() ?: emptyList()
+    }
 
-        val comments = baseQuery.fetch()
-        val totalCount = queryFactory
-            .select(postComment.count())
-            .from(postComment)
-            .where(postComment.post.eq(post))
-            .fetchOne() ?: 0L
-
-        return PageImpl(comments, pageable, totalCount)
+    private fun cursorIdCondition(cursor: PostComment?): BooleanExpression? {
+        return if (cursor != null) {
+            postComment.id.lt(cursor.id!!)
+        } else {
+            null
+        }
     }
 }
