@@ -6,7 +6,6 @@ import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemRunRepository
 import com.solve.domain.problem.util.CodeRunner
-import com.solve.domain.problem.util.WebSocketManager
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
@@ -30,14 +29,10 @@ class ProblemRunService(
 
     // HTTP 요청으로 초기 실행 준비
     fun initializeRun(request: RunCodeRequest): String {
-        val problem = problemRepository.findByIdOrNull(request.problemId)
-            ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, request.problemId)
-
         val author = userRepository.findByEmail(securityHolder.user.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
         val run = ProblemRun(
-            problem = problem,
             author = author,
             code = request.code,
             language = request.language
@@ -47,7 +42,6 @@ class ProblemRunService(
         return savedRun.id.toString()
     }
 
-    // WebSocket 연결 시 실제 코드 실행
     fun startExecution(runId: String, session: WebSocketSession) {
         val run = problemRunRepository.findByIdOrNull(runId.toLong())
             ?: throw CustomException(ProblemError.PROBLEM_NOT_AUTHORIZED)
@@ -55,12 +49,10 @@ class ProblemRunService(
         val codeRunner = CodeRunner(run.language, fileProperties)
         runningProcesses[runId] = codeRunner
 
-        // 실행 시작 알림
         session.sendMessage(TextMessage("""{"type":"status","content":"Started code execution"}"""))
 
         val process = codeRunner.execute(runId, run.code)
 
-        // 출력 모니터링 스레드
         Thread {
             try {
                 process.inputStream.bufferedReader().use { reader ->

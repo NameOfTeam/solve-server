@@ -13,10 +13,6 @@ class ProblemRun(
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id", nullable = false)
-    val problem: Problem,
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,
 
