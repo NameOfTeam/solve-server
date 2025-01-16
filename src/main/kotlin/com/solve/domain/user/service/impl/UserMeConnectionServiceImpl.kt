@@ -3,6 +3,7 @@ package com.solve.domain.user.service.impl
 import com.solve.domain.user.domain.entity.UserConnection
 import com.solve.domain.user.dto.request.UserMeAddConnectionRequest
 import com.solve.domain.user.error.UserConnectionError
+import com.solve.domain.user.repository.UserConnectionRepository
 import com.solve.domain.user.repository.UserRepository
 import com.solve.domain.user.service.UserMeConnectionService
 import com.solve.global.error.CustomException
@@ -14,17 +15,18 @@ import java.util.*
 @Service
 class UserMeConnectionServiceImpl(
     private val securityHolder: SecurityHolder,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userConnectionRepository: UserConnectionRepository
 ) : UserMeConnectionService {
     @Transactional
     override fun addConnection(request: UserMeAddConnectionRequest) {
         val user = securityHolder.user
-        val connection = user.connections.find { it.type == request.type }
+        val connection = userConnectionRepository.findByUserAndType(user, request.type)
 
         if (connection != null) {
             connection.value = request.value
         } else {
-            user.connections.add(
+            userConnectionRepository.save(
                 UserConnection(
                     user = user,
                     type = request.type,
@@ -39,12 +41,10 @@ class UserMeConnectionServiceImpl(
     @Transactional
     override fun removeConnection(connectionId: UUID) {
         val user = securityHolder.user
-        val connection = user.connections.find { it.id == connectionId } ?: throw CustomException(
+        val connection = userConnectionRepository.findByUserAndId(user, connectionId) ?: throw CustomException(
             UserConnectionError.CONNECTION_NOT_FOUND
         )
 
-        user.connections.remove(connection)
-
-        userRepository.save(user)
+        userConnectionRepository.delete(connection)
     }
 }

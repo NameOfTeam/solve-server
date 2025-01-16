@@ -55,11 +55,7 @@ class User(
 
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val frozen: MutableSet<UserFrozen> = mutableSetOf(),
-
-    @BatchSize(size = 20)
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val connections: MutableSet<UserConnection> = mutableSetOf()
+    val frozen: MutableSet<UserFrozen> = mutableSetOf()
 ) : BaseTimeEntity() {
 
     override fun equals(other: Any?): Boolean {
