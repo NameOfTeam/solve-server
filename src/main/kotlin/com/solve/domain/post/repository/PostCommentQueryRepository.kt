@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface PostCommentQueryRepository {
-    fun getComments(post: Post, pageable: Pageable): Page<PostComment>
+    fun getComments(post: Post, cursorId: Long?, size: Int): List<PostComment>
 }

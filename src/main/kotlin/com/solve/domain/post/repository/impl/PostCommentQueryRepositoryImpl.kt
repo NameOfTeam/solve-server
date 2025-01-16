@@ -1,5 +1,6 @@
 package com.solve.domain.post.repository.impl
 
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.solve.domain.post.domain.entity.Post
 import com.solve.domain.post.domain.entity.PostComment
@@ -18,21 +19,27 @@ class PostCommentQueryRepositoryImpl(
     private val postComment = QPostComment.postComment
 
     @Transactional(readOnly = true)
-    override fun getComments(post: Post, pageable: Pageable): Page<PostComment> {
-        val baseQuery = queryFactory
+    override fun getComments(
+        post: Post,
+        cursorId: Long?,
+        size: Int
+    ): List<PostComment> {
+        return queryFactory
             .selectFrom(postComment)
-            .where(postComment.post.eq(post))
-            .offset(pageable.offset)
-            .limit(pageable.pageSize.toLong())
-            .orderBy(postComment._createdAt.desc())
+            .where(
+                postComment.post.eq(post),
+                cursorIdCondition(cursorId)
+            )
+            .orderBy(postComment._createdAt.desc(), postComment.id.desc())
+            .limit(size.toLong())
+            .fetch() ?: emptyList()
+    }
 
-        val comments = baseQuery.fetch()
-        val totalCount = queryFactory
-            .select(postComment.count())
-            .from(postComment)
-            .where(postComment.post.eq(post))
-            .fetchOne() ?: 0L
-
-        return PageImpl(comments, pageable, totalCount)
+    private fun cursorIdCondition(cursorId: Long?): BooleanExpression? {
+        return if (cursorId != null && cursorId > 0) {
+            postComment.id.lt(cursorId)
+        } else {
+            null
+        }
     }
 }

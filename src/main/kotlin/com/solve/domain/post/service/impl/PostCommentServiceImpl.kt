@@ -27,9 +27,9 @@ class PostCommentServiceImpl(
     private val postCommentReplyRepository: PostCommentReplyRepository,
 ) : PostCommentService {
     @Transactional(readOnly = true)
-    override fun getComments(postId: Long, pageable: Pageable): Page<PostCommentResponse> {
+    override fun getComments(postId: Long, cursorId: Long?, size: Int): List<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comments = postCommentQueryRepository.getComments(post, pageable)
+        val comments = postCommentQueryRepository.getComments(post, cursorId, size)
 
         return comments.map { it.toResponse() }
     }
