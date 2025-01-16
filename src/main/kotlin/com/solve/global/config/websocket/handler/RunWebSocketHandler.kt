@@ -1,4 +1,4 @@
-package com.solve.domain.run.util.handler
+package com.solve.global.config.websocket.handler
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
