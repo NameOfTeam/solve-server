@@ -2,6 +2,7 @@ package com.solve.domain.user.service.impl
 
 import com.solve.domain.user.dto.response.UserResponse
 import com.solve.domain.user.error.UserError
+import com.solve.domain.user.mapper.UserMapper
 import com.solve.domain.user.repository.UserRepository
 import com.solve.domain.user.service.UserService
 import com.solve.global.error.CustomException
@@ -10,8 +11,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserServiceImpl(
-    private val userRepository: UserRepository
-): UserService {
+    private val userRepository: UserRepository,
+    private val userMapper: UserMapper
+) : UserService {
     @Transactional(readOnly = true)
     override fun getUser(username: String): UserResponse {
         val user = userRepository.findByUsername(username) ?: throw CustomException(
@@ -19,6 +21,6 @@ class UserServiceImpl(
             username
         )
 
-        return UserResponse.of(user)
+        return userMapper.toResponse(user)
     }
 }
