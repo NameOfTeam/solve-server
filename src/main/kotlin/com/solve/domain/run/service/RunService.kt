@@ -21,14 +21,12 @@ import java.util.concurrent.ConcurrentHashMap
 class RunService(
     private val runRepository: RunRepository,
     private val fileProperties: FileProperties,
-    private val userRepository: UserRepository,
     private val securityHolder: SecurityHolder,
 ) {
     private val runningProcesses = ConcurrentHashMap<String, CodeRunner>()
 
     fun runCode(request: RunCodeRequest): RunResponse {
-        val author = userRepository.findByEmail(securityHolder.user.email)
-            ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
+        val author = securityHolder.user
 
         val run = Run(
             author = author,

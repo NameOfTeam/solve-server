@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 
-@Tag(name = "코드 실행", description = "run code")
+@Tag(name = "코드 실행", description = "Run Code")
 @RestController
 @RequestMapping("/runs")
 class RunController(
