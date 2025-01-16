@@ -35,13 +35,7 @@ class Contest(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)
-    var visibility: ContestVisibility = ContestVisibility.PUBLIC,
-
-    @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val participants: MutableSet<ContestParticipant> = mutableSetOf(),
-
-    @OneToMany(mappedBy = "contest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val problems: MutableSet<ContestProblem> = mutableSetOf(),
+    var visibility: ContestVisibility = ContestVisibility.PUBLIC
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
