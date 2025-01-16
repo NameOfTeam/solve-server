@@ -37,9 +37,6 @@ class Post(
     @JoinColumn(name = "problem_id")
     var problem: Problem? = null,
 
-    @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val likes: MutableSet<PostLike> = mutableSetOf(),
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User
