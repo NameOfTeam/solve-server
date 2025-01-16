@@ -1,6 +1,5 @@
 package com.solve.global.config.websocket.handler
 
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.run.dto.request.RunWebSocketMessage
 import com.solve.domain.run.service.RunService
