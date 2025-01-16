@@ -19,16 +19,14 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class RunService(
-    private val problemRepository: ProblemRepository,
-    private val problemRunRepository: RunRepository,
+    private val runRepository: RunRepository,
     private val fileProperties: FileProperties,
     private val userRepository: UserRepository,
     private val securityHolder: SecurityHolder,
 ) {
     private val runningProcesses = ConcurrentHashMap<String, CodeRunner>()
 
-    // HTTP 요청으로 초기 실행 준비
-    fun initializeRun(request: RunCodeRequest): String {
+    fun initializeRun(request: RunCodeRequest): RunCodeRequest {
         val author = userRepository.findByEmail(securityHolder.user.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
@@ -38,12 +36,13 @@ class RunService(
             language = request.language
         )
 
-        val savedRun = problemRunRepository.save(run)
-        return savedRun.id.toString()
+        runRepository.save(run)
+
+        return request
     }
 
     fun startExecution(runId: String, session: WebSocketSession) {
-        val run = problemRunRepository.findByIdOrNull(runId.toLong())
+        val run = runRepository.findByIdOrNull(runId.toLong())
             ?: throw CustomException(ProblemError.PROBLEM_NOT_AUTHORIZED)
 
         val codeRunner = CodeRunner(run.language, fileProperties)

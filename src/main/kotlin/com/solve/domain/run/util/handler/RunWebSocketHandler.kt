@@ -11,7 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
 
 class RunWebSocketHandler(
-    private val problemRunService: RunService,
+    private val runRepository: RunService,
 ) : TextWebSocketHandler() {
     private val sessions = ConcurrentHashMap<String, WebSocketSession>()
 
@@ -25,7 +25,7 @@ class RunWebSocketHandler(
         try {
             sessions[session.id] = session
             session.attributes["runId"] = runId
-            problemRunService.startExecution(runId, session)
+            runRepository.startExecution(runId, session)
         } catch (e: Exception) {
             session.close(CloseStatus.BAD_DATA)
         }
@@ -35,7 +35,7 @@ class RunWebSocketHandler(
         val runId = session.attributes["runId"] as? String
         sessions.remove(session.id)
         if (runId != null) {
-            problemRunService.stopCode(runId)
+            runRepository.stopCode(runId)
         }
     }
 
@@ -55,10 +55,10 @@ class RunWebSocketHandler(
 
         when (messageData.type) {
             "input" -> messageData.input?.let { input ->
-                problemRunService.handleInput(runId, input)
+                runRepository.handleInput(runId, input)
             }
             "stop" -> {
-                problemRunService.stopCode(runId)
+                runRepository.stopCode(runId)
                 session.close()
             }
             else -> session.sendMessage(TextMessage("""{"type":"error","content":"Unknown message type"}"""))

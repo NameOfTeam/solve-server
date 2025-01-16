@@ -6,7 +6,7 @@ import com.solve.global.common.enums.ProgrammingLanguage
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "problem_runs")
+@Table(name = "runs")
 class Run(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
