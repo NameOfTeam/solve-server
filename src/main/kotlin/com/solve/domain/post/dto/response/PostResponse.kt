@@ -17,6 +17,7 @@ data class PostResponse(
     val problem: PostProblemResponse?,
     val likeCount: Long,
     val isLiked: Boolean,
+    val commentCount: Long,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

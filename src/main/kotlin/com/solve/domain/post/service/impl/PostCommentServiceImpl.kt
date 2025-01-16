@@ -7,10 +7,7 @@ import com.solve.domain.post.dto.response.PostCommentAuthorResponse
 import com.solve.domain.post.dto.response.PostCommentResponse
 import com.solve.domain.post.error.PostCommentError
 import com.solve.domain.post.error.PostError
-import com.solve.domain.post.repository.PostCommentLikeRepository
-import com.solve.domain.post.repository.PostCommentReplyRepository
-import com.solve.domain.post.repository.PostCommentRepository
-import com.solve.domain.post.repository.PostRepository
+import com.solve.domain.post.repository.*
 import com.solve.domain.post.service.PostCommentService
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
@@ -25,13 +22,14 @@ class PostCommentServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postRepository: PostRepository,
     private val postCommentRepository: PostCommentRepository,
+    private val postCommentQueryRepository: PostCommentQueryRepository,
     private val postCommentLikeRepository: PostCommentLikeRepository,
-    private val postCommentReplyRepository: PostCommentReplyRepository
+    private val postCommentReplyRepository: PostCommentReplyRepository,
 ) : PostCommentService {
     @Transactional(readOnly = true)
     override fun getComments(postId: Long, pageable: Pageable): Page<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comments = postCommentRepository.findAllByPostOrderByCreatedAtDesc(post, pageable)
+        val comments = postCommentQueryRepository.getComments(post, pageable)
 
         return comments.map { it.toResponse() }
     }

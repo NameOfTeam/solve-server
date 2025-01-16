@@ -8,10 +8,7 @@ import com.solve.domain.post.dto.response.PostCommentReplyResponse
 import com.solve.domain.post.error.PostCommentError
 import com.solve.domain.post.error.PostCommentReplyError
 import com.solve.domain.post.error.PostError
-import com.solve.domain.post.repository.PostCommentReplyLikeRepository
-import com.solve.domain.post.repository.PostCommentReplyRepository
-import com.solve.domain.post.repository.PostCommentRepository
-import com.solve.domain.post.repository.PostRepository
+import com.solve.domain.post.repository.*
 import com.solve.domain.post.service.PostCommentReplyService
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
@@ -27,13 +24,14 @@ class PostCommentReplyServiceImpl(
     private val securityHolder: SecurityHolder,
     private val postCommentRepository: PostCommentRepository,
     private val postCommentReplyRepository: PostCommentReplyRepository,
-    private val postCommentReplyLikeRepository: PostCommentReplyLikeRepository
+    private val postCommentReplyLikeRepository: PostCommentReplyLikeRepository,
+    private val postCommentReplyQueryRepository: PostCommentReplyQueryRepository
 ) : PostCommentReplyService {
     @Transactional(readOnly = true)
     override fun getReplies(postId: Long, commentId: Long, pageable: Pageable): Page<PostCommentReplyResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND)
         val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND)
-        val replies = postCommentReplyRepository.findAllByPostAndCommentOrderByCreatedAt(post, comment, pageable)
+        val replies = postCommentReplyQueryRepository.getReplies(post, comment, pageable)
 
         return replies.map { it.toResponse() }
     }
