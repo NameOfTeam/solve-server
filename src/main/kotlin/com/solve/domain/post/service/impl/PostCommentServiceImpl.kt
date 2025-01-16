@@ -11,8 +11,6 @@ import com.solve.domain.post.repository.*
 import com.solve.domain.post.service.PostCommentService
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +27,8 @@ class PostCommentServiceImpl(
     @Transactional(readOnly = true)
     override fun getComments(postId: Long, cursorId: Long?, size: Int): List<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comments = postCommentQueryRepository.getComments(post, cursorId, size)
+        val cursor = cursorId?.let { postCommentRepository.findByIdOrNull(it) ?: throw CustomException(PostCommentError.POST_COMMENT_CURSOR_NOT_FOUND, it) }
+        val comments = postCommentQueryRepository.getComments(post, cursor, size)
 
         return comments.map { it.toResponse() }
     }

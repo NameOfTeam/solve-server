@@ -6,9 +6,6 @@ import com.solve.domain.post.domain.entity.Post
 import com.solve.domain.post.domain.entity.PostComment
 import com.solve.domain.post.domain.entity.QPostComment
 import com.solve.domain.post.repository.PostCommentQueryRepository
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,23 +18,23 @@ class PostCommentQueryRepositoryImpl(
     @Transactional(readOnly = true)
     override fun getComments(
         post: Post,
-        cursorId: Long?,
+        cursor: PostComment?,
         size: Int
     ): List<PostComment> {
         return queryFactory
             .selectFrom(postComment)
             .where(
                 postComment.post.eq(post),
-                cursorIdCondition(cursorId)
+                cursorIdCondition(cursor)
             )
             .orderBy(postComment._createdAt.desc(), postComment.id.desc())
             .limit(size.toLong())
             .fetch() ?: emptyList()
     }
 
-    private fun cursorIdCondition(cursorId: Long?): BooleanExpression? {
-        return if (cursorId != null && cursorId > 0) {
-            postComment.id.lt(cursorId)
+    private fun cursorIdCondition(cursor: PostComment?): BooleanExpression? {
+        return if (cursor != null) {
+            postComment.id.lt(cursor.id!!)
         } else {
             null
         }
