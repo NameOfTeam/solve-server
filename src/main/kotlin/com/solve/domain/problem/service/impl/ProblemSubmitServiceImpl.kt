@@ -77,7 +77,7 @@ class ProblemSubmitServiceImpl(
         }
     }
 
-//    @Transactional
+    //    @Transactional
     fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val executor = CodeExecutor(submit, request, fileProperties)
         val problem = submit.problem
