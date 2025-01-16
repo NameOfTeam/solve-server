@@ -58,10 +58,12 @@ class RunWebSocketHandler(
             "input" -> messageData.input?.let { input ->
                 runService.handleInput(runId, input)
             }
+
             "stop" -> {
                 runService.stopCode(runId)
                 session.close()
             }
+
             else -> session.sendMessage(TextMessage("""{"type":"error","content":"Unknown message type"}"""))
         }
     }

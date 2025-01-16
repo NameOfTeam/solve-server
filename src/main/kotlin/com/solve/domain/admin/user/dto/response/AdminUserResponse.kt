@@ -1,6 +1,5 @@
 package com.solve.domain.admin.user.dto.response
 
-import com.solve.domain.user.domain.entity.User
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.dto.response.UserMeConnectionResponse
 import java.time.LocalDate
@@ -21,22 +20,4 @@ data class AdminUserResponse(
     val connections: List<UserMeConnectionResponse>,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
-) {
-    companion object {
-        fun of(me: User) = AdminUserResponse(
-            id = me.id!!,
-            username = me.username,
-            email = me.email,
-            introduction = me.introduction,
-            role = me.role,
-            streak = me.streak,
-            maxStreak = me.maxStreak,
-            grass = me.grass,
-            solvedCount = me.solvedCount,
-            isSolvedToday = me.solvedToday,
-            connections = me.connections.map { UserMeConnectionResponse.of(it) },
-            createdAt = me.createdAt,
-            updatedAt = me.updatedAt
-        )
-    }
-}
+)

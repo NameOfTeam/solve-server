@@ -36,7 +36,8 @@ class WorkbookLikeServiceImpl(
             workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
         val user = securityHolder.user
         val workbookLike =
-            workbookLikeRepository.findByWorkbookAndUser(workbook, user) ?: throw CustomException(WorkbookLikeError.WORKBOOK_LIKE_NOT_FOUND)
+            workbookLikeRepository.findByWorkbookAndUser(workbook, user)
+                ?: throw CustomException(WorkbookLikeError.WORKBOOK_LIKE_NOT_FOUND)
 
         workbookLikeRepository.delete(workbookLike)
     }

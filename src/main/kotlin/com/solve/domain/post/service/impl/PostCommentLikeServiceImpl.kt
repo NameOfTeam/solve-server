@@ -24,24 +24,31 @@ class PostCommentLikeServiceImpl(
     @Transactional
     override fun likeComment(postId: Long, commentId: Long) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
+        val comment = postCommentRepository.findByPostAndId(post, commentId)
+            ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
         val user = securityHolder.user
 
         if (postCommentLikeRepository.existsByCommentAndUser(comment, user))
             throw CustomException(PostCommentLikeError.POST_COMMENT_ALREADY_LIKED, commentId)
 
-        postCommentLikeRepository.save(PostCommentLike(
-            comment = comment,
-            user = user
-        ))
+        postCommentLikeRepository.save(
+            PostCommentLike(
+                comment = comment,
+                user = user
+            )
+        )
     }
 
     @Transactional
     override fun unlikeComment(postId: Long, commentId: Long) {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val comment = postCommentRepository.findByPostAndId(post, commentId) ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
+        val comment = postCommentRepository.findByPostAndId(post, commentId)
+            ?: throw CustomException(PostCommentError.POST_COMMENT_NOT_FOUND, commentId)
         val user = securityHolder.user
-        val like = postCommentLikeRepository.findByCommentAndUser(comment, user) ?: throw CustomException(PostCommentLikeError.POST_COMMENT_NOT_LIKED, commentId)
+        val like = postCommentLikeRepository.findByCommentAndUser(comment, user) ?: throw CustomException(
+            PostCommentLikeError.POST_COMMENT_NOT_LIKED,
+            commentId
+        )
 
         postCommentLikeRepository.delete(like)
     }

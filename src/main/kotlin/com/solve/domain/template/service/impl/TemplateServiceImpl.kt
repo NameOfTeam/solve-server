@@ -5,6 +5,6 @@ import com.solve.global.common.enums.ProgrammingLanguage
 import org.springframework.stereotype.Service
 
 @Service
-class TemplateServiceImpl: TemplateService {
+class TemplateServiceImpl : TemplateService {
     override fun getTemplate(language: ProgrammingLanguage) = language.template
 }

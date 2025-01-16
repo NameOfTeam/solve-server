@@ -1,5 +1,6 @@
 package com.solve.domain.problem.domain.entity
 
+import com.solve.domain.problem.domain.enums.ProblemTag
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.entity.BaseTimeEntity
 import com.solve.global.common.enums.Tier
@@ -40,6 +41,16 @@ class Problem(
     @Enumerated(EnumType.STRING)
     @Column(name = "tier", nullable = false)
     val tier: Tier,
+
+    @ElementCollection
+    @CollectionTable(
+        name = "problem_tags",
+        joinColumns = [JoinColumn(name = "problem_id")]
+    )
+    @Column(name = "tag")
+    @Enumerated(EnumType.STRING)
+    @BatchSize(size = 20)
+    val tags: MutableSet<ProblemTag> = mutableSetOf(),
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

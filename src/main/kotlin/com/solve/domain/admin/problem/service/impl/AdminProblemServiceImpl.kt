@@ -48,15 +48,15 @@ class AdminProblemServiceImpl(
     override fun createProblem(request: AdminProblemCreateRequest) {
         val author = securityHolder.user
         val problem = Problem(
-                title = request.title,
-                content = request.content,
-                input = request.input,
-                output = request.output,
-                tier = Tier.UNRATED,
-                memoryLimit = request.memoryLimit,
-                timeLimit = request.timeLimit,
-                author = author
-            )
+            title = request.title,
+            content = request.content,
+            input = request.input,
+            output = request.output,
+            tier = Tier.UNRATED,
+            memoryLimit = request.memoryLimit,
+            timeLimit = request.timeLimit,
+            author = author
+        )
 
         problemRepository.save(problem)
 
@@ -115,7 +115,8 @@ class AdminProblemServiceImpl(
         timeLimit = timeLimit,
         testCases = problemTestCaseRepository.findAllByProblem(this).map { it.toResponse() },
         author = AdminProblemAuthorResponse.of(author),
-        contributors = problemContributorRepository.findAllByProblem(this).map { AdminProblemContributorResponse.of(it.user) },
+        contributors = problemContributorRepository.findAllByProblem(this)
+            .map { AdminProblemContributorResponse.of(it.user) },
         correctRate = problemSubmitRepository.findAllByProblem(this).let { submits ->
             (submits.map { it.state }
                 .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size * 1000).toInt() / 10.0

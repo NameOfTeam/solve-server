@@ -1,12 +1,7 @@
 package com.solve.domain.theme.domain.entity
 
 import com.solve.global.common.entity.BaseTimeEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "themes")
@@ -40,4 +35,4 @@ class Theme(
 
     @Column(name = "price", nullable = false)
     val price: Int,
-): BaseTimeEntity()
+) : BaseTimeEntity()

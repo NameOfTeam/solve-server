@@ -6,8 +6,8 @@ import com.solve.domain.admin.contest.error.AdminContestParticipantError
 import com.solve.domain.admin.contest.service.AdminContestParticipantService
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.error.ContestError
-import com.solve.domain.contest.error.ContestOperatorError
 import com.solve.domain.contest.repository.ContestOperatorRepository
+import com.solve.domain.contest.repository.ContestParticipantRepository
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
@@ -23,7 +23,8 @@ class AdminContestParticipantServiceImpl(
     private val securityHolder: SecurityHolder,
     private val contestRepository: ContestRepository,
     private val userRepository: UserRepository,
-    private val contestOperatorRepository: ContestOperatorRepository
+    private val contestOperatorRepository: ContestOperatorRepository,
+    private val contestParticipantRepository: ContestParticipantRepository
 ) : AdminContestParticipantService {
     @Transactional
     override fun addContestParticipant(contestId: Long, request: AdminContestParticipantAddRequest) {
@@ -36,11 +37,10 @@ class AdminContestParticipantServiceImpl(
         if (!contestOperatorRepository.existsByContestAndUser(contest, me) && contest.owner != me)
             throw CustomException(AdminContestError.CONTEST_NOT_AUTHORIZED)
 
-        if (contest.participants.any { it.user == user }) {
+        if (contestParticipantRepository.existsByContestAndUser(contest, user))
             throw CustomException(AdminContestParticipantError.CONTEST_PARTICIPANT_ALREADY_EXISTS)
-        }
 
-        contest.participants.add(ContestParticipant(contest = contest, user = user))
+        contestParticipantRepository.save(ContestParticipant(contest = contest, user = user))
     }
 
     @Transactional
@@ -48,17 +48,14 @@ class AdminContestParticipantServiceImpl(
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
         val user = userRepository.findByIdOrNull(userId) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_ID)
-        val operator = securityHolder.user
+        val me = securityHolder.user
 
-        if (!contestOperatorRepository.existsByContestAndUser(contest, operator) && contest.owner != operator)
+        if (!contestOperatorRepository.existsByContestAndUser(contest, me) && contest.owner != me)
             throw CustomException(AdminContestError.CONTEST_NOT_AUTHORIZED)
 
-        if (contest.participants.none { it.user == user }) {
-            throw CustomException(AdminContestParticipantError.CONTEST_PARTICIPANT_NOT_FOUND)
-        }
+        val participant = contestParticipantRepository.findByContestAndUser(contest, user)
+            ?: throw CustomException(AdminContestParticipantError.CONTEST_PARTICIPANT_NOT_FOUND)
 
-        contest.participants.removeIf { it.user == user }
-
-        contestRepository.save(contest)
+        contestParticipantRepository.delete(participant)
     }
 }

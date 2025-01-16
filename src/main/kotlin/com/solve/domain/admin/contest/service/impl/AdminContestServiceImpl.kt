@@ -10,6 +10,8 @@ import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.error.ContestError
 import com.solve.domain.contest.repository.ContestOperatorRepository
+import com.solve.domain.contest.repository.ContestParticipantRepository
+import com.solve.domain.contest.repository.ContestProblemRepository
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.user.repository.UserRepository
@@ -27,7 +29,9 @@ class AdminContestServiceImpl(
     private val userRepository: UserRepository,
     private val problemRepository: ProblemRepository,
     private val contestRepository: ContestRepository,
-    private val contestOperatorRepository: ContestOperatorRepository
+    private val contestOperatorRepository: ContestOperatorRepository,
+    private val contestParticipantRepository: ContestParticipantRepository,
+    private val contestProblemRepository: ContestProblemRepository
 ) : AdminContestService {
     @Transactional(readOnly = true)
     override fun getContests(pageable: Pageable): Page<AdminContestResponse> {
@@ -58,26 +62,28 @@ class AdminContestServiceImpl(
             visibility = request.visibility
         )
 
+        contestRepository.save(contest)
+
         contestOperatorRepository.saveAll(operators.map {
             ContestOperator(
                 contest = contest,
                 user = it
             )
         })
-        contest.participants.addAll(participants.map {
+
+        contestParticipantRepository.saveAll(participants.map {
             ContestParticipant(
                 contest = contest,
                 user = it
             )
         })
-        contest.problems.addAll(problems.map {
+
+        contestProblemRepository.saveAll(problems.map {
             ContestProblem(
                 contest = contest,
                 problem = it
             )
         })
-
-        contestRepository.save(contest)
     }
 
     @Transactional
@@ -100,7 +106,7 @@ class AdminContestServiceImpl(
         contestRepository.delete(contest)
     }
 
-    private fun Contest.toResponse() =  AdminContestResponse(
+    private fun Contest.toResponse() = AdminContestResponse(
         id = id!!,
         title = title,
         description = description,
@@ -108,9 +114,10 @@ class AdminContestServiceImpl(
         endAt = endAt,
         createdAt = createdAt,
         updatedAt = updatedAt,
-        participants = participants.map { AdminContestParticipantResponse.of(it) },
+        participants = contestParticipantRepository.findAllByContest(this)
+            .map { AdminContestParticipantResponse.of(it) },
         operators = contestOperatorRepository.findAllByContest(this).map { AdminContestOperatorResponse.of(it) },
-        problems = problems.map { AdminContestProblemResponse.of(it) },
+        problems = contestProblemRepository.findAllByContest(this).map { AdminContestProblemResponse.of(it) },
         visibility = visibility,
         owner = AdminContestOwnerResponse.of(owner)
     )

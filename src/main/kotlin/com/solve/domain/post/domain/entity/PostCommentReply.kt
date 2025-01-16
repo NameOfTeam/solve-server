@@ -34,4 +34,4 @@ class PostCommentReply(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_id")
     val reply: PostCommentReply? = null
-): BaseTimeEntity()
+) : BaseTimeEntity()

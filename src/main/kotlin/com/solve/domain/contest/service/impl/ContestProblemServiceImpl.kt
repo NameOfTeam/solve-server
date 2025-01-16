@@ -3,9 +3,9 @@ package com.solve.domain.contest.service.impl
 import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.dto.request.ContestProblemAddRequest
 import com.solve.domain.contest.error.ContestError
-import com.solve.domain.contest.error.ContestOperatorError
 import com.solve.domain.contest.error.ContestProblemError
 import com.solve.domain.contest.repository.ContestOperatorRepository
+import com.solve.domain.contest.repository.ContestProblemRepository
 import com.solve.domain.contest.repository.ContestRepository
 import com.solve.domain.contest.service.ContestProblemService
 import com.solve.domain.problem.error.ProblemError
@@ -21,7 +21,8 @@ class ContestProblemServiceImpl(
     private val securityHolder: SecurityHolder,
     private val contestRepository: ContestRepository,
     private val problemRepository: ProblemRepository,
-    private val contestOperatorRepository: ContestOperatorRepository
+    private val contestOperatorRepository: ContestOperatorRepository,
+    private val contestProblemRepository: ContestProblemRepository
 ) : ContestProblemService {
     @Transactional
     override fun addContestProblem(contestId: Long, request: ContestProblemAddRequest) {
@@ -34,11 +35,10 @@ class ContestProblemServiceImpl(
         if (!contestOperatorRepository.existsByContestAndUser(contest, me) && contest.owner != me)
             throw CustomException(ContestError.CONTEST_NOT_AUTHORIZED)
 
-        if (contest.problems.any { it.problem == problem }) {
+        if (contestProblemRepository.existsByContestAndProblem(contest, problem))
             throw CustomException(ContestProblemError.CONTEST_PROBLEM_ALREADY_EXISTS)
-        }
 
-        contest.problems.add(ContestProblem(contest = contest, problem = problem))
+        contestProblemRepository.save(ContestProblem(contest = contest, problem = problem))
 
         contestRepository.save(contest)
     }
@@ -50,12 +50,16 @@ class ContestProblemServiceImpl(
         val problem =
             problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
-        if (!contestOperatorRepository.existsByContestAndUser(contest, securityHolder.user) && contest.owner != securityHolder.user)
+        if (!contestOperatorRepository.existsByContestAndUser(
+                contest,
+                securityHolder.user
+            ) && contest.owner != securityHolder.user
+        )
             throw CustomException(ContestError.CONTEST_NOT_AUTHORIZED)
 
-        val contestProblem = contest.problems.find { it.problem == problem }
+        val contestProblem = contestProblemRepository.findByContestAndProblem(contest, problem)
             ?: throw CustomException(ContestProblemError.CONTEST_PROBLEM_NOT_FOUND)
 
-        contest.problems.remove(contestProblem)
+        contestProblemRepository.delete(contestProblem)
     }
 }

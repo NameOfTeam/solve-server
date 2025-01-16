@@ -6,6 +6,7 @@ import com.solve.domain.user.dto.request.UserMePasswordUpdateRequest
 import com.solve.domain.user.dto.request.UserMeUpdateRequest
 import com.solve.domain.user.dto.response.UserMeResponse
 import com.solve.domain.user.error.UserError
+import com.solve.domain.user.mapper.UserMeMapper
 import com.solve.domain.user.repository.UserRepository
 import com.solve.domain.user.service.UserMeService
 import com.solve.global.config.file.FileProperties
@@ -22,13 +23,14 @@ class UserMeServiceImpl(
     private val securityHolder: SecurityHolder,
     private val passwordEncoder: BCryptPasswordEncoder,
     private val userRepository: UserRepository,
-    private val fileProperties: FileProperties
+    private val fileProperties: FileProperties,
+    private val userMeMapper: UserMeMapper
 ) : UserMeService {
     @Transactional(readOnly = true)
     override fun getMe(): UserMeResponse {
         val user = securityHolder.user
 
-        return UserMeResponse.of(user)
+        return userMeMapper.toResponse(user)
     }
 
     @Transactional
@@ -41,7 +43,7 @@ class UserMeServiceImpl(
 
         user = userRepository.save(user)
 
-        return UserMeResponse.of(user)
+        return userMeMapper.toResponse(user)
     }
 
     @Transactional
@@ -58,7 +60,7 @@ class UserMeServiceImpl(
 
         user = userRepository.save(user)
 
-        return UserMeResponse.of(user)
+        return userMeMapper.toResponse(user)
     }
 
     @Transactional
@@ -81,6 +83,6 @@ class UserMeServiceImpl(
 
         png.delete()
 
-        return UserMeResponse.of(user)
+        return userMeMapper.toResponse(user)
     }
 }

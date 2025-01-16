@@ -1,8 +1,6 @@
 package com.solve.domain.admin.problem.dto.response
 
-import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.entity.ProblemTestCase
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.user.domain.entity.User
 
 data class AdminProblemResponse(

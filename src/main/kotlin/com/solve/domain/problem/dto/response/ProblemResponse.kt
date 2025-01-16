@@ -1,9 +1,9 @@
 package com.solve.domain.problem.dto.response
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
+import com.solve.domain.problem.domain.enums.ProblemTag
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.enums.Tier
 
@@ -18,6 +18,7 @@ data class ProblemResponse(
     val timeLimit: Double,
     var correctRate: Double,
     val tier: Tier,
+    val tags: Set<ProblemTag>,
     val solvedCount: Int,
     val examples: List<ProblemExampleResponse>,
     val author: ProblemAuthorResponse,

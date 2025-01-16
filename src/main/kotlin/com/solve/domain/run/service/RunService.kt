@@ -1,13 +1,11 @@
 package com.solve.domain.run.service
 
+import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.run.domain.entity.Run
 import com.solve.domain.run.dto.request.RunCodeRequest
-import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.run.dto.response.RunResponse
 import com.solve.domain.run.repository.RunRepository
 import com.solve.domain.run.util.CodeRunner
-import com.solve.domain.user.error.UserError
-import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder

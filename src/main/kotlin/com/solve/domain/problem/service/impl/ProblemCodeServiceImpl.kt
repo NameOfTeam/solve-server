@@ -22,7 +22,10 @@ class ProblemCodeServiceImpl(
     @Transactional
     override fun saveCode(problemId: Long, request: ProblemCodeCreateRequest) {
         val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(
+                ProblemError.PROBLEM_NOT_FOUND,
+                problemId
+            )
 
         val user = securityHolder.user
 
@@ -48,12 +51,16 @@ class ProblemCodeServiceImpl(
     @Transactional(readOnly = true)
     override fun getCode(problemId: Long): ProblemCodeResponse {
         val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(
+                ProblemError.PROBLEM_NOT_FOUND,
+                problemId
+            )
 
         val user = securityHolder.user
 
         val code =
-            problemCodeRepository.findByProblemAndUser(problem, user) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+            problemCodeRepository.findByProblemAndUser(problem, user)
+                ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
         return ProblemCodeResponse.of(code)
     }
@@ -61,12 +68,16 @@ class ProblemCodeServiceImpl(
     @Transactional
     override fun deleteCode(problemId: Long) {
         val problem =
-            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, problemId)
+            problemRepository.findByIdOrNull(problemId) ?: throw CustomException(
+                ProblemError.PROBLEM_NOT_FOUND,
+                problemId
+            )
 
         val user = securityHolder.user
 
         val code =
-            problemCodeRepository.findByProblemAndUser(problem, user) ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
+            problemCodeRepository.findByProblemAndUser(problem, user)
+                ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
 
         problemCodeRepository.delete(code)
     }

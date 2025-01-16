@@ -1,6 +1,5 @@
 package com.solve.domain.admin.contest.dto.response
 
-import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.ContestOperator
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.domain.entity.ContestProblem

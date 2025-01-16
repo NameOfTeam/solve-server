@@ -1,12 +1,8 @@
 package com.solve.domain.workbook.domain.entity
 
 import com.solve.domain.user.domain.entity.User
-import com.solve.domain.workbook.error.WorkbookBookmarkError
-import com.solve.domain.workbook.error.WorkbookLikeError
 import com.solve.global.common.entity.BaseTimeEntity
-import com.solve.global.error.CustomException
 import jakarta.persistence.*
-import org.hibernate.annotations.BatchSize
 
 @Entity
 @Table(

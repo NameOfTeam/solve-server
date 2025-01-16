@@ -1,6 +1,7 @@
 package com.solve.domain.user.service.impl
 
 import com.solve.domain.user.dto.response.UserResponse
+import com.solve.domain.user.mapper.UserMapper
 import com.solve.domain.user.repository.UserQueryRepository
 import com.solve.domain.user.service.UserSearchService
 import org.springframework.data.domain.Page
@@ -10,12 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserSearchServiceImpl(
-    private val userQueryRepository: UserQueryRepository
-): UserSearchService {
+    private val userQueryRepository: UserQueryRepository,
+    private val userMapper: UserMapper
+) : UserSearchService {
     @Transactional(readOnly = true)
     override fun searchUser(query: String, pageable: Pageable): Page<UserResponse> {
         val users = userQueryRepository.searchUser(query, pageable)
 
-        return users.map { UserResponse.of(it) }
+        return users.map { userMapper.toResponse(it) }
     }
 }

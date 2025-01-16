@@ -40,7 +40,8 @@ class AdminContestOperatorServiceImpl(
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
         val user = userRepository.findByIdOrNull(userId) ?: throw CustomException(UserError.USER_NOT_FOUND_BY_ID)
         val operator =
-            contestOperatorRepository.findByContestAndUser(contest, user) ?: throw CustomException(ContestOperatorError.CONTEST_OPERATOR_NOT_FOUND)
+            contestOperatorRepository.findByContestAndUser(contest, user)
+                ?: throw CustomException(ContestOperatorError.CONTEST_OPERATOR_NOT_FOUND)
 
         contestOperatorRepository.delete(operator)
     }

@@ -34,7 +34,8 @@ class AdminWorkbookServiceImpl(
 
     @Transactional(readOnly = true)
     override fun getWorkbook(workbookId: Long): AdminWorkbookResponse {
-        val workbook = workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
+        val workbook =
+            workbookRepository.findByIdOrNull(workbookId) ?: throw CustomException(WorkbookError.WORKBOOK_NOT_FOUND)
 
         return workbook.toResponse()
     }
