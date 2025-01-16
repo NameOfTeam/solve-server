@@ -18,5 +18,6 @@ class TemplateController(
 ) {
     @Operation(summary = "템플릿 조회", description = "템플릿을 조회합니다.")
     @GetMapping("/{language}")
-    fun getTemplate(@PathVariable language: ProgrammingLanguage) = BaseResponse.of(templateService.getTemplate(language))
+    fun getTemplate(@PathVariable language: ProgrammingLanguage) =
+        BaseResponse.of(templateService.getTemplate(language))
 }

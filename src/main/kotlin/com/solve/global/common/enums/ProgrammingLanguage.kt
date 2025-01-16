@@ -1,34 +1,43 @@
 package com.solve.global.common.enums
 
 enum class ProgrammingLanguage(val template: String) {
-    JAVA("""
+    JAVA(
+        """
 public class Main {
    public static void main(String[] args) {
 
    }
 }
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    KOTLIN("""
+    KOTLIN(
+        """
 fun main() {
 
 }
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    PYTHON("""
+    PYTHON(
+        """
 
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    C("""
+    C(
+        """
 #include <stdio.h>
 
 int main() {
 
    return 0;
 }
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    CPP("""
+    CPP(
+        """
 #include <iostream>
 using namespace std;
 
@@ -36,9 +45,11 @@ int main() {
 
    return 0;
 }
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    CSHARP("""
+    CSHARP(
+        """
 using System;
 
 class MainClass {
@@ -46,13 +57,18 @@ class MainClass {
 
    }
 }
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    NODE_JS("""
+    NODE_JS(
+        """
 
-""".trimIndent()),
+""".trimIndent()
+    ),
 
-    SWIFT("""
+    SWIFT(
+        """
 
-""".trimIndent());
+""".trimIndent()
+    );
 }

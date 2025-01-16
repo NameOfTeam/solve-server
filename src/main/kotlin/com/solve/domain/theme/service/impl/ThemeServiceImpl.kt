@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ThemeServiceImpl(
     private val themeRepository: ThemeRepository
-): ThemeService {
+) : ThemeService {
     @Transactional(readOnly = true)
     override fun getThemes(pageable: Pageable): Page<ThemeResponse> {
         val themes = themeRepository.findAll(pageable)

@@ -14,14 +14,14 @@ class ProblemCodeController(
 ) {
     @Operation(summary = "코드 저장", description = "작성 중인 코드를 저장합니다.")
     @PostMapping
-    fun saveCode(@PathVariable problemId : Long, request: ProblemCodeCreateRequest) =
+    fun saveCode(@PathVariable problemId: Long, request: ProblemCodeCreateRequest) =
         problemCodeService.saveCode(problemId, request)
 
     @Operation(summary = "코드 불러오기", description = "저장된 코드를 불러옵니다.")
     @GetMapping
-    fun getCode(@PathVariable problemId : Long) = problemCodeService.getCode(problemId)
+    fun getCode(@PathVariable problemId: Long) = problemCodeService.getCode(problemId)
 
     @Operation(summary = "코드 초기화", description = "저장된 코드를 삭제합니다.")
     @DeleteMapping
-    fun deleteCode(@PathVariable problemId : Long) = problemCodeService.deleteCode(problemId)
+    fun deleteCode(@PathVariable problemId: Long) = problemCodeService.deleteCode(problemId)
 }

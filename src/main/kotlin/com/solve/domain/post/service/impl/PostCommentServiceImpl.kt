@@ -27,7 +27,10 @@ class PostCommentServiceImpl(
     @Transactional(readOnly = true)
     override fun getComments(postId: Long, cursorId: Long?, size: Int): List<PostCommentResponse> {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException(PostError.POST_NOT_FOUND, postId)
-        val cursor = cursorId?.let { postCommentRepository.findByIdOrNull(it) ?: throw CustomException(PostCommentError.POST_COMMENT_CURSOR_NOT_FOUND, it) }
+        val cursor = cursorId?.let {
+            postCommentRepository.findByIdOrNull(it)
+                ?: throw CustomException(PostCommentError.POST_COMMENT_CURSOR_NOT_FOUND, it)
+        }
         val comments = postCommentQueryRepository.getComments(post, cursor, size)
 
         return comments.map { it.toResponse() }
@@ -80,7 +83,10 @@ class PostCommentServiceImpl(
         content = content,
         author = PostCommentAuthorResponse.of(author),
         likeCount = postCommentLikeRepository.countByComment(this),
-        isLiked = securityHolder.isAuthenticated && postCommentLikeRepository.existsByCommentAndUser(this, securityHolder.user),
+        isLiked = securityHolder.isAuthenticated && postCommentLikeRepository.existsByCommentAndUser(
+            this,
+            securityHolder.user
+        ),
         replyCount = postCommentReplyRepository.countByComment(this),
         createdAt = createdAt,
         updatedAt = updatedAt

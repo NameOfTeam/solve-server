@@ -5,6 +5,6 @@ import com.solve.domain.problem.dto.response.ProblemCodeResponse
 
 interface ProblemCodeService {
     fun saveCode(problemId: Long, request: ProblemCodeCreateRequest)
-    fun getCode(problemId: Long) : ProblemCodeResponse
+    fun getCode(problemId: Long): ProblemCodeResponse
     fun deleteCode(problemId: Long)
 }
