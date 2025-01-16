@@ -1,4 +1,4 @@
-package com.solve.domain.problem.domain.entity
+package com.solve.domain.run.domain.entity
 
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.entity.BaseTimeEntity
@@ -7,7 +7,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "problem_runs")
-class ProblemRun(
+class Run(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

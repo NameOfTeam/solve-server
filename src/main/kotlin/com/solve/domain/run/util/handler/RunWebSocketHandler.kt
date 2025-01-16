@@ -1,16 +1,17 @@
-package com.solve.domain.problem.util.handler
+package com.solve.domain.run.util.handler
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.solve.domain.problem.service.impl.ProblemRunService
+import com.solve.domain.run.dto.request.RunWebSocketMessage
+import com.solve.domain.run.service.RunService
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
 
-class CodeExecutionWebSocketHandler(
-    private val problemRunService: ProblemRunService,
+class RunWebSocketHandler(
+    private val problemRunService: RunService,
 ) : TextWebSocketHandler() {
     private val sessions = ConcurrentHashMap<String, WebSocketSession>()
 
@@ -46,7 +47,7 @@ class CodeExecutionWebSocketHandler(
         }
 
         val messageData = try {
-            ObjectMapper().readValue(message.payload, WebSocketMessage::class.java)
+            ObjectMapper().readValue(message.payload, RunWebSocketMessage::class.java)
         } catch (e: Exception) {
             session.sendMessage(TextMessage("""{"type":"error","content":"Invalid message format"}"""))
             return
@@ -64,8 +65,3 @@ class CodeExecutionWebSocketHandler(
         }
     }
 }
-
-data class WebSocketMessage(
-    val type: String = "",
-    val input: String? = null
-)

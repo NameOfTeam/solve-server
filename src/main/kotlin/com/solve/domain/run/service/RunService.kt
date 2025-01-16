@@ -1,11 +1,11 @@
-package com.solve.domain.problem.service.impl
+package com.solve.domain.run.service
 
-import com.solve.domain.problem.domain.entity.ProblemRun
-import com.solve.domain.problem.dto.request.RunCodeRequest
+import com.solve.domain.run.domain.entity.Run
+import com.solve.domain.run.dto.request.RunCodeRequest
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
-import com.solve.domain.problem.repository.ProblemRunRepository
-import com.solve.domain.problem.util.CodeRunner
+import com.solve.domain.run.repository.RunRepository
+import com.solve.domain.run.util.CodeRunner
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
@@ -18,9 +18,9 @@ import org.springframework.web.socket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class ProblemRunService(
+class RunService(
     private val problemRepository: ProblemRepository,
-    private val problemRunRepository: ProblemRunRepository,
+    private val problemRunRepository: RunRepository,
     private val fileProperties: FileProperties,
     private val userRepository: UserRepository,
     private val securityHolder: SecurityHolder,
@@ -32,7 +32,7 @@ class ProblemRunService(
         val author = userRepository.findByEmail(securityHolder.user.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
-        val run = ProblemRun(
+        val run = Run(
             author = author,
             code = request.code,
             language = request.language

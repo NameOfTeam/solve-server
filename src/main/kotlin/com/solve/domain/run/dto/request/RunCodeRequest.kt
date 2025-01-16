@@ -1,4 +1,4 @@
-package com.solve.domain.problem.dto.request
+package com.solve.domain.run.dto.request
 
 import com.solve.global.common.enums.ProgrammingLanguage
 
