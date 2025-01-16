@@ -8,6 +8,7 @@ import com.solve.domain.post.dto.response.PostCreateResponse
 import com.solve.domain.post.dto.response.PostProblemResponse
 import com.solve.domain.post.dto.response.PostResponse
 import com.solve.domain.post.error.PostError
+import com.solve.domain.post.repository.PostCommentRepository
 import com.solve.domain.post.repository.PostRepository
 import com.solve.domain.post.service.PostService
 import com.solve.domain.problem.error.ProblemError
@@ -22,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional
 class PostServiceImpl(
     private val securityHolder: SecurityHolder,
     private val problemRepository: ProblemRepository,
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
+    private val postCommentRepository: PostCommentRepository
 ) : PostService {
     @Transactional(readOnly = true)
     override fun getPost(postId: Long): PostResponse {
@@ -105,6 +107,7 @@ class PostServiceImpl(
         isLiked = likes.any { it.user == securityHolder.user },
         author = PostAuthorResponse.of(author),
         problem = problem?.let { PostProblemResponse.of(it) },
+        commentCount = postCommentRepository.countByPost(this),
         createdAt = createdAt,
         updatedAt = updatedAt
     )
