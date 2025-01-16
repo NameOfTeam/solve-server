@@ -1,4 +1,4 @@
-package com.solve.global.config.websocket.handler
+package com.solve.global.websocket.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.problem.domain.enums.ProblemSubmitState

@@ -95,7 +95,7 @@ class RunService(
 
     private fun sendOutput(session: WebSocketSession, output: String) {
         if (session.isOpen) {
-            session.sendMessage(TextMessage("""{"type":"output","content":"$output"}"""))
+            session.sendMessage(TextMessage("""{"type":"output","content":"${output.replace("\"", "\\\"")}"}"""))
         }
     }
 }
