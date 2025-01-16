@@ -1,7 +1,7 @@
 package com.solve.global.config.websocket
 
-import com.solve.global.config.websocket.handler.ProgressWebSocketHandler
-import com.solve.global.config.websocket.handler.RunWebSocketHandler
+import com.solve.global.websocket.handler.ProgressWebSocketHandler
+import com.solve.global.websocket.handler.RunWebSocketHandler
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer

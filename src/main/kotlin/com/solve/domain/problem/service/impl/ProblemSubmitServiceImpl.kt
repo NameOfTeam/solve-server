@@ -15,7 +15,7 @@ import com.solve.domain.problem.util.CodeExecutor
 import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
-import com.solve.global.config.websocket.handler.ProgressWebSocketHandler
+import com.solve.global.websocket.handler.ProgressWebSocketHandler
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
