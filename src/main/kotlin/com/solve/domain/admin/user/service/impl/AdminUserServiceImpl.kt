@@ -4,6 +4,7 @@ import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.webp.WebpWriter
 import com.solve.domain.admin.user.dto.request.AdminUserUpdateRequest
 import com.solve.domain.admin.user.dto.response.AdminUserResponse
+import com.solve.domain.admin.user.mapper.AdminUserMapper
 import com.solve.domain.admin.user.service.AdminUserService
 import com.solve.domain.user.domain.enums.UserRole
 import com.solve.domain.user.error.UserError
@@ -24,7 +25,8 @@ import java.util.*
 class AdminUserServiceImpl(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val fileProperties: FileProperties
+    private val fileProperties: FileProperties,
+    private val adminUserMapper: AdminUserMapper
 ) : AdminUserService {
     @Transactional(readOnly = true)
     override fun getUsers(pageable: Pageable, search: String, role: UserRole): Slice<AdminUserResponse> {
@@ -35,7 +37,7 @@ class AdminUserServiceImpl(
             search
         )
 
-        return users.map { AdminUserResponse.of(it) }
+        return users.map { adminUserMapper.toResponse(it) }
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +47,7 @@ class AdminUserServiceImpl(
             userId.toString()
         )
 
-        return AdminUserResponse.of(user)
+        return adminUserMapper.toResponse(user)
     }
 
     @Transactional
@@ -59,7 +61,7 @@ class AdminUserServiceImpl(
         request.introduction?.let { user.introduction = it }
         request.role?.let { user.role = it }
 
-        return AdminUserResponse.of(user)
+        return adminUserMapper.toResponse(user)
     }
 
     @Transactional
@@ -85,7 +87,7 @@ class AdminUserServiceImpl(
 
         png.delete()
 
-        return AdminUserResponse.of(user)
+        return adminUserMapper.toResponse(user)
     }
 
     @Transactional
@@ -97,6 +99,6 @@ class AdminUserServiceImpl(
 
         userRepository.delete(user)
 
-        return AdminUserResponse.of(user)
+        return adminUserMapper.toResponse(user)
     }
 }
