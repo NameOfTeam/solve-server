@@ -3,7 +3,6 @@ package com.solve.domain.problem.service.impl
 import com.solve.domain.problem.domain.entity.ProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.request.ProblemSubmitRequest
-import com.solve.domain.problem.dto.response.ProblemSubmitProgressResponse
 import com.solve.domain.problem.dto.response.ProblemSubmitResponse
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.error.ProblemSubmitError
@@ -16,10 +15,10 @@ import com.solve.domain.problem.util.CodeExecutor
 import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
+import com.solve.global.config.websocket.handler.ProgressWebSocketHandler
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.messaging.simp.SimpMessageSendingOperations
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,9 +33,9 @@ class ProblemSubmitServiceImpl(
     private val problemRepository: ProblemRepository,
     private val problemSubmitRepository: ProblemSubmitRepository,
     private val problemSubmitQueueRepository: ProblemSubmitQueueRepository,
-    private val simpMessageSendingOperations: SimpMessageSendingOperations,
     private val userRepository: UserRepository,
     private val problemTestCaseRepository: ProblemTestCaseRepository,
+    private val progressWebSocketHandler: ProgressWebSocketHandler
 ) : ProblemSubmitService {
     @Transactional
     override fun submitProblem(problemId: Long, request: ProblemSubmitRequest): ProblemSubmitResponse {
@@ -53,7 +52,7 @@ class ProblemSubmitServiceImpl(
         )
 
         problemSubmitRepository.save(submit)
-        problemSubmitQueueRepository.push(submit.id!!)
+//        problemSubmitQueueRepository.push(submit.id!!)
 
         return ProblemSubmitResponse.of(submit)
     }
@@ -78,7 +77,7 @@ class ProblemSubmitServiceImpl(
         }
     }
 
-    @Transactional
+//    @Transactional
     fun processSubmit(submit: ProblemSubmit, request: ProblemSubmitRequest) {
         val executor = CodeExecutor(submit, request, fileProperties)
         val problem = submit.problem
@@ -123,12 +122,7 @@ class ProblemSubmitServiceImpl(
     }
 
     private fun updateProgress(submitId: Long, progress: Double, state: ProblemSubmitState) {
-        val progressResponse = ProblemSubmitProgressResponse(
-            submitId = submitId,
-            progress = progress,
-            result = state
-        )
-        simpMessageSendingOperations.convertAndSend("/sub/progress/$submitId", progressResponse)
+        progressWebSocketHandler.sendProgressUpdate(submitId, progress, state)
     }
 
     private fun handleAcceptedSubmission(submit: ProblemSubmit) {
