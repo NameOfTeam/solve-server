@@ -1,4 +1,4 @@
-package com.solve.domain.problem.util
+package com.solve.domain.run.util
 
 import com.solve.domain.problem.util.config.LanguageConfig
 import com.solve.global.common.enums.ProgrammingLanguage
