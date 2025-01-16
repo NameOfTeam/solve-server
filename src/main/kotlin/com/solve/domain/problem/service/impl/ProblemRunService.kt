@@ -1,12 +1,12 @@
 package com.solve.domain.problem.service.impl
 
 import com.solve.domain.problem.domain.entity.ProblemRun
+import com.solve.domain.problem.dto.request.RunCodeRequest
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemRunRepository
-import com.solve.domain.problem.service.ProblemRunService
-import com.solve.domain.problem.service.RunCodeRequest
 import com.solve.domain.problem.util.CodeRunner
+import com.solve.domain.problem.util.WebSocketManager
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.config.file.FileProperties
@@ -14,25 +14,26 @@ import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class ProblemRunServiceImpl(
+class ProblemRunService(
     private val problemRepository: ProblemRepository,
     private val problemRunRepository: ProblemRunRepository,
     private val fileProperties: FileProperties,
     private val userRepository: UserRepository,
-) : ProblemRunService {
+    private val securityHolder: SecurityHolder,
+) {
     private val runningProcesses = ConcurrentHashMap<String, CodeRunner>()
 
-    override fun runCode(request: RunCodeRequest, session: WebSocketSession) {
+    // HTTP 요청으로 초기 실행 준비
+    fun initializeRun(request: RunCodeRequest): String {
         val problem = problemRepository.findByIdOrNull(request.problemId)
             ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND, request.problemId)
 
-        val author = userRepository.findByEmail(session.attributes["user"].toString())
+        val author = userRepository.findByEmail(securityHolder.user.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
         val run = ProblemRun(
@@ -43,26 +44,21 @@ class ProblemRunServiceImpl(
         )
 
         val savedRun = problemRunRepository.save(run)
-        processRun(savedRun, session)
+        return savedRun.id.toString()
     }
 
-    override fun stopCode(sessionId: String) {
-        runningProcesses[sessionId]?.stop()
-        runningProcesses.remove(sessionId)
-    }
+    // WebSocket 연결 시 실제 코드 실행
+    fun startExecution(runId: String, session: WebSocketSession) {
+        val run = problemRunRepository.findByIdOrNull(runId.toLong())
+            ?: throw CustomException(ProblemError.PROBLEM_NOT_AUTHORIZED)
 
-    override fun handleInput(sessionId: String, input: String) {
-        runningProcesses[sessionId]?.sendInput(input)
-    }
-
-    private fun processRun(run: ProblemRun, session: WebSocketSession) {
         val codeRunner = CodeRunner(run.language, fileProperties)
-        runningProcesses[session.id] = codeRunner
+        runningProcesses[runId] = codeRunner
 
         // 실행 시작 알림
         session.sendMessage(TextMessage("""{"type":"status","content":"Started code execution"}"""))
 
-        val process = codeRunner.execute(run.id.toString(), run.code)
+        val process = codeRunner.execute(runId, run.code)
 
         // 출력 모니터링 스레드
         Thread {
@@ -92,9 +88,20 @@ class ProblemRunServiceImpl(
             } catch (e: Exception) {
                 session.sendMessage(TextMessage("""{"type":"error","content":"Execution failed: ${e.message}"}"""))
             } finally {
-                runningProcesses.remove(session.id)
+                runningProcesses.remove(runId)
             }
         }.start()
+    }
+
+    fun handleInput(runId: String, input: String?) {
+        input?.let {
+            runningProcesses[runId]?.sendInput(it)
+        }
+    }
+
+    fun stopCode(runId: String) {
+        runningProcesses[runId]?.stop()
+        runningProcesses.remove(runId)
     }
 
     private fun sendOutput(session: WebSocketSession, output: String) {

@@ -1,6 +1,6 @@
 package com.solve.global.config.websocket
 
-import com.solve.domain.problem.service.ProblemRunService
+import com.solve.domain.problem.service.impl.ProblemRunService
 import com.solve.domain.problem.util.handler.CodeExecutionWebSocketHandler
 import com.solve.global.config.websocket.interceptor.WebSocketInterceptor
 import com.solve.global.security.jwt.provider.JwtProvider
@@ -23,7 +23,7 @@ class WebSocketConfig : WebSocketConfigurer {
     private lateinit var socketInterceptor: WebSocketInterceptor
 
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(CodeExecutionWebSocketHandler(problemRunService, jwtProvider), "/ws/run")
+        registry.addHandler(CodeExecutionWebSocketHandler(problemRunService, jwtProvider), "/ws/run/{runId}")
             .setAllowedOrigins("*").addInterceptors(socketInterceptor)
     }
 }
