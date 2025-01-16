@@ -1,12 +1,10 @@
 package com.solve.domain.run.controller
 
 import com.solve.domain.run.dto.request.RunCodeRequest
-import com.solve.domain.run.dto.response.RunResponse
 import com.solve.domain.run.service.RunService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "코드 실행", description = "run code")
@@ -17,5 +15,5 @@ class RunController(
 ) {
     @Operation(summary = "코드 실행", description = "코드를 실행합니다.")
     @PostMapping
-    fun runCode(@RequestBody request: RunCodeRequest) = BaseResponse.of(runService.initializeRun(request))
+    fun runCode(@RequestBody request: RunCodeRequest) = BaseResponse.of(runService.runCode(request))
 }

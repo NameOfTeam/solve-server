@@ -3,7 +3,7 @@ package com.solve.domain.run.service
 import com.solve.domain.run.domain.entity.Run
 import com.solve.domain.run.dto.request.RunCodeRequest
 import com.solve.domain.problem.error.ProblemError
-import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.domain.run.dto.response.RunResponse
 import com.solve.domain.run.repository.RunRepository
 import com.solve.domain.run.util.CodeRunner
 import com.solve.domain.user.error.UserError
@@ -26,7 +26,7 @@ class RunService(
 ) {
     private val runningProcesses = ConcurrentHashMap<String, CodeRunner>()
 
-    fun initializeRun(request: RunCodeRequest): RunCodeRequest {
+    fun runCode(request: RunCodeRequest): RunResponse {
         val author = userRepository.findByEmail(securityHolder.user.email)
             ?: throw CustomException(UserError.USER_NOT_FOUND_BY_EMAIL)
 
@@ -38,10 +38,10 @@ class RunService(
 
         runRepository.save(run)
 
-        return request
+        return RunResponse(run.id!!)
     }
 
-    fun startExecution(runId: String, session: WebSocketSession) {
+    fun startRun(runId: String, session: WebSocketSession) {
         val run = runRepository.findByIdOrNull(runId.toLong())
             ?: throw CustomException(ProblemError.PROBLEM_NOT_AUTHORIZED)
 

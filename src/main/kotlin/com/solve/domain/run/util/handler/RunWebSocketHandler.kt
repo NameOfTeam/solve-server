@@ -4,14 +4,16 @@ package com.solve.domain.run.util.handler
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.run.dto.request.RunWebSocketMessage
 import com.solve.domain.run.service.RunService
+import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
 
+@Component
 class RunWebSocketHandler(
-    private val runRepository: RunService,
+    private val runService: RunService,
 ) : TextWebSocketHandler() {
     private val sessions = ConcurrentHashMap<String, WebSocketSession>()
 
@@ -25,7 +27,7 @@ class RunWebSocketHandler(
         try {
             sessions[session.id] = session
             session.attributes["runId"] = runId
-            runRepository.startExecution(runId, session)
+            runService.startRun(runId, session)
         } catch (e: Exception) {
             session.close(CloseStatus.BAD_DATA)
         }
@@ -35,7 +37,7 @@ class RunWebSocketHandler(
         val runId = session.attributes["runId"] as? String
         sessions.remove(session.id)
         if (runId != null) {
-            runRepository.stopCode(runId)
+            runService.stopCode(runId)
         }
     }
 
@@ -55,10 +57,10 @@ class RunWebSocketHandler(
 
         when (messageData.type) {
             "input" -> messageData.input?.let { input ->
-                runRepository.handleInput(runId, input)
+                runService.handleInput(runId, input)
             }
             "stop" -> {
-                runRepository.stopCode(runId)
+                runService.stopCode(runId)
                 session.close()
             }
             else -> session.sendMessage(TextMessage("""{"type":"error","content":"Unknown message type"}"""))
