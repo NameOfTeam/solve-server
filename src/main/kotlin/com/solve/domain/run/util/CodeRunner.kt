@@ -55,14 +55,17 @@ class CodeRunner(
                 "docker", "exec", "-w", workDir, "-i", containerName,
                 "python3", "-u", languageConfig.fileName
             )
+
             ProgrammingLanguage.JAVA -> listOf(
                 "docker", "exec", "-w", workDir, "-i", containerName,
                 "java", "Main"
             )
+
             ProgrammingLanguage.C -> listOf(
                 "docker", "exec", "-w", workDir, "-i", containerName,
                 "./${languageConfig.fileName.replace(".c", "")}"
             )
+
             ProgrammingLanguage.NODE_JS -> listOf(
                 "docker", "exec", "-w", workDir, "-i", containerName,
                 "node", languageConfig.fileName

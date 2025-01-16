@@ -2,7 +2,7 @@ package com.solve.domain.post.dto.response
 
 import com.solve.domain.user.domain.entity.User
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class PostCommentResponse(
     val id: Long,
