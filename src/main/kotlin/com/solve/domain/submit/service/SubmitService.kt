@@ -3,10 +3,11 @@ package com.solve.domain.submit.service
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemTestCaseRepository
-import com.solve.domain.problem.util.CodeExecutor
+import com.solve.domain.submit.util.CodeExecutor
 import com.solve.domain.submit.domain.entity.Submit
 import com.solve.domain.submit.domain.enums.SubmitState
 import com.solve.domain.submit.dto.request.SubmitRequest
+import com.solve.domain.submit.dto.request.UpdateProgressRequest
 import com.solve.domain.submit.dto.response.SubmitResponse
 import com.solve.domain.submit.error.SubmitError
 import com.solve.domain.submit.repository.SubmitQueryRepository
@@ -115,6 +116,7 @@ class SubmitService(
 
     //    @Transactional
     fun processSubmit(submit: Submit, request: SubmitRequest) {
+        println("???????")
         val executor = CodeExecutor(submit, request, fileProperties)
         val problem = submit.problem
         val testCases = problemTestCaseRepository.findAllByProblem(problem)
@@ -126,9 +128,12 @@ class SubmitService(
         submit.state = SubmitState.JUDGING
         updateProgress(submit.id!!, progress, SubmitState.JUDGING)
 
+        println("!!!!!")
+        println(testCases)
 //        executor.initializeJavaContainer()
         for (testCase in testCases) {
-            val result = executor.execute(testCase.input, problem.timeLimit, testCase.output)
+            println("testCase: $testCase")
+            val result = executor.execute(testCase.input, problem.timeLimit, testCase.output, problem.memoryLimit)
             maxTimeUsage = maxOf(maxTimeUsage, result.timeUsage)
             maxMemoryUsage = maxOf(maxMemoryUsage, result.memoryUsage)
 
@@ -140,7 +145,7 @@ class SubmitService(
 //                    submit.compileError = result.compilationOutput
                 }
                 submitRepository.save(submit)
-                updateProgress(submit.id, progress, result.state)
+                updateProgress(submit.id, progress, result.state, submit.language)
                 return
             }
 
@@ -152,15 +157,15 @@ class SubmitService(
         submit.timeUsage = maxTimeUsage  // timeUsage 필드 사용
         submit.memoryUsage = maxMemoryUsage
         submitRepository.save(submit)
-        updateProgress(submit.id, 100.0, SubmitState.ACCEPTED)
+        updateProgress(submit.id, 100.0, SubmitState.ACCEPTED, submit.language, submit.timeUsage, submit.memoryUsage)
 
         handleAcceptedSubmission(submit)
     }
 
-    private fun updateProgress(submitId: Long, progress: Double, state: SubmitState) {
-        progressWebSocketHandler.sendProgressUpdate(submitId, progress, state)
+    private fun updateProgress(submitId: Long, progress: Double, state: SubmitState, language: ProgrammingLanguage?= null, timeUsage: Long?= null, memoryUsage: Long?= null) {
+        progressWebSocketHandler.sendProgressUpdate(UpdateProgressRequest(submitId, progress, state, timeUsage, memoryUsage, language))
     }
-
+    
     private fun handleAcceptedSubmission(submit: Submit) {
         try {
             val user = submit.author
