@@ -1,16 +1,16 @@
 package com.solve.global.websocket.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.problem.dto.response.ProblemSubmitProgressResponse
-import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
+import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.dto.response.SubmitProgressResponse
+import com.solve.domain.submit.repository.SubmitQueueRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ProgressWebSocketHandler(
-    private val problemSubmitQueueRepository: ProblemSubmitQueueRepository
+    private val submitQueueRepository: SubmitQueueRepository
 ) : WebSocketHandler {
     private val sessions = ConcurrentHashMap<Long, WebSocketSession>()
 
@@ -18,7 +18,7 @@ class ProgressWebSocketHandler(
         val submitId = session.uri?.path?.substringAfterLast("/")?.toLongOrNull()
         if (submitId != null) {
             sessions[submitId] = session
-            problemSubmitQueueRepository.push(submitId)
+            submitQueueRepository.push(submitId)
         }
     }
 
@@ -37,9 +37,9 @@ class ProgressWebSocketHandler(
 
     override fun supportsPartialMessages(): Boolean = false
 
-    fun sendProgressUpdate(submitId: Long, progress: Double, state: ProblemSubmitState) {
+    fun sendProgressUpdate(submitId: Long, progress: Double, state: SubmitState) {
         val session = sessions[submitId] ?: return
-        val progressResponse = ProblemSubmitProgressResponse(
+        val progressResponse = SubmitProgressResponse(
             submitId = submitId,
             progress = progress,
             result = state
