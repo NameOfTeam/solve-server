@@ -1,7 +1,8 @@
-package com.solve.domain.problem.domain.entity
+package com.solve.domain.submit.domain.entity
 
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.problem.domain.enums.ProblemSubmitVisibility
+import com.solve.domain.problem.domain.entity.Problem
+import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.domain.enums.SubmitVisibility
 import com.solve.domain.user.domain.entity.User
 import com.solve.global.common.entity.BaseTimeEntity
 import com.solve.global.common.enums.ProgrammingLanguage
@@ -9,22 +10,22 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "problem_submits",
+    name = "submits",
     indexes = [
-        Index(name = "idx_problem_submit_problem", columnList = "problem_id"),
-        Index(name = "idx_problem_submit_author", columnList = "author_id"),
-        Index(name = "idx_problem_submit_state", columnList = "state"),
-        Index(name = "idx_problem_submit_language", columnList = "language")
+        Index(name = "idx_submit_problem", columnList = "problem_id"),
+        Index(name = "idx_submit_author", columnList = "author_id"),
+        Index(name = "idx_submit_state", columnList = "state"),
+        Index(name = "idx_submit_language", columnList = "language")
     ]
 )
-class ProblemSubmit(
+class Submit(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false)
-    var state: ProblemSubmitState,
+    var state: SubmitState,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
@@ -49,11 +50,11 @@ class ProblemSubmit(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false)
-    val visibility: ProblemSubmitVisibility,
+    val visibility: SubmitVisibility,
 ) : BaseTimeEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is ProblemSubmit) return false
+        if (other !is Submit) return false
         if (id == null || other.id == null) return false
         return id == other.id
     }

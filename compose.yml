@@ -1,15 +1,4 @@
 services:
-  mysql:
-    image: mysql
-    container_name: solve-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: solve
-    ports:
-      - 3306:3306
-    volumes:
-      - ./.compose/mysql:/var/lib/mysql
-    restart: unless-stopped
   redis:
     image: redis
     container_name: solve-redis
@@ -18,18 +7,3 @@ services:
     restart: unless-stopped
     volumes:
       - ./.compose/redis/data:/data
-      - ./.compose/redis/redis.conf:/usr/local/etc/redis/redis.conf
-#  cassendra:
-#    image: cassendra
-#    container_name: solve-cassendra
-#    ports:
-#      - 9042:9042
-#    volumes:
-#      - ./.compose/cassendra:/var/lib/cassendra
-#    environment:
-#      - CASSANDRA_CLUSTER_NAME=solve
-#    healthcheck:
-#      test: ["CMD", "cqlsh", "-e", "DESCRIBE KEYSPACES"]
-#      interval: 15s
-#      timeout: 10s
-#      retries: 10

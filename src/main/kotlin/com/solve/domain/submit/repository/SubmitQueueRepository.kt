@@ -1,22 +1,21 @@
-package com.solve.domain.problem.repository.impl
+package com.solve.domain.submit.repository
 
-import com.solve.domain.problem.repository.ProblemSubmitQueueRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
 
 @Repository
-class ProblemSubmitQueueRepositoryImpl(
+class SubmitQueueRepository(
     private val redisTemplate: RedisTemplate<String, String>
-) : ProblemSubmitQueueRepository {
-    override fun push(submitId: Long) {
+) {
+    fun push(submitId: Long) {
         redisTemplate.opsForList().leftPush("problemSubmitQueue", submitId.toString())
     }
 
-    override fun pop(): Long? {
+    fun pop(): Long? {
         return redisTemplate.opsForList().rightPop("problemSubmitQueue")?.toLong()
     }
 
-    override fun size(): Int {
+    fun size(): Int {
         return redisTemplate.opsForList().size("problemSubmitQueue")?.toInt() ?: 0
     }
 }

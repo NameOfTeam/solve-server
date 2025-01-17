@@ -1,6 +1,6 @@
-package com.solve.domain.problem.domain.enums
+package com.solve.domain.submit.domain.enums
 
-enum class ProblemSubmitState {
+enum class SubmitState {
     // 맞았습니다
     ACCEPTED,
 
@@ -18,6 +18,8 @@ enum class ProblemSubmitState {
 
     // 런타임 에러
     RUNTIME_ERROR,
+
+    // 컴파일 에러
     COMPILE_ERROR,
 
     // 기다리는 중

@@ -1,10 +1,10 @@
 package com.solve.domain.problem.util
 
-import com.solve.domain.problem.domain.entity.ProblemSubmit
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
-import com.solve.domain.problem.dto.request.ProblemSubmitRequest
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.util.config.LanguageConfig
+import com.solve.domain.submit.domain.entity.Submit
+import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.dto.request.SubmitRequest
 import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import java.io.File
@@ -12,15 +12,15 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class CodeExecutor(
-    private val submit: ProblemSubmit,
-    private val request: ProblemSubmitRequest,
+    private val submit: Submit,
+    private val request: SubmitRequest,
     private val fileProperties: FileProperties
 ) {
     data class ExecutionResult(
         val output: String,
         val error: String,
         val success: Boolean,
-        val state: ProblemSubmitState? = null,
+        val state: SubmitState? = null,
         val timeUsage: Long = 0,
         val compilationOutput: String? = null,
         val memoryUsage: Long = 0,
@@ -80,7 +80,7 @@ class CodeExecutor(
                 output = "",
                 error = "Time Limit Exceeded",
                 success = false,
-                state = ProblemSubmitState.TIME_LIMIT_EXCEEDED
+                state = SubmitState.TIME_LIMIT_EXCEEDED
             )
         }
 
@@ -94,7 +94,7 @@ class CodeExecutor(
                 output = "",
                 error = errorOutput,
                 success = false,
-                state = ProblemSubmitState.RUNTIME_ERROR
+                state = SubmitState.RUNTIME_ERROR
             )
         }
 
@@ -121,7 +121,7 @@ class CodeExecutor(
                 output = actualOutput,
                 error = "",
                 success = false,
-                state = ProblemSubmitState.PRESENTATION_ERROR,
+                state = SubmitState.PRESENTATION_ERROR,
                 timeUsage = timeUsage,
                 memoryUsage = memoryUsage,
             )
@@ -132,7 +132,7 @@ class CodeExecutor(
                 output = actualOutput,
                 error = "",
                 success = false,
-                state = ProblemSubmitState.WRONG_ANSWER,
+                state = SubmitState.WRONG_ANSWER,
                 timeUsage = timeUsage,
                 memoryUsage = memoryUsage,
             )
@@ -142,7 +142,7 @@ class CodeExecutor(
             output = actualOutput,
             error = "",
             success = true,
-            state = ProblemSubmitState.ACCEPTED,
+            state = SubmitState.ACCEPTED,
             timeUsage = timeUsage,
             memoryUsage = memoryUsage,
         )
@@ -167,7 +167,7 @@ class CodeExecutor(
                 output = "",
                 error = output,
                 success = false,
-                state = ProblemSubmitState.COMPILE_ERROR,
+                state = SubmitState.COMPILE_ERROR,
                 compilationOutput = output
             )
         } else null

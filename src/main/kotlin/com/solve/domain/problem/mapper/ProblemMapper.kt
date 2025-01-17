@@ -1,26 +1,26 @@
 package com.solve.domain.problem.mapper
 
 import com.solve.domain.problem.domain.entity.Problem
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.dto.response.ProblemAuthorResponse
 import com.solve.domain.problem.dto.response.ProblemExampleResponse
 import com.solve.domain.problem.dto.response.ProblemResponse
 import com.solve.domain.problem.repository.ProblemExampleRepository
-import com.solve.domain.problem.repository.ProblemSubmitRepository
+import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.repository.SubmitRepository
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
 class ProblemMapper(
-    private val problemSubmitRepository: ProblemSubmitRepository,
+    private val submitRepository: SubmitRepository,
     private val problemExampleRepository: ProblemExampleRepository,
     private val securityHolder: SecurityHolder
 ) {
     @Transactional(readOnly = true)
     fun toResponse(problem: Problem): ProblemResponse {
-        val submits = problemSubmitRepository.findAllByProblem(problem)
-        val acceptedSubmits = submits.filter { it.state == ProblemSubmitState.ACCEPTED }
+        val submits = submitRepository.findAllByProblem(problem)
+        val acceptedSubmits = submits.filter { it.state == SubmitState.ACCEPTED }
         val distinctSolvedCount = acceptedSubmits.distinctBy { it.author }.size
         val correctRate = if (submits.isNotEmpty()) {
             (acceptedSubmits.size.toDouble() / submits.size * 1000).toInt() / 10.0
@@ -44,20 +44,20 @@ class ProblemMapper(
         ).apply {
             if (!securityHolder.isAuthenticated) return@apply
 
-            val mySubmits = problemSubmitRepository.findAllByProblemAndAuthor(problem, securityHolder.user)
+            val mySubmits = submitRepository.findAllByProblemAndAuthor(problem, securityHolder.user)
 
-            if (mySubmits.any { it.state == ProblemSubmitState.ACCEPTED }) {
-                state = ProblemSubmitState.ACCEPTED
+            if (mySubmits.any { it.state == SubmitState.ACCEPTED }) {
+                state = SubmitState.ACCEPTED
             } else if (mySubmits.any {
                     it.state in listOf(
-                        ProblemSubmitState.WRONG_ANSWER,
-                        ProblemSubmitState.RUNTIME_ERROR,
-                        ProblemSubmitState.TIME_LIMIT_EXCEEDED,
-                        ProblemSubmitState.MEMORY_LIMIT_EXCEEDED,
-                        ProblemSubmitState.COMPILE_ERROR
+                        SubmitState.WRONG_ANSWER,
+                        SubmitState.RUNTIME_ERROR,
+                        SubmitState.TIME_LIMIT_EXCEEDED,
+                        SubmitState.MEMORY_LIMIT_EXCEEDED,
+                        SubmitState.COMPILE_ERROR
                     )
                 }) {
-                state = ProblemSubmitState.WRONG_ANSWER
+                state = SubmitState.WRONG_ANSWER
             }
         }
     }

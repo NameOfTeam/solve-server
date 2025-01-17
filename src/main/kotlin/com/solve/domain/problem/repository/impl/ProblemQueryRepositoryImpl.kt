@@ -5,11 +5,11 @@ import com.querydsl.jpa.impl.JPAQuery
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.entity.QProblem
-import com.solve.domain.problem.domain.entity.QProblemSubmit
 import com.solve.domain.problem.domain.enums.ProblemSearchOrder
 import com.solve.domain.problem.domain.enums.ProblemSearchState
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.repository.ProblemQueryRepository
+import com.solve.domain.submit.domain.entity.QSubmit
+import com.solve.domain.submit.domain.enums.SubmitState
 import com.solve.global.common.enums.Tier
 import com.solve.global.security.holder.SecurityHolder
 import org.springframework.data.domain.Page
@@ -24,7 +24,7 @@ class ProblemQueryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : ProblemQueryRepository {
     private val problem = QProblem.problem
-    private val submit = QProblemSubmit.problemSubmit
+    private val submit = QSubmit.submit
 
     @Transactional(readOnly = true)
     override fun searchProblem(
@@ -79,7 +79,7 @@ class ProblemQueryRepositoryImpl(
         if (state.contains(ProblemSearchState.SOLVED)) {
             return problem.id.`in`(
                 submittedProblems
-                    .filter { it.state == ProblemSubmitState.ACCEPTED }
+                    .filter { it.state == SubmitState.ACCEPTED }
                     .map { it.problem.id }
             )
         }
@@ -93,7 +93,7 @@ class ProblemQueryRepositoryImpl(
         if (state.contains(ProblemSearchState.SOLVING)) {
             return problem.id.`in`(
                 submittedProblems
-                    .filter { it.state != ProblemSubmitState.ACCEPTED }
+                    .filter { it.state != SubmitState.ACCEPTED }
                     .map { it.problem.id }
             )
         }
@@ -111,7 +111,7 @@ class ProblemQueryRepositoryImpl(
                 query.leftJoin(submit).on(submit.problem.eq(problem))
                     .groupBy(problem)
                     .orderBy(
-                        submit.state.`when`(ProblemSubmitState.ACCEPTED)
+                        submit.state.`when`(SubmitState.ACCEPTED)
                             .then(1L)
                             .otherwise(0L)
                             .sum()
@@ -125,7 +125,7 @@ class ProblemQueryRepositoryImpl(
                 query.leftJoin(submit).on(submit.problem.eq(problem))
                     .groupBy(problem)
                     .orderBy(
-                        submit.state.`when`(ProblemSubmitState.ACCEPTED)
+                        submit.state.`when`(SubmitState.ACCEPTED)
                             .then(1L)
                             .otherwise(0L)
                             .sum()

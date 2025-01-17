@@ -10,9 +10,13 @@ import com.solve.domain.admin.problem.service.AdminProblemService
 import com.solve.domain.problem.domain.entity.Problem
 import com.solve.domain.problem.domain.entity.ProblemExample
 import com.solve.domain.problem.domain.entity.ProblemTestCase
-import com.solve.domain.problem.domain.enums.ProblemSubmitState
 import com.solve.domain.problem.error.ProblemError
-import com.solve.domain.problem.repository.*
+import com.solve.domain.problem.repository.ProblemContributorRepository
+import com.solve.domain.problem.repository.ProblemExampleRepository
+import com.solve.domain.problem.repository.ProblemRepository
+import com.solve.domain.problem.repository.ProblemTestCaseRepository
+import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.repository.SubmitRepository
 import com.solve.global.common.enums.Tier
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
@@ -29,7 +33,7 @@ class AdminProblemServiceImpl(
     private val problemTestCaseRepository: ProblemTestCaseRepository,
     private val problemExampleRepository: ProblemExampleRepository,
     private val problemContributorRepository: ProblemContributorRepository,
-    private val problemSubmitRepository: ProblemSubmitRepository
+    private val submitRepository: SubmitRepository
 ) : AdminProblemService {
     @Transactional(readOnly = true)
     override fun getProblems(pageable: Pageable): Page<AdminProblemResponse> {
@@ -117,9 +121,9 @@ class AdminProblemServiceImpl(
         author = AdminProblemAuthorResponse.of(author),
         contributors = problemContributorRepository.findAllByProblem(this)
             .map { AdminProblemContributorResponse.of(it.user) },
-        correctRate = problemSubmitRepository.findAllByProblem(this).let { submits ->
+        correctRate = submitRepository.findAllByProblem(this).let { submits ->
             (submits.map { it.state }
-                .filter { it == ProblemSubmitState.ACCEPTED }.size.toDouble() / submits.size * 1000).toInt() / 10.0
+                .filter { it == SubmitState.ACCEPTED }.size.toDouble() / submits.size * 1000).toInt() / 10.0
         },
     )
 
