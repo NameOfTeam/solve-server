@@ -1,7 +1,7 @@
-package com.solve.domain.problem.util
+package com.solve.domain.submit.util
 
 import com.solve.domain.problem.error.ProblemError
-import com.solve.domain.problem.util.config.LanguageConfig
+import com.solve.domain.submit.util.config.LanguageConfig
 import com.solve.domain.submit.domain.entity.Submit
 import com.solve.domain.submit.domain.enums.SubmitState
 import com.solve.domain.submit.dto.request.SubmitRequest
@@ -38,7 +38,8 @@ class CodeExecutor(
         }
     }
 
-    fun execute(input: String, timeLimit: Double, expectedOutput: String): ExecutionResult {
+    fun execute(input: String, timeLimit: Double, expectedOutput: String, memoryLimit: Long): ExecutionResult {
+        println(3)
         val sourceFile = createSourceFile()
 
         compile(sourceFile)?.let { return it }
@@ -115,6 +116,17 @@ class CodeExecutor(
 
         val memoryUsage = Regex("Memory Usage: (\\d+) KB")
             .find(entireOutput)?.groups?.get(1)?.value?.toLongOrNull() ?: 0
+
+        if (memoryUsage > memoryLimit) {
+            return ExecutionResult(
+                output = actualOutput,
+                error = "",
+                success = false,
+                state = SubmitState.MEMORY_LIMIT_EXCEEDED,
+                timeUsage = timeUsage,
+                memoryUsage = memoryUsage,
+            )
+        }
 
         if (hasPresentationError(actualOutput, expectedOutput)) {
             return ExecutionResult(

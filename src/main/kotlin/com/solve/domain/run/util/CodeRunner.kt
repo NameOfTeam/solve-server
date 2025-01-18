@@ -1,6 +1,6 @@
 package com.solve.domain.run.util
 
-import com.solve.domain.problem.util.config.LanguageConfig
+import com.solve.domain.submit.util.config.LanguageConfig
 import com.solve.global.common.enums.ProgrammingLanguage
 import com.solve.global.config.file.FileProperties
 import java.io.BufferedWriter

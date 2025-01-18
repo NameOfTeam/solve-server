@@ -42,7 +42,7 @@ class Problem(
     @Column(name = "tier", nullable = false)
     val tier: Tier,
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
         name = "problem_tags",
         joinColumns = [JoinColumn(name = "problem_id")]

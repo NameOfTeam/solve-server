@@ -2,6 +2,7 @@ package com.solve.global.websocket.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.submit.domain.enums.SubmitState
+import com.solve.domain.submit.dto.request.UpdateProgressRequest
 import com.solve.domain.submit.dto.response.SubmitProgressResponse
 import com.solve.domain.submit.repository.SubmitQueueRepository
 import org.springframework.stereotype.Component
@@ -37,16 +38,44 @@ class ProgressWebSocketHandler(
 
     override fun supportsPartialMessages(): Boolean = false
 
-    fun sendProgressUpdate(submitId: Long, progress: Double, state: SubmitState) {
-        val session = sessions[submitId] ?: return
-        val progressResponse = SubmitProgressResponse(
-            submitId = submitId,
-            progress = progress,
-            result = state
-        )
+    fun sendProgressUpdate(request: UpdateProgressRequest) {
+        val session = sessions[request.submitId] ?: return
 
-        if (session.isOpen) {
+        if (request.state == SubmitState.ACCEPTED && session.isOpen) {
+            val progressResponse = SubmitProgressResponse(
+                submitId = request.submitId,
+                progress = request.progress,
+                result = request.state,
+                language = request.language,
+                timeUsage = request.timeUsage,
+                memoryUsage = request.memoryUsage,
+            )
+
             session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
+            session.close()
+
+        } else if (request.state ==
+            SubmitState.JUDGING ||
+            request.state == SubmitState.PENDING ||
+            request.state == SubmitState.JUDGING_IN_PROGRESS &&
+            session.isOpen) {
+            val progressResponse = SubmitProgressResponse(
+                submitId = request.submitId,
+                progress = request.progress,
+                result = request.state,
+            )
+
+            session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
+        } else {
+            val progressResponse = SubmitProgressResponse(
+                submitId = request.submitId,
+                progress = request.progress,
+                result = request.state,
+                language = request.language
+            )
+
+            session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
+            session.close()
         }
     }
 }
