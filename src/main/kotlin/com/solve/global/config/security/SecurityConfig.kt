@@ -59,12 +59,14 @@ class SecurityConfig(
         .authorizeHttpRequests {
             it
                 .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
-                .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/reissue").anonymous()
+
+                .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/signup", "/auth/reissue", "/auth/verify").anonymous()
+                .requestMatchers(HttpMethod.POST, "/admin/auth/signup").anonymous()
 
                 .requestMatchers(HttpMethod.GET, "/statistics").permitAll()
 
-                .requestMatchers(HttpMethod.GET, "/posts").permitAll()
-                .requestMatchers(HttpMethod.GET, "/posts/{postId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/posts/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/posts", "/posts/{postId}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/posts").user()
                 .requestMatchers(HttpMethod.PATCH, "/posts/{postId}").user()
                 .requestMatchers(HttpMethod.DELETE, "/posts/{postId}").user()
@@ -79,31 +81,56 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.PATCH, "/posts/{postId}/comments/{commentId}/replies/{replyId}").user()
                 .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/comments/{commentId}/replies/{replyId}").user()
 
-                .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/problems/search").permitAll()
+                .requestMatchers(HttpMethod.POST, "/posts/{postId}/comments/{commentId}/likes").user()
+                .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/comments/{commentId}/likes").user()
+                .requestMatchers(HttpMethod.POST, "/posts/{postId}/comments/{commentId}/replies/{replyId}/likes").user()
+                .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/comments/{commentId}/replies/{replyId}/likes").user()
 
-                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/test-cases").permitAll()
+                .requestMatchers(HttpMethod.GET, "/problems", "/problems/{problemId}", "/problems/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/code").user()
+                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/code").user()
+                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/code").user()
 
-                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/ideas").permitAll()
-                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/ideas").user()
-                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/ideas").user()
-                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/ideas/{ideaId}").user()
+                .requestMatchers(HttpMethod.POST, "/submits").user()
+                .requestMatchers(HttpMethod.GET, "/submits/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/submits/my").user()
 
-                .requestMatchers(HttpMethod.GET, "/problems/{problemId}/ideas/{ideaId}/comments").permitAll()
-                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/ideas/{ideaId}/comments").user()
-                .requestMatchers(HttpMethod.PATCH, "/problems/{problemId}/ideas/{ideaId}/comments/{commentId}").user()
-                .requestMatchers(HttpMethod.DELETE, "/problems/{problemId}/ideas/{ideaId}/comments/{commentId}").user()
+                .requestMatchers(HttpMethod.POST, "/runs").user()
 
-                .requestMatchers(HttpMethod.POST, "/problems/{problemId}/submit").user()
-
+                .requestMatchers(HttpMethod.GET, "/users/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/{username}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/me").user()
                 .requestMatchers(HttpMethod.PATCH, "/users/me").user()
+                .requestMatchers(HttpMethod.PATCH, "/users/me/password").user()
+                .requestMatchers(HttpMethod.PATCH, "/users/me/avatar").user()
+                .requestMatchers(HttpMethod.GET, "/users/me/solved").user()
 
-                .requestMatchers(HttpMethod.GET, "/ws").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/me/connections").user()
+                .requestMatchers(HttpMethod.DELETE, "/users/me/connections/{connectionId}").user()
 
-                .requestMatchers(HttpMethod.POST, "/admin/auth/signup").anonymous()
+                .requestMatchers(HttpMethod.GET, "/workbooks", "/workbooks/{workbookId}", "/workbooks/search").permitAll()
+                .requestMatchers(HttpMethod.POST, "/workbooks").user()
+                .requestMatchers(HttpMethod.PATCH, "/workbooks/{workbookId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/workbooks/{workbookId}").user()
+
+                .requestMatchers(HttpMethod.POST, "/workbooks/{workbookId}/problems").user()
+                .requestMatchers(HttpMethod.DELETE, "/workbooks/{workbookId}/problems/{problemId}").user()
+
+                .requestMatchers(HttpMethod.POST, "/workbooks/{workbookId}/likes").user()
+                .requestMatchers(HttpMethod.DELETE, "/workbooks/{workbookId}/likes").user()
+                .requestMatchers(HttpMethod.POST, "/workbooks/{workbookId}/bookmarks").user()
+                .requestMatchers(HttpMethod.DELETE, "/workbooks/{workbookId}/bookmarks").user()
+
+                .requestMatchers(HttpMethod.GET, "/contests", "/contests/{contestId}", "/contests/search").permitAll()
+                .requestMatchers(HttpMethod.POST, "/contests/{contestId}/participants").user()
+                .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/participants").user()
+                .requestMatchers(HttpMethod.POST, "/contests/{contestId}/problems").user()
+                .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/problems/{problemId}").user()
+
+                .requestMatchers(HttpMethod.GET, "/templates/{language}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/themes", "/themes/search").permitAll()
+
                 .requestMatchers("/admin/**").admin()
-
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/avatars/**").permitAll()
 
