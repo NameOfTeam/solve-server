@@ -29,6 +29,9 @@ dependencies {
     implementation("com.sksamuel.scrimage:scrimage-webp:4.2.0")
     runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.116.Final")
 
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
 
