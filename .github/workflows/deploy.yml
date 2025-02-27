@@ -52,8 +52,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: GITHUB_SHA
           script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}
+            docker rm -f $(docker ps -qa)
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}
             docker compose up -d
             docker image prune -f
 
