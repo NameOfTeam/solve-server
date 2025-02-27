@@ -18,7 +18,7 @@ class SwaggerConfig {
             .addSecurityItem(SecurityRequirement().addList("Authorization"))
             .servers(
                 listOf(
-                    Server().url("http://solveapi.jmino.me").description("Production Server"),
+                    Server().url("https://solveapi.jmino.me").description("Production Server"),
                     Server().url("http://localhost:8080").description("Development Server"),
                 )
             )
