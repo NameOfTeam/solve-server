@@ -4,10 +4,17 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
     open-in-view: false
+
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    locations: classpath:db/migration
+
   jwt:
     issuer: ${JWT_ISSUER}
     prefix: ${JWT_PREFIX}
@@ -15,10 +22,12 @@ spring:
     secret-key: ${JWT_SECRET_KEY}
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
     refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -31,22 +40,29 @@ spring:
             enable: true
             required: true
           auth: true
+
   frontend:
     url: ${FRONTEND_URL}
+
   admin:
     key: ${ADMIN_KEY}
+
   jackson:
     time-zone: Asia/Seoul
+
   file:
     path: ${FILE_PATH}
+
   servlet:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
+
   discord:
     webhook:
       exception:
         url: ${DISCORD_WEBHOOK_EXCEPTION_URL}
+
 management:
   endpoints:
     enabled-by-default: false
@@ -56,6 +72,7 @@ management:
         include: health,info
     web:
       base-path: /actuator
+
   endpoint:
     health:
       enabled: true
