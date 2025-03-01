@@ -41,11 +41,10 @@ class SubmitService(
     private val submitQueryRepository: SubmitQueryRepository
 ) {
     @Transactional(readOnly = true)
-    fun getMySubmits(problemId: Long, cursorId: Long, size: Int): List<SubmitResponse> {
+    fun getMySubmits(problemId: Long, cursorId: Long?, size: Int): List<SubmitResponse> {
         val problem = problemRepository.findByIdOrNull(problemId)
             ?: throw CustomException(ProblemError.PROBLEM_NOT_FOUND)
-        val cursor = submitRepository.findByIdOrNull(cursorId)
-            ?: throw CustomException(SubmitError.SUBMIT_NOT_FOUND)
+        val cursor = cursorId?.let { submitRepository.findByIdOrNull(it) ?: throw CustomException(SubmitError.SUBMIT_NOT_FOUND) }
 
         val submits = submitQueryRepository.getMySubmits(problem, cursor, size)
 

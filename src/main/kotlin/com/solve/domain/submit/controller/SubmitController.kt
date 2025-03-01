@@ -35,7 +35,7 @@ class SubmitController(
     @GetMapping("/my")
     fun getMySubmits(
         @RequestParam problemId: Long,
-        @RequestParam(required = false) cursorId: Long,
+        @RequestParam(required = false) cursorId: Long?,
         @RequestParam(required = false, defaultValue = "10") size: Int
     ) = BaseResponse.of(submitService.getMySubmits(problemId, cursorId, size))
 }
