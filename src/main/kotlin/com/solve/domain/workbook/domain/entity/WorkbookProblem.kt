@@ -12,14 +12,14 @@ import java.io.Serializable
         Index(name = "idx_workbook_problem_problem", columnList = "problem_id")
     ]
 )
-@IdClass(WorkbookProblemId::class)
 class WorkbookProblem(
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workbook_id", nullable = false)
     val workbook: Workbook,
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     val problem: Problem
@@ -37,27 +37,6 @@ class WorkbookProblem(
     override fun hashCode(): Int {
         var result = workbook.id?.hashCode() ?: 0
         result = 31 * result + (problem.id?.hashCode() ?: 0)
-        return result
-    }
-}
-
-class WorkbookProblemId(
-    val workbook: Long? = null,
-    val problem: Long? = null
-) : Serializable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is WorkbookProblemId) return false
-
-        if (workbook != other.workbook) return false
-        if (problem != other.problem) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = workbook?.hashCode() ?: 0
-        result = 31 * result + (problem?.hashCode() ?: 0)
         return result
     }
 }
