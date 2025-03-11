@@ -5,9 +5,6 @@ import com.solve.domain.admin.contest.dto.request.AdminContestUpdateRequest
 import com.solve.domain.admin.contest.dto.response.*
 import com.solve.domain.admin.contest.service.AdminContestService
 import com.solve.domain.contest.domain.entity.Contest
-import com.solve.domain.contest.domain.entity.ContestOperator
-import com.solve.domain.contest.domain.entity.ContestParticipant
-import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.error.ContestError
 import com.solve.domain.contest.repository.ContestOperatorRepository
 import com.solve.domain.contest.repository.ContestParticipantRepository
@@ -48,42 +45,7 @@ class AdminContestServiceImpl(
 
     @Transactional
     override fun createContest(request: AdminContestCreateRequest) {
-        val operators = userRepository.findAllById(request.operatorIds)
-        val participants = userRepository.findAllById(request.participantIds)
-        val problems = problemRepository.findAllById(request.problemIds)
-        val owner = securityHolder.user
-
-        val contest = Contest(
-            title = request.title,
-            description = request.description,
-            startAt = request.startAt,
-            endAt = request.endAt,
-            owner = owner,
-            visibility = request.visibility
-        )
-
-        contestRepository.save(contest)
-
-        contestOperatorRepository.saveAll(operators.map {
-            ContestOperator(
-                contest = contest,
-                user = it
-            )
-        })
-
-        contestParticipantRepository.saveAll(participants.map {
-            ContestParticipant(
-                contest = contest,
-                user = it
-            )
-        })
-
-        contestProblemRepository.saveAll(problems.map {
-            ContestProblem(
-                contest = contest,
-                problem = it
-            )
-        })
+        // TODO createContest 메서드 구현
     }
 
     @Transactional
@@ -93,9 +55,9 @@ class AdminContestServiceImpl(
 
         request.title?.let { contest.title = it }
         request.description?.let { contest.description = it }
-        request.startAt?.let { contest.startAt = it }
-        request.endAt?.let { contest.endAt = it }
-        request.visibility?.let { contest.visibility = it }
+        request.startTime?.let { contest.startTime = it }
+        request.endTime?.let { contest.endTime = it }
+        request.isPublic?.let { contest.isPublic = it }
     }
 
     @Transactional
@@ -110,15 +72,17 @@ class AdminContestServiceImpl(
         id = id!!,
         title = title,
         description = description,
-        startAt = startAt,
-        endAt = endAt,
+        startTime = startTime,
+        endTime = endTime,
         createdAt = createdAt,
         updatedAt = updatedAt,
         participants = contestParticipantRepository.findAllByContest(this)
             .map { AdminContestParticipantResponse.of(it) },
         operators = contestOperatorRepository.findAllByContest(this).map { AdminContestOperatorResponse.of(it) },
         problems = contestProblemRepository.findAllByContest(this).map { AdminContestProblemResponse.of(it) },
-        visibility = visibility,
+        isPublic = isPublic,
+        isDeleted = isDeleted,
+        isRegistrationOpen = isRegistrationOpen,
         owner = AdminContestOwnerResponse.of(owner)
     )
 }

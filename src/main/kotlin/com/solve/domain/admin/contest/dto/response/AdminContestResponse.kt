@@ -3,7 +3,6 @@ package com.solve.domain.admin.contest.dto.response
 import com.solve.domain.contest.domain.entity.ContestOperator
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.domain.entity.ContestProblem
-import com.solve.domain.contest.domain.enums.ContestVisibility
 import com.solve.domain.user.domain.entity.User
 import java.time.LocalDateTime
 import java.util.*
@@ -12,13 +11,15 @@ data class AdminContestResponse(
     val id: Long,
     val title: String,
     val description: String,
-    val startAt: LocalDateTime,
-    val endAt: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val owner: AdminContestOwnerResponse,
     val participants: List<AdminContestParticipantResponse>,
     val operators: List<AdminContestOperatorResponse>,
     val problems: List<AdminContestProblemResponse>,
-    val visibility: ContestVisibility,
+    val isPublic: Boolean,
+    val isDeleted: Boolean,
+    val isRegistrationOpen: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

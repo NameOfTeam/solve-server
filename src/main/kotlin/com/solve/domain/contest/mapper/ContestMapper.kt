@@ -19,21 +19,22 @@ class ContestMapper(
         id = contest.id!!,
         title = contest.title,
         description = contest.description,
-        startAt = contest.startAt,
-        endAt = contest.endAt,
+        startTime = contest.startTime,
+        endTime = contest.endTime,
         owner = ContestOwnerResponse.of(contest.owner),
-        visibility = contest.visibility,
-        state = if (contest.startAt.isAfter(LocalDateTime.now())) {
-            ContestState.UPCOMING
-        } else if (contest.endAt.isBefore(LocalDateTime.now())) {
-            ContestState.ENDED
-        } else {
-            ContestState.ONGOING
+        state = when {
+            contest.startTime.isAfter(LocalDateTime.now()) -> ContestState.UPCOMING
+            contest.endTime.isBefore(LocalDateTime.now()) -> ContestState.ENDED
+            else -> ContestState.ONGOING
         },
         winner = contest.winner?.let { ContestWinnerResponse.of(it) },
         operators = contestOperatorRepository.findAllByContest(contest).map { ContestOperatorResponse.of(it) },
         participants = contestParticipantRepository.findAllByContest(contest).map { ContestParticipantResponse.of(it) },
-        problems = contestProblemRepository.findAllByContest(contest).map { ContestProblemResponse.of(it) },
+        problems = if (contest.startTime.isBefore(LocalDateTime.now())) {
+            contestProblemRepository.findAllByContest(contest).map { ContestProblemResponse.of(it) }
+        } else {
+            emptyList()
+        },
         createdAt = contest.createdAt,
         updatedAt = contest.updatedAt
     )
