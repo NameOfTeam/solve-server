@@ -1,6 +1,6 @@
 package com.solve.domain.statistics.service.impl
 
-import com.solve.domain.contest.repository.ContestRepository
+import com.solve.domain.contest.domain.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.statistics.dto.response.StatisticsResponse
 import com.solve.domain.statistics.service.StatisticsService

@@ -5,8 +5,8 @@ import com.solve.domain.admin.contest.service.AdminContestOperatorService
 import com.solve.domain.contest.domain.entity.ContestOperator
 import com.solve.domain.contest.error.ContestError
 import com.solve.domain.contest.error.ContestOperatorError
-import com.solve.domain.contest.repository.ContestOperatorRepository
-import com.solve.domain.contest.repository.ContestRepository
+import com.solve.domain.contest.domain.repository.ContestOperatorRepository
+import com.solve.domain.contest.domain.repository.ContestRepository
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException

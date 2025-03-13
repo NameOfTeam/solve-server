@@ -1,11 +1,11 @@
-package com.solve.domain.contest.repository.impl
+package com.solve.domain.contest.domain.repository.impl
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.QContest
 import com.solve.domain.contest.domain.enums.ContestSearchState
-import com.solve.domain.contest.repository.ContestQueryRepository
+import com.solve.domain.contest.domain.repository.ContestQueryRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable

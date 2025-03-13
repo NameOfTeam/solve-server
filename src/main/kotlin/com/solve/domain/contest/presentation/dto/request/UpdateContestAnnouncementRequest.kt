@@ -1,4 +1,4 @@
-package com.solve.domain.contest.dto.request
+package com.solve.domain.contest.presentation.dto.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size

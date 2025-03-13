@@ -6,10 +6,10 @@ import com.solve.domain.admin.contest.dto.response.*
 import com.solve.domain.admin.contest.service.AdminContestService
 import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.error.ContestError
-import com.solve.domain.contest.repository.ContestOperatorRepository
-import com.solve.domain.contest.repository.ContestParticipantRepository
-import com.solve.domain.contest.repository.ContestProblemRepository
-import com.solve.domain.contest.repository.ContestRepository
+import com.solve.domain.contest.domain.repository.ContestOperatorRepository
+import com.solve.domain.contest.domain.repository.ContestParticipantRepository
+import com.solve.domain.contest.domain.repository.ContestProblemRepository
+import com.solve.domain.contest.domain.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException

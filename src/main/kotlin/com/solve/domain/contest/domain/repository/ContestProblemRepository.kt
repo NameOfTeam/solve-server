@@ -1,4 +1,4 @@
-package com.solve.domain.contest.repository
+package com.solve.domain.contest.domain.repository
 
 import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.ContestProblem

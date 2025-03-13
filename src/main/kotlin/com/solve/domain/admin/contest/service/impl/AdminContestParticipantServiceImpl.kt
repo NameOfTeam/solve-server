@@ -6,9 +6,9 @@ import com.solve.domain.admin.contest.error.AdminContestParticipantError
 import com.solve.domain.admin.contest.service.AdminContestParticipantService
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.error.ContestError
-import com.solve.domain.contest.repository.ContestOperatorRepository
-import com.solve.domain.contest.repository.ContestParticipantRepository
-import com.solve.domain.contest.repository.ContestRepository
+import com.solve.domain.contest.domain.repository.ContestOperatorRepository
+import com.solve.domain.contest.domain.repository.ContestParticipantRepository
+import com.solve.domain.contest.domain.repository.ContestRepository
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.error.CustomException

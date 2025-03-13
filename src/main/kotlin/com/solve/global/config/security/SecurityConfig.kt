@@ -122,10 +122,23 @@ class SecurityConfig(
                 .requestMatchers(HttpMethod.DELETE, "/workbooks/{workbookId}/bookmarks").user()
 
                 .requestMatchers(HttpMethod.GET, "/contests", "/contests/{contestId}", "/contests/search").permitAll()
-                .requestMatchers(HttpMethod.POST, "/contests/{contestId}/participants").user()
-                .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/participants").user()
+
+                .requestMatchers(HttpMethod.GET, "/contests/{contestId}/announcements", "/contests/{contestId}/announcements/{announcementId}").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/contests/{contestId}/participants").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/contests/{contestId}/leaderboard", "/contests/{contestId}/leaderboard/export").permitAll()
+
+                .requestMatchers(HttpMethod.POST, "/contests/{contestId}/register").user()
+
+                .requestMatchers(HttpMethod.POST, "/contests/{contestId}/announcements").user()
+                .requestMatchers(HttpMethod.PATCH, "/contests/{contestId}/announcements/{announcementId}").user()
+                .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/announcements/{announcementId}").user()
+
                 .requestMatchers(HttpMethod.POST, "/contests/{contestId}/problems").user()
                 .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/problems/{problemId}").user()
+
+                .requestMatchers(HttpMethod.DELETE, "/contests/{contestId}/participants/{participantId}").user()
 
                 .requestMatchers(HttpMethod.GET, "/templates/{language}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/themes", "/themes/search").permitAll()
