@@ -30,7 +30,7 @@ class AdminContestProblemServiceImpl(
         if (contestProblemRepository.existsByContestAndProblem(contest, problem))
             throw CustomException(ContestProblemError.CONTEST_PROBLEM_ALREADY_EXISTS)
 
-        contestProblemRepository.save(ContestProblem(contest = contest, problem = problem))
+        contestProblemRepository.save(ContestProblem(contest = contest, problem = problem, order = request.order, score = request.score))
     }
 
     @Transactional

@@ -24,6 +24,6 @@ class AdminStatisticServiceImpl(
     override fun getTotalSubmissions() = submitRepository.count()
 
     override fun getTotalOngoingContests() = LocalDateTime.now().let {
-        contestRepository.countByEndAtGreaterThanEqualAndStartAtLessThanEqual(it, it)
+        contestRepository.countByEndTimeGreaterThanEqualAndStartTimeLessThanEqual(it, it)
     }
 }

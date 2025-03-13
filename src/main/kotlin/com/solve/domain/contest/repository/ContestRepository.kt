@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDateTime
 
 interface ContestRepository : JpaRepository<Contest, Long> {
-    fun countByEndAtGreaterThanEqualAndStartAtLessThanEqual(endAt: LocalDateTime, startAt: LocalDateTime): Long
+    fun countByEndTimeGreaterThanEqualAndStartTimeLessThanEqual(endAt: LocalDateTime, startAt: LocalDateTime): Long
 }

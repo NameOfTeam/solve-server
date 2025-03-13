@@ -12,14 +12,14 @@ import java.io.Serializable
         Index(name = "idx_problem_contributor_problem", columnList = "problem_id")
     ]
 )
-@IdClass(ProblemContributorId::class)
 class ProblemContributor(
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     val problem: Problem,
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BINARY(16)")
     val user: User,
@@ -37,27 +37,6 @@ class ProblemContributor(
     override fun hashCode(): Int {
         var result = problem.id?.hashCode() ?: 0
         result = 31 * result + (user.id?.hashCode() ?: 0)
-        return result
-    }
-}
-
-class ProblemContributorId(
-    val problem: Long? = null,
-    val user: Long? = null
-) : Serializable {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ProblemContributorId) return false
-
-        if (problem != other.problem) return false
-        if (user != other.user) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = problem?.hashCode() ?: 0
-        result = 31 * result + (user?.hashCode() ?: 0)
         return result
     }
 }

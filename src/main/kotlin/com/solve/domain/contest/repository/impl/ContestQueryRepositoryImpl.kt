@@ -33,7 +33,7 @@ class ContestQueryRepositoryImpl(
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
 
-        baseQuery.orderBy(contest.startAt.desc())
+        baseQuery.orderBy(contest.startTime.desc())
 
         val contests = baseQuery.fetch()
         val totalCount = queryFactory
@@ -56,9 +56,9 @@ class ContestQueryRepositoryImpl(
 
     private fun filterByState(state: ContestSearchState?, now: LocalDateTime): BooleanExpression? =
         when (state) {
-            ContestSearchState.UPCOMING -> contest.startAt.after(now)
-            ContestSearchState.ONGOING -> contest.startAt.before(now).and(contest.endAt.after(now))
-            ContestSearchState.ENDED -> contest.endAt.before(now)
+            ContestSearchState.UPCOMING -> contest.startTime.after(now)
+            ContestSearchState.ONGOING -> contest.startTime.before(now).and(contest.endTime.after(now))
+            ContestSearchState.ENDED -> contest.endTime.before(now)
             null -> null
         }
 }

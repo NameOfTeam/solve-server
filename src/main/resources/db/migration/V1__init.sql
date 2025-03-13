@@ -93,9 +93,10 @@ CREATE TABLE problem_examples
 
 CREATE TABLE problem_contributors
 (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     problem_id BIGINT     NOT NULL,
     user_id    BINARY(16) NOT NULL,
-    PRIMARY KEY (problem_id, user_id),
+    UNIQUE INDEX idx_problem_contributor_unique (problem_id, user_id),
     INDEX idx_problem_contributor_user (user_id),
     INDEX idx_problem_contributor_problem (problem_id),
     FOREIGN KEY (problem_id) REFERENCES problems (id),
@@ -195,11 +196,12 @@ CREATE TABLE posts
 
 CREATE TABLE post_likes
 (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     post_id    BIGINT     NOT NULL,
     user_id    BINARY(16) NOT NULL,
     created_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (post_id, user_id),
+    UNIQUE INDEX idx_post_like_unique (post_id, user_id),
     INDEX idx_post_like_user (user_id),
     INDEX idx_post_like_post (post_id),
     FOREIGN KEY (post_id) REFERENCES posts (id),
@@ -222,9 +224,10 @@ CREATE TABLE post_comments
 
 CREATE TABLE post_comment_likes
 (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
     post_comment_id BIGINT     NOT NULL,
     user_id         BINARY(16) NOT NULL,
-    PRIMARY KEY (post_comment_id, user_id),
+    UNIQUE INDEX idx_post_comment_like_unique (post_comment_id, user_id),
     INDEX idx_post_comment_like_user (user_id),
     INDEX idx_post_comment_like_comment (post_comment_id),
     FOREIGN KEY (post_comment_id) REFERENCES post_comments (id),
@@ -251,9 +254,10 @@ CREATE TABLE post_comment_replies
 
 CREATE TABLE post_comment_reply_likes
 (
+    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
     post_comment_reply_id BIGINT     NOT NULL,
     user_id               BINARY(16) NOT NULL,
-    PRIMARY KEY (post_comment_reply_id, user_id),
+    UNIQUE INDEX idx_post_comment_reply_like_unique (post_comment_reply_id, user_id),
     INDEX idx_post_comment_reply_like_user (user_id),
     INDEX idx_post_comment_reply_like_comment (post_comment_reply_id),
     FOREIGN KEY (post_comment_reply_id) REFERENCES post_comment_replies (id),
@@ -262,45 +266,80 @@ CREATE TABLE post_comment_reply_likes
 
 CREATE TABLE contests
 (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title       VARCHAR(255) NOT NULL,
-    description TEXT         NOT NULL,
-    start_at    TIMESTAMP    NOT NULL,
-    end_at      TIMESTAMP    NOT NULL,
-    owner_id    BINARY(16)   NOT NULL,
-    winner_id   BINARY(16),
-    visibility  VARCHAR(50)  NOT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title                VARCHAR(255) NOT NULL,
+    description          TEXT         NOT NULL,
+    start_time           TIMESTAMP    NOT NULL,
+    end_time             TIMESTAMP    NOT NULL,
+    owner_id             BINARY(16)   NOT NULL,
+    winner_id            BINARY(16),
+    is_public            BOOLEAN      NOT NULL DEFAULT FALSE,
+    is_deleted           BOOLEAN      NOT NULL DEFAULT FALSE,
+    is_registration_open BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users (id),
     FOREIGN KEY (winner_id) REFERENCES users (id)
 );
 
 CREATE TABLE contest_operators
 (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     contest_id BIGINT     NOT NULL,
     user_id    BINARY(16) NOT NULL,
-    PRIMARY KEY (contest_id, user_id),
+    UNIQUE INDEX idx_contest_operator_unique (contest_id, user_id),
     FOREIGN KEY (contest_id) REFERENCES contests (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE contest_participants
 (
-    contest_id BIGINT     NOT NULL,
-    user_id    BINARY(16) NOT NULL,
-    PRIMARY KEY (contest_id, user_id),
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    contest_id       BIGINT     NOT NULL,
+    user_id          BINARY(16) NOT NULL,
+    registration_time TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_contest_participant_unique (contest_id, user_id),
     FOREIGN KEY (contest_id) REFERENCES contests (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE contest_problems
 (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     contest_id BIGINT NOT NULL,
     problem_id BIGINT NOT NULL,
-    PRIMARY KEY (contest_id, problem_id),
+    `order`    INT    NOT NULL,
+    score      INT    NOT NULL,
+    UNIQUE INDEX idx_contest_problem_unique (contest_id, problem_id),
     FOREIGN KEY (contest_id) REFERENCES contests (id),
     FOREIGN KEY (problem_id) REFERENCES problems (id)
+);
+
+CREATE TABLE contest_announcements (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    contest_id BIGINT NOT NULL,
+    user_id BINARY(16) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    important BOOLEAN NOT NULL,
+    published_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT fk_contest_announcements_contest FOREIGN KEY (contest_id) REFERENCES contests (id),
+    CONSTRAINT fk_contest_announcements_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE contest_submissions
+(
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    participant_id BIGINT      NOT NULL,
+    problem_id     BIGINT      NOT NULL,
+    code           TEXT        NOT NULL,
+    language       VARCHAR(50) NOT NULL,
+    result         VARCHAR(50),
+    score          INT,
+    FOREIGN KEY (participant_id) REFERENCES contest_participants (id),
+    FOREIGN KEY (problem_id) REFERENCES contest_problems (id)
 );
 
 CREATE TABLE workbooks
@@ -317,9 +356,10 @@ CREATE TABLE workbooks
 
 CREATE TABLE workbook_problems
 (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     workbook_id BIGINT NOT NULL,
     problem_id  BIGINT NOT NULL,
-    PRIMARY KEY (workbook_id, problem_id),
+    UNIQUE INDEX idx_workbook_problem_unique (workbook_id, problem_id),
     INDEX idx_workbook_problem_workbook (workbook_id),
     INDEX idx_workbook_problem_problem (problem_id),
     FOREIGN KEY (workbook_id) REFERENCES workbooks (id),
@@ -328,9 +368,10 @@ CREATE TABLE workbook_problems
 
 CREATE TABLE workbook_likes
 (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     workbook_id BIGINT     NOT NULL,
     user_id     BINARY(16) NOT NULL,
-    PRIMARY KEY (workbook_id, user_id),
+    UNIQUE INDEX idx_workbook_like_unique (workbook_id, user_id),
     INDEX idx_workbook_like_user (user_id),
     INDEX idx_workbook_like_workbook (workbook_id),
     FOREIGN KEY (workbook_id) REFERENCES workbooks (id),
@@ -339,9 +380,10 @@ CREATE TABLE workbook_likes
 
 CREATE TABLE workbook_bookmarks
 (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     workbook_id BIGINT     NOT NULL,
     user_id     BINARY(16) NOT NULL,
-    PRIMARY KEY (workbook_id, user_id),
+    UNIQUE INDEX idx_workbook_bookmark_unique (workbook_id, user_id),
     INDEX idx_workbook_bookmark_user (user_id),
     INDEX idx_workbook_bookmark_workbook (workbook_id),
     FOREIGN KEY (workbook_id) REFERENCES workbooks (id),
