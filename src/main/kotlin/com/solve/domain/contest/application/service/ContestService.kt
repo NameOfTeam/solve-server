@@ -1,20 +1,18 @@
-package com.solve.domain.contest.service
+package com.solve.domain.contest.application.service
 
 import com.solve.domain.contest.domain.entity.Contest
 import com.solve.domain.contest.domain.entity.ContestAnnouncement
 import com.solve.domain.contest.domain.entity.ContestParticipant
 import com.solve.domain.contest.domain.entity.ContestProblem
 import com.solve.domain.contest.domain.enums.ContestSearchState
-import com.solve.domain.contest.dto.request.ContestProblemAddRequest
-import com.solve.domain.contest.dto.request.CreateContestAnnouncementRequest
-import com.solve.domain.contest.dto.request.UpdateContestAnnouncementRequest
-import com.solve.domain.contest.dto.response.ContestAnnouncementResponse
-import com.solve.domain.contest.dto.response.ContestParticipantResponse
-import com.solve.domain.contest.dto.response.ContestResponse
+import com.solve.domain.contest.domain.enums.ContestState
+import com.solve.domain.contest.domain.repository.*
+import com.solve.domain.contest.presentation.dto.request.ContestProblemAddRequest
+import com.solve.domain.contest.presentation.dto.request.CreateContestAnnouncementRequest
+import com.solve.domain.contest.presentation.dto.request.UpdateContestAnnouncementRequest
 import com.solve.domain.contest.error.ContestError
 import com.solve.domain.contest.error.ContestProblemError
-import com.solve.domain.contest.mapper.ContestMapper
-import com.solve.domain.contest.repository.*
+import com.solve.domain.contest.presentation.dto.response.*
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.user.domain.entity.User
@@ -25,10 +23,10 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class ContestService(
-    private val contestMapper: ContestMapper,
     private val securityHolder: SecurityHolder,
     private val contestRepository: ContestRepository,
     private val problemRepository: ProblemRepository,
@@ -40,22 +38,22 @@ class ContestService(
 ) {
     @Transactional(readOnly = true)
     fun getContests(pageable: Pageable): Page<ContestResponse> {
-        return contestRepository.findAll(pageable).map { contestMapper.toResponse(it) }
+        return contestRepository.findAll(pageable).map { it.toResponse() }
     }
 
     @Transactional(readOnly = true)
-    fun getContest(contestId: Long): ContestResponse {
+    fun getContest(contestId: Long): ContestDetailResponse {
         val contest =
             contestRepository.findByIdOrNull(contestId) ?: throw CustomException(ContestError.CONTEST_NOT_FOUND)
 
-        return contestMapper.toResponse(contest)
+        return contest.toDetailResponse()
     }
 
     @Transactional(readOnly = true)
     fun searchContest(query: String, state: ContestSearchState?, pageable: Pageable): Page<ContestResponse> {
         val contests = contestQueryRepository.searchContest(query, state, pageable)
 
-        return contests.map { contestMapper.toResponse(it) }
+        return contests.map { it.toResponse() }
     }
 
     @Transactional(readOnly = true)
@@ -215,4 +213,43 @@ class ContestService(
     }
 
     fun Contest.hasPermission(user: User) = owner == user || contestOperatorRepository.existsByContestAndUser(this, user)
+    fun Contest.toResponse() = ContestResponse(
+        id = id!!,
+        title = title,
+        description = description,
+        startTime = startTime,
+        endTime = endTime,
+        owner = ContestOwnerResponse.of(owner),
+        state = when {
+            startTime.isAfter(LocalDateTime.now()) -> ContestState.UPCOMING
+            endTime.isBefore(LocalDateTime.now()) -> ContestState.ENDED
+            else -> ContestState.ONGOING
+        },
+        winner = winner?.let { ContestWinnerResponse.of(it) },
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+    fun Contest.toDetailResponse() = ContestDetailResponse(
+        id = id!!,
+        title = title,
+        description = description,
+        startTime = startTime,
+        endTime = endTime,
+        owner = ContestOwnerResponse.of(owner),
+        state = when {
+            startTime.isAfter(LocalDateTime.now()) -> ContestState.UPCOMING
+            endTime.isBefore(LocalDateTime.now()) -> ContestState.ENDED
+            else -> ContestState.ONGOING
+        },
+        winner = winner?.let { ContestWinnerResponse.of(it) },
+        operators = contestOperatorRepository.findAllByContest(this).map { ContestOperatorResponse.of(it) },
+        participants = contestParticipantRepository.findAllByContest(this).map { ContestParticipantResponse.of(it) },
+        problems = if (startTime.isBefore(LocalDateTime.now())) {
+            contestProblemRepository.findAllByContest(this).map { ContestProblemResponse.of(it) }
+        } else {
+            emptyList()
+        },
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
 }

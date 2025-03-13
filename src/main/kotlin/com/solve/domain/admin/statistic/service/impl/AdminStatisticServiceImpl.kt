@@ -1,7 +1,7 @@
 package com.solve.domain.admin.statistic.service.impl
 
 import com.solve.domain.admin.statistic.service.AdminStatisticService
-import com.solve.domain.contest.repository.ContestRepository
+import com.solve.domain.contest.domain.repository.ContestRepository
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.submit.repository.SubmitRepository
 import com.solve.domain.user.repository.UserRepository

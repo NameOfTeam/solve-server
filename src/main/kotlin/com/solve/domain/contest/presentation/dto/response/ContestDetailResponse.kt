@@ -1,9 +1,9 @@
-package com.solve.domain.contest.dto.response
+package com.solve.domain.contest.presentation.dto.response
 
 import com.solve.domain.contest.domain.enums.ContestState
 import java.time.LocalDateTime
 
-data class ContestResponse(
+data class ContestDetailResponse(
     val id: Long,
     val title: String,
     val description: String,

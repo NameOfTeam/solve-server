@@ -1,4 +1,4 @@
-package com.solve.domain.contest.dto.response
+package com.solve.domain.contest.presentation.dto.response
 
 import com.solve.domain.user.domain.entity.User
 import java.util.*

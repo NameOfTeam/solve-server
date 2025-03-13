@@ -1,10 +1,10 @@
-package com.solve.domain.contest.controller
+package com.solve.domain.contest.presentation.controller
 
 import com.solve.domain.contest.domain.enums.ContestSearchState
-import com.solve.domain.contest.dto.request.ContestProblemAddRequest
-import com.solve.domain.contest.dto.request.CreateContestAnnouncementRequest
-import com.solve.domain.contest.dto.request.UpdateContestAnnouncementRequest
-import com.solve.domain.contest.service.ContestService
+import com.solve.domain.contest.presentation.dto.request.ContestProblemAddRequest
+import com.solve.domain.contest.presentation.dto.request.CreateContestAnnouncementRequest
+import com.solve.domain.contest.presentation.dto.request.UpdateContestAnnouncementRequest
+import com.solve.domain.contest.application.service.ContestService
 import com.solve.global.common.dto.BaseResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
