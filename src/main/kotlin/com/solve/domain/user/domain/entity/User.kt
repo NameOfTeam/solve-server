@@ -38,6 +38,12 @@ class User(
     @Column(name = "gender", nullable = false)
     var gender: String = "",
 
+    @Column(name = "birth")
+    var birth: LocalDate? = null,
+
+    @Column(name = "rating", nullable = false)
+    var rating: Int = 0,
+
     @Column(name = "is_verified", nullable = false)
     var isVerified: Boolean = false,
 
