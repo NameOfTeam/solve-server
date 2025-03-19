@@ -1,16 +1,21 @@
 CREATE TABLE users
 (
-    id           BINARY(16) PRIMARY KEY,
-    username     VARCHAR(255) NOT NULL UNIQUE,
-    email        VARCHAR(255) NOT NULL UNIQUE,
-    password     VARCHAR(255) NOT NULL,
-    introduction TEXT,
-    gender       VARCHAR(50)  NOT NULL DEFAULT '',
-    is_verified  BOOLEAN      NOT NULL DEFAULT FALSE,
-    role         VARCHAR(50)  NOT NULL,
-    tier         VARCHAR(50)  NOT NULL,
-    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id             BINARY(16) PRIMARY KEY,
+    username       VARCHAR(255) NOT NULL UNIQUE,
+    email          VARCHAR(255) NOT NULL UNIQUE,
+    password       VARCHAR(255) NOT NULL,
+    introduction   TEXT,
+    gender         VARCHAR(50)  NOT NULL DEFAULT '',
+    birth          DATE,
+    is_verified    BOOLEAN      NOT NULL DEFAULT FALSE,
+    role           VARCHAR(50)  NOT NULL,
+    tier           VARCHAR(50)  NOT NULL,
+    rating         INT          NOT NULL DEFAULT 0,
+    solved_count   INT          NOT NULL DEFAULT 0,
+    streak         INT          NOT NULL DEFAULT 0,
+    max_streak     INT          NOT NULL DEFAULT 0,
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_username (username),
     INDEX idx_user_email (email),
     INDEX idx_user_tier (tier),
@@ -38,6 +43,42 @@ CREATE TABLE email_verifications
     is_verified        BOOLEAN      NOT NULL DEFAULT FALSE,
     created_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE badges
+(
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    description TEXT         NOT NULL,
+    image_url   VARCHAR(255) NOT NULL,
+    `condition`   TEXT         NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_badges
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BINARY(16) NOT NULL,
+    badge_id   BIGINT     NOT NULL,
+    created_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_badge_user (user_id),
+    INDEX idx_user_badge_badge (badge_id),
+    UNIQUE INDEX idx_user_badge_unique (user_id, badge_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (badge_id) REFERENCES badges (id) ON DELETE CASCADE
+);
+
+CREATE TABLE user_links
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BINARY(16)   NOT NULL,
+    link       VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_link_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE problems
@@ -294,9 +335,9 @@ CREATE TABLE contest_operators
 
 CREATE TABLE contest_participants
 (
-    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
-    contest_id       BIGINT     NOT NULL,
-    user_id          BINARY(16) NOT NULL,
+    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+    contest_id        BIGINT     NOT NULL,
+    user_id           BINARY(16) NOT NULL,
     registration_time TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE INDEX idx_contest_participant_unique (contest_id, user_id),
     FOREIGN KEY (contest_id) REFERENCES contests (id),
@@ -316,17 +357,17 @@ CREATE TABLE contest_problems
 );
 
 CREATE TABLE contest_announcements (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    contest_id BIGINT NOT NULL,
-    user_id BINARY(16) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    important BOOLEAN NOT NULL,
-    published_at DATETIME NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
-    CONSTRAINT fk_contest_announcements_contest FOREIGN KEY (contest_id) REFERENCES contests (id),
-    CONSTRAINT fk_contest_announcements_user FOREIGN KEY (user_id) REFERENCES users (id)
+                                       id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                       contest_id   BIGINT       NOT NULL,
+                                       user_id      BINARY(16)   NOT NULL,
+                                       title        VARCHAR(255) NOT NULL,
+                                       content      TEXT         NOT NULL,
+                                       important    BOOLEAN      NOT NULL,
+                                       published_at DATETIME     NOT NULL,
+                                       created_at   DATETIME     NOT NULL,
+                                       updated_at   DATETIME     NOT NULL,
+                                       CONSTRAINT fk_contest_announcements_contest FOREIGN KEY (contest_id) REFERENCES contests (id),
+                                       CONSTRAINT fk_contest_announcements_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE contest_submissions
