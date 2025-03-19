@@ -10,4 +10,6 @@ interface ContestParticipantRepository : JpaRepository<ContestParticipant, Long>
     fun findAllByContest(contest: Contest): List<ContestParticipant>
 
     fun existsByContestAndUser(contest: Contest, user: User): Boolean
+
+    fun countByUser(user: User): Long
 }
