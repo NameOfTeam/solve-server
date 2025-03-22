@@ -65,13 +65,9 @@ spring:
 
 management:
   endpoints:
-    enabled-by-default: false
-    jmx:
-      exposure:
-        exclude: '*'
-        include: health,info,prometheus
     web:
-      base-path: /actuator
+      exposure:
+        include: health,info,prometheus
 
   endpoint:
     health:
