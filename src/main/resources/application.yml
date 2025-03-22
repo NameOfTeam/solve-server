@@ -69,12 +69,18 @@ management:
     jmx:
       exposure:
         exclude: '*'
-        include: health,info
+        include: health,info,prometheus
     web:
       base-path: /actuator
 
   endpoint:
     health:
       enabled: true
+      show-details: always
     info:
       enabled: true
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true
