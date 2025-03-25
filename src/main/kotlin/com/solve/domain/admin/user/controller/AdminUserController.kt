@@ -1,5 +1,6 @@
 package com.solve.domain.admin.user.controller
 
+import com.solve.domain.admin.user.dto.request.AdminUserCreateRequest
 import com.solve.domain.admin.user.dto.request.AdminUserUpdateRequest
 import com.solve.domain.admin.user.service.AdminUserService
 import com.solve.domain.user.domain.enums.UserRole
@@ -25,6 +26,10 @@ class AdminUserController(
         @RequestParam("search", required = false, defaultValue = "") search: String,
         @RequestParam("role", required = false, defaultValue = "USER") role: UserRole
     ) = BaseResponse.of(adminUserService.getUsers(pageable, search, role))
+
+    @Operation(summary = "사용자 등록", description = "사용자를 등록합니다.")
+    @PostMapping
+    fun createUser(@RequestBody request: AdminUserCreateRequest) = BaseResponse.of(adminUserService.createUser(request))
 
     @Operation(summary = "사용자 상세 조회")
     @GetMapping("/{userId}")
