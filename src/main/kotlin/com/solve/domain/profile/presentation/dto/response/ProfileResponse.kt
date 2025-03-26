@@ -7,6 +7,7 @@ import java.util.UUID
 
 data class ProfileResponse(
     val id: UUID,
+    val username: String,
     val introduction: String?,
     val badges: List<ProfileBadgeResponse>,
     val tier: Tier,
