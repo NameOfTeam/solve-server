@@ -33,6 +33,7 @@ class ProfileService(
 
         val profile = ProfileResponse(
             id = user.id!!,
+            username = user.username,
             introduction = user.introduction,
             tier = user.tier,
             birth = user.birth,
