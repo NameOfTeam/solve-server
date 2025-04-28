@@ -1,81 +1,64 @@
 package com.solve.global.websocket.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.solve.domain.submit.domain.enums.SubmitState
 import com.solve.domain.submit.dto.request.UpdateProgressRequest
-import com.solve.domain.submit.dto.response.SubmitProgressResponse
-import com.solve.domain.submit.repository.SubmitQueueRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.web.socket.*
+import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.TextMessage
+import org.springframework.web.socket.WebSocketSession
+import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ProgressWebSocketHandler(
-    private val submitQueueRepository: SubmitQueueRepository
-) : WebSocketHandler {
-    private val sessions = ConcurrentHashMap<Long, WebSocketSession>()
+    private val objectMapper: ObjectMapper
+) : TextWebSocketHandler() {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+    private val submitSessions = ConcurrentHashMap<String, MutableSet<WebSocketSession>>()
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val submitId = session.uri?.path?.substringAfterLast("/")?.toLongOrNull()
+        val submitId = getSubmitIdFromSession(session)
         if (submitId != null) {
-            sessions[submitId] = session
-            submitQueueRepository.push(submitId)
+            submitSessions.computeIfAbsent(submitId) { ConcurrentHashMap.newKeySet() }.add(session)
+            log.info("WebSocket 연결 생성: {} (제출 ID: {})", session.id, submitId)
         }
     }
 
-    override fun handleMessage(session: WebSocketSession, message: WebSocketMessage<*>) {}
-
-    override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
-        session.close()
-    }
-
-    override fun afterConnectionClosed(session: WebSocketSession, closeStatus: CloseStatus) {
-        val submitId = session.uri?.path?.substringAfterLast("/")?.toLongOrNull()
+    override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        val submitId = getSubmitIdFromSession(session)
         if (submitId != null) {
-            sessions.remove(submitId)
+            val sessions = submitSessions[submitId]
+            sessions?.remove(session)
+            if (sessions.isNullOrEmpty()) {
+                submitSessions.remove(submitId)
+            }
+            log.info("WebSocket 연결 종료: {} (제출 ID: {})", session.id, submitId)
         }
     }
 
-    override fun supportsPartialMessages(): Boolean = false
+    private fun getSubmitIdFromSession(session: WebSocketSession): String? {
+        val path = session.uri?.path ?: return null
+        val segments = path.split("/")
+        return if (segments.isNotEmpty()) segments.last() else null
+    }
 
-    fun sendProgressUpdate(request: UpdateProgressRequest) {
-        val session = sessions[request.submitId] ?: return
+    fun sendProgressUpdate(progressData: UpdateProgressRequest) {
+        val submitId = progressData.submitId.toString()
+        val sessions = submitSessions[submitId] ?: return
 
-        if (request.state == SubmitState.ACCEPTED && session.isOpen) {
-            val progressResponse = SubmitProgressResponse(
-                submitId = request.submitId,
-                progress = request.progress,
-                result = request.state,
-                language = request.language,
-                timeUsage = request.timeUsage,
-                memoryUsage = request.memoryUsage,
-            )
+        try {
+            val jsonMessage = objectMapper.writeValueAsString(progressData)
+            val message = TextMessage(jsonMessage)
 
-            session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
-            session.close()
-
-        } else if (request.state ==
-            SubmitState.JUDGING ||
-            request.state == SubmitState.PENDING ||
-            request.state == SubmitState.JUDGING_IN_PROGRESS &&
-            session.isOpen) {
-            val progressResponse = SubmitProgressResponse(
-                submitId = request.submitId,
-                progress = request.progress,
-                result = request.state,
-            )
-
-            session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
-        } else {
-            val progressResponse = SubmitProgressResponse(
-                submitId = request.submitId,
-                progress = request.progress,
-                result = request.state,
-                language = request.language
-            )
-
-            session.sendMessage(TextMessage(ObjectMapper().writeValueAsString(progressResponse)))
-            session.close()
+            for (session in sessions) {
+                if (session.isOpen) {
+                    session.sendMessage(message)
+                }
+            }
+        } catch (e: Exception) {
+            log.error("진행 상황 메시지 전송 실패 (제출 ID: {}): {}", submitId, e.message)
         }
     }
 }

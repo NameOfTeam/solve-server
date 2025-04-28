@@ -30,4 +30,10 @@ enum class SubmitState {
 
     // 채점 중
     JUDGING_IN_PROGRESS,
+
+    // 컴파일 중
+    COMPILING,
+
+    // 시스템 에러
+    SYSTEM_ERROR
 }

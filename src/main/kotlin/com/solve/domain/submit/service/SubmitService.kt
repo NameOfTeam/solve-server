@@ -1,9 +1,9 @@
 package com.solve.domain.submit.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.solve.domain.problem.error.ProblemError
 import com.solve.domain.problem.repository.ProblemRepository
 import com.solve.domain.problem.repository.ProblemTestCaseRepository
-import com.solve.domain.submit.util.CodeExecutor
 import com.solve.domain.submit.domain.entity.Submit
 import com.solve.domain.submit.domain.enums.SubmitState
 import com.solve.domain.submit.dto.request.SubmitRequest
@@ -11,35 +11,36 @@ import com.solve.domain.submit.dto.request.UpdateProgressRequest
 import com.solve.domain.submit.dto.response.SubmitResponse
 import com.solve.domain.submit.error.SubmitError
 import com.solve.domain.submit.repository.SubmitQueryRepository
-import com.solve.domain.submit.repository.SubmitQueueRepository
 import com.solve.domain.submit.repository.SubmitRepository
-import com.solve.domain.user.domain.entity.UserSolved
 import com.solve.domain.user.error.UserError
 import com.solve.domain.user.repository.UserRepository
 import com.solve.global.common.enums.ProgrammingLanguage
-import com.solve.global.config.file.FileProperties
 import com.solve.global.error.CustomException
 import com.solve.global.security.holder.SecurityHolder
 import com.solve.global.websocket.handler.ProgressWebSocketHandler
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.util.concurrent.CompletableFuture
 
 @Service
 class SubmitService(
     private val securityHolder: SecurityHolder,
-    private val fileProperties: FileProperties,
     private val problemRepository: ProblemRepository,
     private val submitRepository: SubmitRepository,
     private val userRepository: UserRepository,
     private val problemTestCaseRepository: ProblemTestCaseRepository,
     private val progressWebSocketHandler: ProgressWebSocketHandler,
-    private val submitQueueRepository: SubmitQueueRepository,
-    private val submitQueryRepository: SubmitQueryRepository
+    private val submitQueryRepository: SubmitQueryRepository,
+    private val redisTemplate: StringRedisTemplate,
+    private val objectMapper: ObjectMapper
 ) {
+    companion object {
+        const val REQUEST_CHANNEL = "submission-requests"
+        const val PROGRESS_CHANNEL = "submission-progress"
+        const val RESULT_CHANNEL = "submission-results"
+    }
+
     @Transactional(readOnly = true)
     fun getMySubmits(problemId: Long, cursorId: Long?, size: Int): List<SubmitResponse> {
         val problem = problemRepository.findByIdOrNull(problemId)
@@ -88,101 +89,38 @@ class SubmitService(
         )
 
         submitRepository.save(submit)
-//        problemSubmitQueueRepository.push(submit.id!!)
+
+        // 채점 서버에 요청 전송
+        sendJudgeRequest(submit)
 
         return SubmitResponse.of(submit)
     }
 
-    @Scheduled(fixedRate = 1000)
-    @Transactional
-    fun processQueue() {
-        if (submitQueueRepository.size() == 0) return
-
-        val submitId = submitQueueRepository.pop() ?: return
-        val submit = submitRepository.findByIdOrNull(submitId)
-            ?: throw CustomException(SubmitError.SUBMIT_NOT_FOUND)
-
-        val request = SubmitRequest(
-            code = submit.code,
-            language = submit.language,
-            visibility = submit.visibility
-        )
-
-        CompletableFuture.runAsync {
-            processSubmit(submit, request)
-        }
-    }
-
-    //    @Transactional
-    fun processSubmit(submit: Submit, request: SubmitRequest) {
-        println("???????")
-        val executor = CodeExecutor(submit, request, fileProperties)
-        val problem = submit.problem
-        val testCases = problemTestCaseRepository.findAllByProblem(problem)
-        var progress = 0.0
-        val totalTestCases = testCases.size.toDouble()
-        var maxTimeUsage = 0L  // Long으로 변경
-        var maxMemoryUsage = 0L
-
-        submit.state = SubmitState.JUDGING
-        updateProgress(submit.id!!, progress, SubmitState.JUDGING)
-
-        println("!!!!!")
-        println(testCases)
-//        executor.initializeJavaContainer()
-        for (testCase in testCases) {
-            println("testCase: $testCase")
-            val result = executor.execute(testCase.input, problem.timeLimit, testCase.output, problem.memoryLimit)
-            maxTimeUsage = maxOf(maxTimeUsage, result.timeUsage)
-            maxMemoryUsage = maxOf(maxMemoryUsage, result.memoryUsage)
-
-            if (!result.success) {
-                submit.state = result.state!!
-                submit.timeUsage = maxTimeUsage  // timeUsage 필드 사용
-                submit.memoryUsage = maxMemoryUsage
-                if (result.state == SubmitState.COMPILE_ERROR) {
-//                    submit.compileError = result.compilationOutput
-                }
-                submitRepository.save(submit)
-                updateProgress(submit.id, progress, result.state, submit.language)
-                return
-            }
-
-            progress += 100.0 / totalTestCases
-            updateProgress(submit.id, progress, SubmitState.JUDGING_IN_PROGRESS)
-        }
-
-        submit.state = SubmitState.ACCEPTED
-        submit.timeUsage = maxTimeUsage  // timeUsage 필드 사용
-        submit.memoryUsage = maxMemoryUsage
-        submitRepository.save(submit)
-        updateProgress(submit.id, 100.0, SubmitState.ACCEPTED, submit.language, submit.timeUsage, submit.memoryUsage)
-
-        handleAcceptedSubmission(submit)
-    }
-
-    private fun updateProgress(submitId: Long, progress: Double, state: SubmitState, language: ProgrammingLanguage?= null, timeUsage: Long?= null, memoryUsage: Long?= null) {
-        progressWebSocketHandler.sendProgressUpdate(UpdateProgressRequest(submitId, progress, state, timeUsage, memoryUsage, language))
-    }
-    
-    private fun handleAcceptedSubmission(submit: Submit) {
+    private fun sendJudgeRequest(submit: Submit) {
         try {
-            val user = submit.author
-            val problemNotSolvedYet = user.solved.none { it.problem == submit.problem }
+            val problem = submit.problem
+            val testCases = problemTestCaseRepository.findAllByProblem(problem)
 
-            if (problemNotSolvedYet) {
-                user.solved.add(
-                    UserSolved(
-                        user = user,
-                        problem = submit.problem,
-                        date = LocalDate.now()
+            val judgeRequest = mapOf(
+                "submissionId" to submit.id.toString(),
+                "code" to submit.code,
+                "language" to submit.language.name,
+                "problemId" to problem.id.toString(),
+                "testCases" to testCases.map {
+                    mapOf(
+                        "input" to it.input,
+                        "output" to it.output
                     )
-                )
-                userRepository.save(user)
-            }
+                },
+                "timeLimit" to problem.timeLimit,
+                "memoryLimit" to problem.memoryLimit
+            )
+
+            val jsonRequest = objectMapper.writeValueAsString(judgeRequest)
+            redisTemplate.convertAndSend(REQUEST_CHANNEL, jsonRequest)
         } catch (e: Exception) {
-            // 로깅 추가
             e.printStackTrace()
+            throw RuntimeException("채점 요청 전송 중 오류가 발생했습니다.", e)
         }
     }
 }
